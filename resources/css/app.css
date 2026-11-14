@@ -186,11 +186,68 @@
     font-size: 20px;
 }
 
-@media (min-width: 64rem) {
-    .auth-artwork {
-        background-image: url('../images/auth-collection-v1.webp');
-        background-position: center;
-        background-size: cover;
+.auth-game-panel {
+    background:
+        radial-gradient(ellipse at 50% 40%, #29384e, transparent 75%), #1b2331;
+}
+
+.auth-game-rows {
+    mask-image: linear-gradient(
+        to right,
+        transparent,
+        black 12%,
+        black 88%,
+        transparent
+    );
+}
+
+.auth-game-track {
+    display: flex;
+    width: max-content;
+    animation: auth-game-scroll linear infinite;
+}
+
+.auth-game-group {
+    display: flex;
+    flex-shrink: 0;
+    gap: 1rem;
+    padding-right: 1rem;
+}
+
+.auth-game-tile {
+    display: flex;
+    width: 12rem;
+    height: clamp(7.5rem, 17svh, 10rem);
+    flex-shrink: 0;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    border: 1px solid #ffffff1f;
+    border-radius: 0.875rem;
+    background: #ffffff05;
+    padding: 1rem 1.5rem;
+}
+
+.auth-game-static .auth-game-tile {
+    width: 100%;
+    min-width: 0;
+}
+
+.auth-game-rows[data-paused='true'] .auth-game-track,
+.auth-game-rows:hover .auth-game-track {
+    animation-play-state: paused;
+}
+
+@keyframes auth-game-scroll {
+    to {
+        transform: translateX(-50%);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .auth-game-track {
+        animation: none;
     }
 }
 

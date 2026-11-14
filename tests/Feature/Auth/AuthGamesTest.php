@@ -1,0 +1,67 @@
+<?php
+
+namespace Tests\Feature\Auth;
+
+use App\Models\Game;
+use App\Models\User;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Inertia\Testing\AssertableInertia as Assert;
+use Tests\TestCase;
+
+class AuthGamesTest extends TestCase
+{
+    use RefreshDatabase;
+
+    public function test_all_guest_auth_pages_receive_the_public_catalogue(): void
+    {
+        Game::factory()->create(['name' => 'Yu-Gi-Oh!', 'slug' => 'yugioh']);
+        Game::factory()->create(['name' => 'Pokémon', 'slug' => 'pokemon', 'image' => 'games/pokemon.svg']);
+        Game::factory()->create(['name' => 'Reserved', 'slug' => 'login']);
+
+        foreach (['/login', '/register', '/forgot-password', '/reset-password/test-token?email=test@example.test'] as $url) {
+            $this->get($url)->assertOk()->assertInertia(fn (Assert $page) => $page
+                ->has('games', 2)
+                ->where('games.0.name', 'Pokémon')
+                ->where('games.0.imageUrl', url('/storage/games/pokemon.svg'))
+                ->where('games.0.url', '/pokemon')
+                ->where('games.1.name', 'Yu-Gi-Oh!')
+                ->where('games.1.imageUrl', null)
+                ->missing('games.0.image')
+                ->missing('games.0.created_at'));
+        }
+    }
+
+    public function test_protected_auth_pages_receive_games_too(): void
+    {
+        Game::factory()->create(['slug' => 'pokemon']);
+        $user = User::factory()->unverified()->create();
+
+        foreach (['verification.notice', 'password.confirm'] as $route) {
+            $this->actingAs($user)->get(route($route))->assertOk()->assertInertia(fn (Assert $page) => $page
+                ->has('games', 1)->where('games.0.slug', 'pokemon'));
+        }
+    }
+
+    public function test_two_factor_challenge_receives_games(): void
+    {
+        Game::factory()->create(['slug' => 'pokemon']);
+        $user = User::factory()->withTwoFactor()->create();
+
+        $this->post(route('login.store'), ['email' => $user->email, 'password' => 'password'])
+            ->assertRedirect(route('two-factor.login'));
+        $this->get(route('two-factor.login'))->assertOk()->assertInertia(fn (Assert $page) => $page
+            ->component('auth/two-factor-challenge')
+            ->has('games', 1)->where('games.0.slug', 'pokemon'));
+    }
+
+    public function test_auth_pages_allow_an_empty_catalogue(): void
+    {
+        $this->get('/login')->assertOk()->assertInertia(fn (Assert $page) => $page->has('games', 0));
+    }
+
+    public function test_account_pages_do_not_receive_the_auth_catalogue(): void
+    {
+        $this->actingAs(User::factory()->create())->get(route('profile.edit'))
+            ->assertOk()->assertInertia(fn (Assert $page) => $page->missing('games'));
+    }
+}

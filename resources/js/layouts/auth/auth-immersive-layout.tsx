@@ -1,14 +1,18 @@
-import { Link } from '@inertiajs/react';
+import { Link, usePage } from '@inertiajs/react';
 import { ArrowLeft } from 'lucide-react';
+import { AuthGameMarquee } from '@/components/auth-game-marquee';
 import { BrandLogo } from '@/components/public/brand-logo';
 import { home } from '@/routes';
 import type { AuthLayoutProps } from '@/types';
+import type { PublicGame } from '@/types/game';
 
 export default function AuthImmersiveLayout({
     children,
     title,
     description,
 }: AuthLayoutProps) {
+    const { games } = usePage<{ games: PublicGame[] }>().props;
+
     return (
         <div
             lang="fr"
@@ -65,19 +69,7 @@ export default function AuthImmersiveLayout({
                     </div>
                 </section>
 
-                <aside
-                    aria-hidden="true"
-                    className="auth-artwork sticky top-8 hidden h-[calc(100svh-4rem)] max-h-[56rem] min-h-[34rem] overflow-hidden rounded-3xl bg-[#07112a] lg:block"
-                >
-                    <div className="absolute inset-x-0 bottom-0 bg-linear-to-t from-[#07112a] via-[#07112a]/80 to-transparent px-8 pt-24 pb-10 text-center text-white">
-                        <p className="font-display text-4xl font-extrabold uppercase xl:text-5xl">
-                            Chaque carte a sa place.
-                        </p>
-                        <p className="mt-3 text-sm text-blue-100/80">
-                            Vos collections, d’un TCG à l’autre.
-                        </p>
-                    </div>
-                </aside>
+                <AuthGameMarquee games={games} />
             </main>
         </div>
     );

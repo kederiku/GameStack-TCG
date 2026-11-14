@@ -50,11 +50,14 @@ Mailpit ; aucun e-mail n’est envoyé sur Internet. Après inscription, suivre
 le lien de vérification dans Mailpit pour accéder au dashboard.
 
 Les sept écrans d’authentification utilisent le design de GameStackr :
-logo et formulaire dans un panneau à gauche, illustration de cartes à droite
-sur ordinateur, formulaire seul sur mobile. Les libellés sont en français ; les messages de validation
+logo et formulaire dans un panneau à gauche, trois rangées de logos des jeux
+défilant en continu à droite sur ordinateur, formulaire seul sur mobile.
+Les images suivent le catalogue administré ; le défilement peut être mis en pause
+et devient une grille fixe lorsque les animations sont réduites.
+Les libellés sont en français ; les messages de validation
 serveur et du navigateur conservent leur langue d’origine. Passkeys, double
 authentification et récupération restent disponibles. Les vérifications sont
-consignées dans [le dernier rapport de design](docs/superpowers/auth-reference-collection-verification.md).
+consignées dans [le dernier rapport de design](docs/superpowers/auth-game-marquee-verification.md).
 
 Créer un administrateur avec une adresse non encore utilisée :
 
