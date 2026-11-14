@@ -7,8 +7,8 @@ import { cn } from '@/lib/utils';
 export default function PasswordInput({
     className,
     ref,
-    showLabel = 'Show password',
-    hideLabel = 'Hide password',
+    showLabel = 'Afficher le mot de passe',
+    hideLabel = 'Masquer le mot de passe',
     ...props
 }: Omit<ComponentProps<'input'>, 'type'> & {
     ref?: Ref<HTMLInputElement>;
@@ -28,7 +28,7 @@ export default function PasswordInput({
             <button
                 type="button"
                 onClick={() => setShowPassword((prev) => !prev)}
-                className="absolute inset-y-0 right-0 flex items-center rounded-r-md px-3 text-muted-foreground hover:text-foreground focus-visible:ring-[3px] focus-visible:ring-ring focus-visible:outline-none"
+                className="absolute inset-y-0 right-0 flex items-center rounded-r-xl px-3 text-muted-foreground hover:text-foreground focus-visible:ring-[3px] focus-visible:ring-ring focus-visible:outline-none"
                 aria-label={showPassword ? hideLabel : showLabel}
             >
                 {showPassword ? (

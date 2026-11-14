@@ -124,12 +124,6 @@
         var(--card);
 }
 
-.auth-form [data-slot='input'] {
-    height: 3rem;
-    border-radius: 0.75rem;
-    background: var(--background);
-}
-
 .auth-brand .brand-logo-name {
     font-size: clamp(2.4rem, 4vw, 3.5rem);
 }
@@ -209,11 +203,7 @@
 }
 
 .auth-form [data-slot='button'] {
-    height: auto;
     min-height: 3rem;
-    padding-block: 0.75rem;
-    border-radius: 0.75rem;
-    white-space: normal;
 }
 
 .auth-form [data-slot='button'],
@@ -440,5 +430,18 @@
 @media (max-width: 1279px) {
     .dashboard-card-fan {
         display: none;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    [data-slot='dialog-overlay'],
+    [data-slot='dialog-content'],
+    [data-slot='sheet-overlay'],
+    [data-slot='sheet-content'],
+    [data-slot='dropdown-menu-content'],
+    [data-slot='select-content'],
+    [data-slot='tooltip-content'] {
+        animation: none;
+        transition: none;
     }
 }

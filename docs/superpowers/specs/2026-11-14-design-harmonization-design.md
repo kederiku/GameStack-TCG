@@ -9,8 +9,8 @@ en s’inspirant de CardCodex, sur une nouvelle branche.
 Branche créée depuis `main` (`e719b01`) : `codex/design-harmonization`.
 L’utilisateur précise que le périmètre est **le site et l’espace membre**,
 sans l’administration Filament. Il retient l’approche **composants partagés et
-réglages en panneaux**. Ce document décrit la réalisation proposée ; sa
-validation reste à recueillir avant le code produit.
+réglages en panneaux**. Ce document est validé par l’utilisateur le 14 novembre
+2026, avec accord pour lancer l’implémentation.
 
 ## État actuel et référence observée
 
