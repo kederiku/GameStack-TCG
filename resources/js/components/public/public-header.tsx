@@ -73,6 +73,7 @@ export function PublicHeader() {
                                         </Button>
                                     </DropdownMenuTrigger>
                                     <DropdownMenuContent
+                                        lang="fr"
                                         align="end"
                                         className="public-theme w-48"
                                     >

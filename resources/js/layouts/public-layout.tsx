@@ -6,7 +6,10 @@ import { home } from '@/routes';
 
 export default function PublicLayout({ children }: PropsWithChildren) {
     return (
-        <div className="public-theme flex min-h-screen flex-col bg-background text-foreground">
+        <div
+            lang="fr"
+            className="public-theme flex min-h-screen flex-col bg-background text-foreground"
+        >
             <a
                 href="#main-content"
                 className="sr-only z-50 rounded-md bg-primary px-4 py-3 text-primary-foreground focus:not-sr-only focus:absolute focus:top-2 focus:left-2"

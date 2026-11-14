@@ -55,6 +55,7 @@ export function GameSelector({
                 </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent
+                lang="fr"
                 align="start"
                 sideOffset={8}
                 className="public-theme max-h-[min(26rem,var(--radix-dropdown-menu-content-available-height))] w-72 max-w-[calc(100vw-2rem)] overflow-y-auto rounded-xl p-1.5"
