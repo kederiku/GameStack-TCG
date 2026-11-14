@@ -167,6 +167,48 @@
         var(--card);
 }
 
+.auth-form [data-slot='input'] {
+    height: 3rem;
+    border-radius: 0.75rem;
+    background: var(--background);
+}
+
+.auth-form [data-slot='button'] {
+    height: auto;
+    min-height: 3rem;
+    padding-block: 0.75rem;
+    border-radius: 0.75rem;
+    white-space: normal;
+}
+
+.auth-form [data-slot='button'],
+.auth-form p {
+    overflow-wrap: anywhere;
+}
+
+.auth-form a {
+    text-decoration-color: color-mix(
+        in srgb,
+        var(--brand-highlight) 45%,
+        transparent
+    );
+}
+
+.auth-form a:hover {
+    color: var(--brand-highlight);
+}
+
+.auth-form .auth-status {
+    margin-bottom: 1.5rem;
+    border: 1px solid var(--border);
+    border-radius: 0.75rem;
+    background: var(--background);
+    padding: 1rem;
+    color: var(--foreground);
+    font-size: 0.875rem;
+    line-height: 1.5;
+}
+
 .card-fan {
     position: relative;
     height: clamp(10.5rem, 24vw, 15rem);

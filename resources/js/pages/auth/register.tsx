@@ -16,7 +16,7 @@ type Props = {
 export default function Register({ passwordRules }: Props) {
     return (
         <>
-            <Head title="Register" />
+            <Head title="Créer un compte" />
             <Form
                 {...store.form()}
                 resetOnSuccess={['password', 'password_confirmation']}
@@ -27,65 +27,79 @@ export default function Register({ passwordRules }: Props) {
                     <>
                         <div className="grid gap-6">
                             <div className="grid gap-2">
-                                <Label htmlFor="name">Name</Label>
+                                <Label htmlFor="name">Nom</Label>
                                 <Input
                                     id="name"
+                                    aria-invalid={Boolean(errors.name)}
                                     type="text"
                                     required
                                     autoFocus
-                                    tabIndex={1}
                                     autoComplete="name"
                                     name="name"
-                                    placeholder="Full name"
+                                    placeholder="Votre nom"
                                 />
                                 <InputError
+                                    role="alert"
                                     message={errors.name}
                                     className="mt-2"
                                 />
                             </div>
 
                             <div className="grid gap-2">
-                                <Label htmlFor="email">Email address</Label>
+                                <Label htmlFor="email">Adresse e-mail</Label>
                                 <Input
                                     id="email"
+                                    aria-invalid={Boolean(errors.email)}
                                     type="email"
                                     required
-                                    tabIndex={2}
                                     autoComplete="email"
                                     name="email"
-                                    placeholder="email@example.com"
+                                    placeholder="vous@exemple.fr"
                                 />
-                                <InputError message={errors.email} />
+                                <InputError
+                                    role="alert"
+                                    message={errors.email}
+                                />
                             </div>
 
                             <div className="grid gap-2">
-                                <Label htmlFor="password">Password</Label>
+                                <Label htmlFor="password">Mot de passe</Label>
                                 <PasswordInput
+                                    showLabel="Afficher le mot de passe"
+                                    hideLabel="Masquer le mot de passe"
                                     id="password"
+                                    aria-invalid={Boolean(errors.password)}
                                     required
-                                    tabIndex={3}
                                     autoComplete="new-password"
                                     name="password"
-                                    placeholder="Password"
+                                    placeholder="Votre mot de passe"
                                     passwordrules={passwordRules}
                                 />
-                                <InputError message={errors.password} />
+                                <InputError
+                                    role="alert"
+                                    message={errors.password}
+                                />
                             </div>
 
                             <div className="grid gap-2">
                                 <Label htmlFor="password_confirmation">
-                                    Confirm password
+                                    Confirmer le mot de passe
                                 </Label>
                                 <PasswordInput
+                                    showLabel="Afficher le mot de passe"
+                                    hideLabel="Masquer le mot de passe"
                                     id="password_confirmation"
+                                    aria-invalid={Boolean(
+                                        errors.password_confirmation,
+                                    )}
                                     required
-                                    tabIndex={4}
                                     autoComplete="new-password"
                                     name="password_confirmation"
-                                    placeholder="Confirm password"
+                                    placeholder="Confirmer le mot de passe"
                                     passwordrules={passwordRules}
                                 />
                                 <InputError
+                                    role="alert"
                                     message={errors.password_confirmation}
                                 />
                             </div>
@@ -93,19 +107,16 @@ export default function Register({ passwordRules }: Props) {
                             <Button
                                 type="submit"
                                 className="mt-2 w-full"
-                                tabIndex={5}
                                 data-test="register-user-button"
                             >
                                 {processing && <Spinner />}
-                                Create account
+                                Créer mon compte
                             </Button>
                         </div>
 
                         <div className="text-center text-sm text-muted-foreground">
-                            Already have an account?{' '}
-                            <TextLink href={login()} tabIndex={6}>
-                                Log in
-                            </TextLink>
+                            Déjà un compte ?{' '}
+                            <TextLink href={login()}>Se connecter</TextLink>
                         </div>
                     </>
                 )}
@@ -115,6 +126,6 @@ export default function Register({ passwordRules }: Props) {
 }
 
 Register.layout = {
-    title: 'Create an account',
-    description: 'Enter your details below to create your account',
+    title: 'Créez votre compte',
+    description: 'Rejoignez GameStackr et retrouvez vos univers TCG.',
 };

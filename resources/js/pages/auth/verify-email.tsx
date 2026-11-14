@@ -1,4 +1,3 @@
-// Components
 import { Form, Head } from '@inertiajs/react';
 import TextLink from '@/components/text-link';
 import { Button } from '@/components/ui/button';
@@ -9,28 +8,28 @@ import { send } from '@/routes/verification';
 export default function VerifyEmail({ status }: { status?: string }) {
     return (
         <>
-            <Head title="Email verification" />
+            <Head title="Vérification e-mail" />
 
             {status === 'verification-link-sent' && (
-                <div className="mb-4 text-center text-sm font-medium text-green-600">
-                    A new verification link has been sent to the email address
-                    you provided during registration.
+                <div role="status" className="auth-status">
+                    Un nouveau lien de vérification a été envoyé à l’adresse
+                    e-mail utilisée lors de votre inscription.
                 </div>
             )}
 
             <Form {...send.form()} className="space-y-6 text-center">
                 {({ processing }) => (
                     <>
-                        <Button disabled={processing} variant="secondary">
+                        <Button disabled={processing} className="w-full">
                             {processing && <Spinner />}
-                            Resend verification email
+                            Renvoyer le lien de vérification
                         </Button>
 
                         <TextLink
                             href={logout()}
                             className="mx-auto block text-sm"
                         >
-                            Log out
+                            Se déconnecter
                         </TextLink>
                     </>
                 )}
@@ -40,7 +39,7 @@ export default function VerifyEmail({ status }: { status?: string }) {
 }
 
 VerifyEmail.layout = {
-    title: 'Email verification',
+    title: 'Vérifiez votre e-mail',
     description:
-        'Please verify your email address by clicking on the link we just emailed to you.',
+        'Encore une étape : cliquez sur le lien envoyé par e-mail pour activer votre compte.',
 };

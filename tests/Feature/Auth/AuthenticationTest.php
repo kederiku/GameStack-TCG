@@ -5,6 +5,7 @@ namespace Tests\Feature\Auth;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\RateLimiter;
+use Inertia\Testing\AssertableInertia as Assert;
 use Laravel\Fortify\Features;
 use Tests\TestCase;
 
@@ -17,6 +18,23 @@ class AuthenticationTest extends TestCase
         $response = $this->get(route('login'));
 
         $response->assertOk();
+    }
+
+    public function test_login_reports_whether_registration_is_available(): void
+    {
+        config(['fortify.features' => [Features::registration()]]);
+
+        $this->get(route('login'))->assertInertia(fn (Assert $page) => $page
+            ->component('auth/login')
+            ->where('canRegister', true)
+        );
+
+        config(['fortify.features' => []]);
+
+        $this->get(route('login'))->assertInertia(fn (Assert $page) => $page
+            ->component('auth/login')
+            ->where('canRegister', false)
+        );
     }
 
     public function test_users_can_authenticate_using_the_login_screen()

@@ -4,6 +4,7 @@ import { useMemo, useState } from 'react';
 import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import {
     InputOTP,
     InputOTPGroup,
@@ -23,18 +24,18 @@ export default function TwoFactorChallenge() {
     }>(() => {
         if (showRecoveryInput) {
             return {
-                title: 'Recovery code',
+                title: 'Code de récupération',
                 description:
-                    'Please confirm access to your account by entering one of your emergency recovery codes.',
-                toggleText: 'login using an authentication code',
+                    'Saisissez l’un des codes de récupération conservés lors de l’activation de la double authentification.',
+                toggleText: 'Utiliser un code d’authentification',
             };
         }
 
         return {
-            title: 'Authentication code',
+            title: 'Vérification en deux étapes',
             description:
-                'Enter the authentication code provided by your authenticator application.',
-            toggleText: 'login using a recovery code',
+                'Saisissez le code à six chiffres de votre application d’authentification.',
+            toggleText: 'Utiliser un code de récupération',
         };
     }, [showRecoveryInput]);
 
@@ -51,7 +52,7 @@ export default function TwoFactorChallenge() {
 
     return (
         <>
-            <Head title="Two-factor authentication" />
+            <Head title="Double authentification" />
 
             <div className="space-y-6">
                 <Form
@@ -64,21 +65,35 @@ export default function TwoFactorChallenge() {
                         <>
                             {showRecoveryInput ? (
                                 <>
+                                    <Label htmlFor="recovery_code">
+                                        Code de récupération
+                                    </Label>
                                     <Input
+                                        id="recovery_code"
+                                        aria-invalid={Boolean(
+                                            errors.recovery_code,
+                                        )}
                                         name="recovery_code"
                                         type="text"
-                                        placeholder="Enter recovery code"
+                                        placeholder="Votre code de récupération"
+                                        autoComplete="off"
                                         autoFocus={showRecoveryInput}
                                         required
                                     />
                                     <InputError
+                                        role="alert"
                                         message={errors.recovery_code}
                                     />
                                 </>
                             ) : (
                                 <div className="flex flex-col items-center justify-center space-y-3 text-center">
+                                    <Label htmlFor="code">
+                                        Code d’authentification
+                                    </Label>
                                     <div className="flex w-full items-center justify-center">
                                         <InputOTP
+                                            id="code"
+                                            aria-invalid={Boolean(errors.code)}
                                             name="code"
                                             maxLength={OTP_MAX_LENGTH}
                                             value={code}
@@ -92,6 +107,7 @@ export default function TwoFactorChallenge() {
                                                     { length: OTP_MAX_LENGTH },
                                                     (_, index) => (
                                                         <InputOTPSlot
+                                                            className="h-12 w-9 text-lg sm:w-11"
                                                             key={index}
                                                             index={index}
                                                         />
@@ -100,7 +116,10 @@ export default function TwoFactorChallenge() {
                                             </InputOTPGroup>
                                         </InputOTP>
                                     </div>
-                                    <InputError message={errors.code} />
+                                    <InputError
+                                        role="alert"
+                                        message={errors.code}
+                                    />
                                 </div>
                             )}
 
@@ -109,14 +128,13 @@ export default function TwoFactorChallenge() {
                                 className="w-full"
                                 disabled={processing}
                             >
-                                Continue
+                                Continuer
                             </Button>
 
                             <div className="text-center text-sm text-muted-foreground">
-                                <span>or you can </span>
                                 <button
                                     type="button"
-                                    className="cursor-pointer text-foreground underline decoration-neutral-300 underline-offset-4 transition-colors duration-300 ease-out hover:decoration-current! dark:decoration-neutral-500"
+                                    className="min-h-11 cursor-pointer rounded-sm text-brand-highlight underline underline-offset-4 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ring"
                                     onClick={() =>
                                         toggleRecoveryMode(clearErrors)
                                     }

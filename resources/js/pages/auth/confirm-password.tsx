@@ -14,32 +14,38 @@ import PasskeyVerify from '@/components/passkey-verify';
 export default function ConfirmPassword() {
     return (
         <>
-            <Head title="Confirm password" />
+            <Head title="Confirmer votre identité" />
 
             <PasskeyVerify
                 routes={{
                     options: confirmOptions(),
                     submit: confirmStore(),
                 }}
-                label="Confirm with passkey"
-                loadingLabel="Confirming..."
-                separator="Or confirm with password"
+                label="Confirmer avec une passkey"
+                loadingLabel="Vérification en cours…"
+                separator="Ou avec votre mot de passe"
             />
 
             <Form {...store.form()} resetOnSuccess={['password']}>
                 {({ processing, errors }) => (
                     <div className="space-y-6">
                         <div className="grid gap-2">
-                            <Label htmlFor="password">Password</Label>
+                            <Label htmlFor="password">Mot de passe</Label>
                             <PasswordInput
+                                showLabel="Afficher le mot de passe"
+                                hideLabel="Masquer le mot de passe"
                                 id="password"
+                                aria-invalid={Boolean(errors.password)}
                                 name="password"
-                                placeholder="Password"
+                                placeholder="Votre mot de passe"
                                 autoComplete="current-password"
                                 autoFocus
                             />
 
-                            <InputError message={errors.password} />
+                            <InputError
+                                role="alert"
+                                message={errors.password}
+                            />
                         </div>
 
                         <div className="flex items-center">
@@ -49,7 +55,7 @@ export default function ConfirmPassword() {
                                 data-test="confirm-password-button"
                             >
                                 {processing && <Spinner />}
-                                Confirm password
+                                Confirmer mon identité
                             </Button>
                         </div>
                     </div>
@@ -60,7 +66,7 @@ export default function ConfirmPassword() {
 }
 
 ConfirmPassword.layout = {
-    title: 'Confirm password',
+    title: 'Confirmez votre identité',
     description:
-        'This is a secure area of the application. Please confirm your password before continuing.',
+        'Pour accéder à cette page, confirmez votre identité avec votre mot de passe ou une passkey.',
 };
