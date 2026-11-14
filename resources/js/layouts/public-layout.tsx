@@ -29,7 +29,7 @@ export default function PublicLayout({ children }: PropsWithChildren) {
                         <BrandLogo className="brand-logo-small" />
                     </Link>
                     <p className="text-xs text-muted-foreground">
-                        Tous vos univers, un seul endroit.
+                        Vos cartes, vos collections, votre espace.
                     </p>
                 </div>
             </footer>

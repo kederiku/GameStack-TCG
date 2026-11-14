@@ -8,31 +8,31 @@ import type { PublicGamePageProps } from '@/types/game';
 export default function Welcome({ games }: PublicGamePageProps) {
     return (
         <>
-            <Head title="Tous vos univers TCG">
+            <Head title="Vos collections de cartes TCG">
                 <meta
                     name="description"
-                    content="Plusieurs univers, une même passion. Retrouvez vos jeux de cartes à collectionner favoris sur GameStackr TCG."
+                    content="GameStackr prépare votre espace de gestion de collections multi-TCG : organiser vos cartes, suivre vos séries et repérer les cartes manquantes."
                 />
             </Head>
             <section className="public-hero relative isolate overflow-hidden rounded-3xl border border-border px-5 pt-10 text-center sm:px-10 sm:pt-14 lg:pt-16">
                 <p className="inline-flex items-center justify-center gap-2 text-[0.65rem] font-semibold tracking-[0.18em] text-brand-highlight uppercase sm:text-xs">
                     <Layers2 className="size-4 shrink-0" aria-hidden="true" />
-                    Le rendez-vous de tous vos TCG
+                    La collection, au cœur du jeu
                 </p>
                 <h1 className="mx-auto mt-6 max-w-4xl font-display text-[clamp(2.75rem,6.5vw,5.5rem)] leading-none font-black tracking-tight uppercase">
-                    Plusieurs univers.
+                    Vos cartes.
                     <span className="mt-1 block text-brand-highlight">
-                        Une même passion.
+                        Toutes vos collections.
                     </span>
                 </h1>
                 <p className="mx-auto mt-6 max-w-md text-sm leading-relaxed text-muted-foreground sm:text-base">
-                    Retrouvez vos jeux de cartes favoris,
-                    <br className="hidden sm:block" /> réunis sur GameStackr.
+                    L’espace multi-TCG pensé pour organiser vos cartes, suivre
+                    vos collections et préparer vos prochaines trouvailles.
                 </p>
                 <div className="mt-7 flex flex-wrap justify-center gap-3">
                     <Button asChild size="lg" className="h-12 px-6">
                         <a href="#jeux">
-                            Explorer les jeux
+                            Choisir mon TCG
                             <ArrowRight className="size-4" />
                         </a>
                     </Button>
@@ -42,7 +42,7 @@ export default function Welcome({ games }: PublicGamePageProps) {
                         size="lg"
                         className="h-12 border border-border px-6"
                     >
-                        <a href="#a-propos">Découvrir GameStackr</a>
+                        <a href="#a-propos">Découvrir le projet</a>
                     </Button>
                 </div>
                 <CardFan />
@@ -51,10 +51,10 @@ export default function Welcome({ games }: PublicGamePageProps) {
             <section id="jeux" className="scroll-mt-8 py-10 sm:py-12">
                 <div className="mb-6 flex flex-col justify-between gap-3 sm:flex-row sm:items-end">
                     <h2 className="font-display text-3xl font-extrabold uppercase sm:text-4xl">
-                        Choisissez votre univers
+                        Une collection, plusieurs TCG
                     </h2>
                     <p className="text-sm text-muted-foreground">
-                        Votre prochain coup de cœur commence ici.
+                        Retrouvez les jeux que vous collectionnez.
                     </p>
                 </div>
                 {games.length > 0 ? (
@@ -74,7 +74,7 @@ export default function Welcome({ games }: PublicGamePageProps) {
                                             {game.name}
                                         </span>
                                         <span className="mt-1 block text-xs text-muted-foreground">
-                                            Explorer le jeu
+                                            Découvrir ce TCG
                                         </span>
                                     </span>
                                     <ArrowRight
@@ -92,10 +92,11 @@ export default function Welcome({ games }: PublicGamePageProps) {
                             aria-hidden="true"
                         />
                         <h3 className="font-medium">
-                            Les premiers univers arrivent bientôt
+                            Les premiers TCG arrivent bientôt
                         </h3>
                         <p className="mt-2 text-sm text-muted-foreground">
-                            Retrouvez prochainement les jeux disponibles ici.
+                            Les jeux à collectionner rejoindront bientôt cet
+                            espace. Votre prochaine collection commence ici.
                         </p>
                     </div>
                 )}
@@ -108,18 +109,26 @@ export default function Welcome({ games }: PublicGamePageProps) {
                 <div>
                     <p className="mb-3 inline-flex items-center gap-2 text-xs font-medium tracking-widest text-brand-highlight uppercase">
                         <Sparkles className="size-4" aria-hidden="true" />
-                        GameStackr TCG
+                        Pensé pour les collectionneurs
                     </p>
                     <h2 className="max-w-sm font-display text-3xl leading-tight font-extrabold uppercase sm:text-4xl">
-                        Une passion qui traverse les univers.
+                        Chaque carte compte.
                     </h2>
                 </div>
-                <p className="max-w-lg self-center text-sm leading-7 text-muted-foreground sm:text-base">
-                    Un jeu de cœur, ou plusieurs à la fois ? GameStackr réunit
-                    vos univers de cartes à collectionner au même endroit.
-                    Choisissez votre jeu, découvrez son espace et passez
-                    librement d’un univers à l’autre.
-                </p>
+                <div className="max-w-lg self-center text-sm leading-7 text-muted-foreground sm:text-base">
+                    <p>
+                        Cartes possédées, doubles, envies : GameStackr se
+                        construit autour de votre façon de collectionner. Notre
+                        objectif : vous aider à organiser vos cartes, suivre vos
+                        séries et repérer les pièces manquantes, d’un TCG à
+                        l’autre.
+                    </p>
+                    <p className="mt-4 text-sm">
+                        Les outils de gestion de collection sont en préparation.
+                        Découvrez dès maintenant les espaces de vos jeux
+                        favoris.
+                    </p>
+                </div>
             </section>
         </>
     );

@@ -173,6 +173,27 @@
     background: var(--background);
 }
 
+.auth-brand .brand-logo-name {
+    font-size: clamp(2.4rem, 4vw, 3.5rem);
+}
+
+.auth-brand .brand-logo-tag {
+    width: 22px;
+    height: 44px;
+}
+
+.auth-brand .brand-logo-tag > span {
+    font-size: 20px;
+}
+
+@media (min-width: 64rem) {
+    .auth-artwork {
+        background-image: url('../images/auth-collection-v1.webp');
+        background-position: center;
+        background-size: cover;
+    }
+}
+
 .auth-form [data-slot='button'] {
     height: auto;
     min-height: 3rem;
