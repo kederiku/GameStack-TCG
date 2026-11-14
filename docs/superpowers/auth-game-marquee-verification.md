@@ -31,4 +31,10 @@ Temporary QA used only the test environment/database on localhost:8001 and did n
 
 ## Independent review
 
-Pending final review of the completed change.
+Independent review of `3f4ace1..72f7313` found one important issue and no critical or minor issues: short desktop windows allowed rows to overlap the caption/header and clipped game names.
+
+Reproduced at 1280×600 before changing code: panel height 544px, header bottom 129px, rows 80–472px, caption top 423px; labels shrank to 10px. The browser's no-overlap assertion returned false.
+
+Corrected minimum panel height to 48rem and minimum tile height to 9rem. The same browser assertion then passed: panel 768px, header bottom 129px, rows 156–620px, caption top 647px. Single-line labels measured 17px and two-line labels 33px. Short windows use normal vertical page scrolling. The final screenshot was refreshed.
+
+After this correction, the complete CI passed again with **116 tests / 718 assertions**, and the production build passed. No deferred findings or declined-to-judge items remain.

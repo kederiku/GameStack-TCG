@@ -26,7 +26,7 @@ export function AuthGameMarquee({ games }: { games: PublicGame[] }) {
     return (
         <aside
             aria-label="Les univers GameStackr"
-            className="auth-game-panel sticky top-8 hidden h-[calc(100svh-4rem)] max-h-[56rem] min-h-[34rem] min-w-0 flex-col overflow-hidden rounded-3xl border border-white/10 text-white lg:flex"
+            className="auth-game-panel sticky top-8 hidden h-[calc(100svh-4rem)] max-h-[56rem] min-h-[48rem] min-w-0 flex-col overflow-hidden rounded-3xl border border-white/10 text-white lg:flex"
         >
             <div className="flex min-h-24 items-center justify-between gap-3 px-7 py-6">
                 <p className="text-xs font-medium tracking-[0.18em] text-slate-300 uppercase">
