@@ -49,6 +49,13 @@ authentification à deux facteurs et passkeys. Les e-mails sont capturés dans
 Mailpit ; aucun e-mail n’est envoyé sur Internet. Après inscription, suivre
 le lien de vérification dans Mailpit pour accéder au dashboard.
 
+Les sept écrans d’authentification utilisent le design Immersive de GameStackr :
+logo TCG, palette publique, panneau décoratif sur ordinateur et formulaires
+adaptés au mobile. Les libellés sont en français ; les messages de validation
+serveur et du navigateur conservent leur langue d’origine. Passkeys, double
+authentification et récupération restent disponibles. Les vérifications sont
+consignées dans [le rapport de refonte auth](docs/superpowers/auth-design-verification.md).
+
 Créer un administrateur avec une adresse non encore utilisée :
 
 ```sh

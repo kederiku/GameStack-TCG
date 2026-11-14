@@ -1,6 +1,6 @@
 # Auth Design Implementation Plan
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [x]`) syntax for tracking.
 
 **Goal:** Appliquer le design Immersive validé aux sept pages d’authentification.
 
@@ -44,20 +44,20 @@ la palette publique. Formulaires Fortify/Inertia conservés, libellés français
 `PasswordInput` accepte `showLabel?: string` et `hideLabel?: string` avec les
 valeurs anglaises existantes par défaut, pour préserver les écrans de compte.
 
-- [ ] Observer la connexion initiale ; constater l’ancien logo et la palette.
-- [ ] Tester que `auth/login` reçoit `canRegister` true/false selon Fortify ;
+- [x] Observer la connexion initiale ; constater l’ancien logo et la palette.
+- [x] Tester que `auth/login` reçoit `canRegister` true/false selon Fortify ;
       constater l’échec avant de fournir la prop.
-- [ ] Implémenter le layout : logo/raccourci accueil, panneau Immersive desktop,
+- [x] Implémenter le layout : logo/raccourci accueil, panneau Immersive desktop,
       formulaire contenu dans une carte, langage français, focus et mobile.
-- [ ] Mettre à jour les sept pages et leurs libellés ; garder les contrats de
+- [x] Mettre à jour les sept pages et leurs libellés ; garder les contrats de
       formulaire, proposer des labels au champ OTP et au code de récupération.
-- [ ] Fournir le drapeau d’inscription et conditionner le lien de connexion.
-- [ ] Vérifier desktop/320 px, clair/sombre, erreurs/statuts, retour accueil,
+- [x] Fournir le drapeau d’inscription et conditionner le lien de connexion.
+- [x] Vérifier desktop/320 px, clair/sombre, erreurs/statuts, retour accueil,
       liens entre formulaires, clavier et bascule des modes 2FA au navigateur.
-- [ ] Exécuter `docker compose exec -T app composer ci:check`,
+- [x] Exécuter `docker compose exec -T app composer ci:check`,
       `docker compose exec -T app npm run build` et `git diff --check` ; succès attendu.
-- [ ] Commit de l’interface ; revue indépendante ciblée sur cette évolution.
-- [ ] Traiter les défauts importants et consigner les preuves ; commit de
+- [x] Commit de l’interface ; revue indépendante ciblée sur cette évolution.
+- [x] Traiter les défauts importants et consigner les preuves ; commit de
       documentation, branche conservée localement sans fusion/publication.
 
 ## Execution
