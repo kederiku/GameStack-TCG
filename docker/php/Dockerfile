@@ -5,7 +5,9 @@ FROM php:8.4-cli-bookworm
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
         ca-certificates curl git unzip libicu-dev libonig-dev libpq-dev libzip-dev \
-    && docker-php-ext-install -j"$(nproc)" bcmath intl mbstring pcntl pdo_pgsql zip \
+        libjpeg62-turbo-dev libpng-dev libwebp-dev \
+    && docker-php-ext-configure gd --with-jpeg --with-webp \
+    && docker-php-ext-install -j"$(nproc)" bcmath exif gd intl mbstring pcntl pdo_pgsql zip \
     && rm -rf /var/lib/apt/lists/*
 
 COPY --from=composer /usr/bin/composer /usr/local/bin/composer

@@ -66,6 +66,51 @@ Les comptes issus de l’inscription publique n’ont jamais accès à Filament,
 y compris en environnement local. Filament lui-même utilise Livewire ;
 l’application et les écrans d’authentification utilisent Inertia/React.
 
+## Jeux
+
+Les administrateurs vérifiés gèrent les jeux dans **Filament → Jeux**
+(`/admin/games`) : nom, slug unique et image optionnelle. Le slug est proposé
+à la création et reste modifiable ; renommer un jeu ne change pas son slug.
+
+Les images JPEG, PNG et WebP sont acceptées jusqu’à **5 Mio** et **4096 × 4096
+pixels**. Le serveur les convertit en WebP (qualité 85), conserve la transparence
+et corrige l’orientation EXIF des JPEG. Le fichier porte le nom normalisé du jeu,
+par exemple `games/{uuid}/pokemon.webp`, sur le disque local `public`
+(`storage/app/public`). Le dossier unique évite les collisions et le cache d’une
+ancienne image. Le lien `public/storage` est créé par `make init`.
+
+Les **SVG** sont également acceptés jusqu’à **5 Mio** et conservent leur format
+vectoriel `.svg`, sans conversion WebP ni limite de dimensions en pixels.
+Leur contenu est nettoyé avec `enshrined/svg-sanitize` avant stockage (scripts,
+attributs actifs et références distantes). Les SVG invalides sont refusés.
+Le renommage, le remplacement et la suppression suivent les mêmes règles que
+les images WebP.
+
+Une nouvelle image remplace l’ancienne après sauvegarde ; retirer une image ou
+supprimer un jeu la supprime du disque, y compris lors d’une suppression groupée.
+Renommer le jeu renomme aussi son image. Annuler le formulaire ne supprime rien.
+Les erreurs de validation, d’écriture et les transactions annulées préservent
+l’image précédente. Une panne disque ou un arrêt brutal reste une limite à
+l’atomicité entre les fichiers et PostgreSQL ; les erreurs de nettoyage sont
+signalées dans les logs Laravel.
+
+Pour mettre à jour un environnement existant (GD/EXIF sont ajoutés à PHP) :
+
+```sh
+make build
+make up
+make composer ARGS='install --no-interaction'
+make migrate
+```
+
+Côté code, utiliser `App\Actions\Games\SaveGame::handle($game, $data)` pour
+créer/modifier un jeu et son image. `image` accepte un `UploadedFile`, le chemin
+actuel pour le conserver, ou `null` pour le retirer ; omettre la clé conserve
+l’image. Les champs `name` et `slug` sont validés par ce service. Pour supprimer,
+utiliser `$game->delete()` ou `Game::destroy($ids)` : les mises à jour/suppressions
+SQL de masse et les méthodes `*Quietly()` contournent les événements Eloquent
+responsables du nettoyage.
+
 ## Commandes
 
 | Commande                     | Effet                                            |
