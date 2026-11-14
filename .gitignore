@@ -1,0 +1,89 @@
+# Environment files and credentials (keep shareable examples)
+.env
+.env.*
+!.env.example
+!.env.*.example
+/auth.json
+/storage/*.key
+
+# Dependencies (composer.lock and package-lock.json must be committed)
+/vendor/
+/node_modules/
+
+# Generated frontend assets and Filament assets
+/bootstrap/ssr/
+/public/build/
+/public/css/filament/
+/public/fonts/filament/
+/public/js/filament/
+/public/fonts-manifest.dev.json
+/public/hot
+/public/storage
+/resources/js/actions/
+/resources/js/routes/
+/resources/js/wayfinder/
+*.tsbuildinfo
+
+# Laravel runtime data (nested .gitignore files preserve empty directories)
+/storage/pail/
+/storage/inertia-devtools/
+/storage/debugbar/
+
+# Test reports, analysis caches and local logs
+/.phpunit.cache/
+/.phpunit.result.cache
+/.phpstan-cache/
+/.php-cs-fixer.cache
+/coverage/
+/coverage.xml
+/clover.xml
+/*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Local Docker overrides and virtual-machine configuration
+/compose.override.yaml
+/compose.override.yml
+/docker-compose.override.yaml
+/docker-compose.override.yml
+/Homestead.json
+/Homestead.yaml
+
+# Operating systems and editors
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+Thumbs.db
+Desktop.ini
+*.swp
+*.swo
+*~
+.phpactor.json
+/.fleet/
+/.history/
+/.idea/
+/.nova/
+/.vscode/
+/.zed/
+
+# Local agent state and worktrees; shared AGENTS.md/CLAUDE.md remain versioned
+/.agents/
+/.amp/
+/.claude/
+/.codex/
+/.cursor/
+/.factory/
+/.grok/
+/.junie/
+/.kiro/
+/.pi/
+/.superpowers/
+/.worktrees/
+/worktrees/
+/.mcp.json
+/boost.json
+/opencode.json
+/opencode.jsonc

@@ -1,0 +1,94 @@
+name: gamestackr-tcg
+
+x-app: &app
+    build:
+        context: .
+        dockerfile: docker/php/Dockerfile
+        args:
+            DOCKER_UID: ${DOCKER_UID:-1000}
+            DOCKER_GID: ${DOCKER_GID:-1000}
+    image: gamestackr-tcg-app:dev
+    working_dir: /var/www/html
+    init: true
+    volumes:
+        - .:/var/www/html
+
+services:
+    app:
+        <<: *app
+        ports:
+            - '127.0.0.1:${APP_PORT:-8000}:8000'
+        depends_on:
+            postgres:
+                condition: service_healthy
+        healthcheck:
+            test:
+                [
+                    'CMD',
+                    'curl',
+                    '--fail',
+                    '--silent',
+                    'http://localhost:8000/up',
+                ]
+            interval: 5s
+            timeout: 5s
+            retries: 12
+            start_period: 10s
+
+    vite:
+        <<: *app
+        command: npm run dev -- --host 0.0.0.0
+        environment:
+            VITE_PORT: ${VITE_PORT:-5173}
+        ports:
+            - '127.0.0.1:${VITE_PORT:-5173}:${VITE_PORT:-5173}'
+        depends_on:
+            app:
+                condition: service_healthy
+        healthcheck:
+            test:
+                [
+                    'CMD-SHELL',
+                    'curl --fail --silent http://localhost:$${VITE_PORT}/@vite/client > /dev/null',
+                ]
+            interval: 5s
+            timeout: 5s
+            retries: 12
+            start_period: 15s
+
+    queue:
+        <<: *app
+        command: php artisan queue:work --tries=3 --timeout=90
+        stop_grace_period: 100s
+        depends_on:
+            app:
+                condition: service_healthy
+
+    postgres:
+        image: postgres:18-bookworm
+        environment:
+            POSTGRES_DB: ${DB_DATABASE:-gamestackr}
+            POSTGRES_USER: ${DB_USERNAME:-gamestackr}
+            POSTGRES_PASSWORD: ${DB_PASSWORD:-local-development-only}
+        ports:
+            - '127.0.0.1:${DB_FORWARD_PORT:-5432}:5432'
+        volumes:
+            - postgres-data:/var/lib/postgresql
+            - ./docker/postgres/init-testing.sql:/docker-entrypoint-initdb.d/10-testing.sql:ro
+        healthcheck:
+            test:
+                [
+                    'CMD-SHELL',
+                    'pg_isready -U "$$POSTGRES_USER" -d "$$POSTGRES_DB"',
+                ]
+            interval: 5s
+            timeout: 5s
+            retries: 12
+
+    mailpit:
+        image: axllent/mailpit:v1.30
+        ports:
+            - '127.0.0.1:${MAILPIT_PORT:-8025}:8025'
+
+volumes:
+    postgres-data:
