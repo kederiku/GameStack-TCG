@@ -1,6 +1,6 @@
 # Auth Reference and Collection Copy Implementation Plan
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [x]`) syntax for tracking.
 
 **Goal:** Adapter l’auth à la référence fournie et recentrer la landing sur les collections.
 
@@ -30,18 +30,19 @@ les contrats des formulaires et les liens actuels. Illustration locale originale
 
 **Files:** `resources/js/layouts/auth/auth-immersive-layout.tsx`,
 `resources/js/pages/welcome.tsx`, `resources/js/layouts/public-layout.tsx`,
+`resources/js/components/passkey-verify.tsx`, `resources/css/app.css`,
 `resources/images/auth-collection-v1.webp`, documentation de l’asset et vérification.
 
 **Interfaces:** `AuthLayoutProps` et `PublicGamePageProps` inchangés.
 
-- [ ] Examiner la référence et la version actuelle au navigateur.
-- [ ] Générer et inspecter l’illustration, puis copier/optimiser l’asset dans le projet.
-- [ ] Recomposer l’auth : logo et formulaire à gauche, visuel à droite, mobile sans visuel.
-- [ ] Réécrire tous les contenus de landing autour des collections et de leur état de préparation.
-- [ ] Vérifier desktop/320 px, clair/sombre, formulaire long et OTP au navigateur.
-- [ ] Exécuter `composer ci:check` et `npm run build` dans Docker, puis `git diff --check`.
-- [ ] Commit, revue indépendante et correction des défauts importants éventuels.
-- [ ] Consigner les résultats et livrer la branche sans fusion/publication.
+- [x] Examiner la référence et la version actuelle au navigateur.
+- [x] Générer et inspecter l’illustration, puis copier/optimiser l’asset dans le projet.
+- [x] Recomposer l’auth : logo et formulaire à gauche, visuel à droite, mobile sans visuel.
+- [x] Réécrire tous les contenus de landing autour des collections et de leur état de préparation.
+- [x] Vérifier desktop/320 px, clair/sombre, formulaire long et OTP au navigateur.
+- [x] Exécuter `composer ci:check` et `npm run build` dans Docker, puis `git diff --check`.
+- [x] Commit, revue indépendante et correction des défauts importants éventuels.
+- [x] Consigner les résultats et livrer la branche sans fusion/publication.
 
 ## Execution
 
