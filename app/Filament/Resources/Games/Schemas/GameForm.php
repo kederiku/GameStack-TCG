@@ -2,12 +2,14 @@
 
 namespace App\Filament\Resources\Games\Schemas;
 
+use App\Support\GameSlug;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 
 class GameForm
 {
@@ -30,6 +32,8 @@ class GameForm
                 ->maxLength(255)
                 ->regex('/\A[a-z0-9]+(?:-[a-z0-9]+)*\z/')
                 ->unique(ignoreRecord: true)
+                ->rules(fn (): array => [Rule::notIn(GameSlug::reserved())])
+                ->validationMessages(['not_in' => 'Ce slug est réservé à une page de l’application. Choisissez un autre identifiant.'])
                 ->helperText('Identifiant unique : lettres minuscules, chiffres et tirets. Il reste inchangé lorsque le jeu est renommé.'),
             FileUpload::make('image')
                 ->label('Image du jeu')

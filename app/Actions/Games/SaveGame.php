@@ -4,6 +4,7 @@ namespace App\Actions\Games;
 
 use App\Models\Game;
 use App\Services\GameImages;
+use App\Support\GameSlug;
 use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Validator;
@@ -37,8 +38,8 @@ class SaveGame
                 $image = array_key_exists('image', $data) ? $data['image'] : $record->image;
                 $attributes = Validator::make(['name' => $name, 'slug' => $slug], [
                     'name' => ['required', 'string', 'max:255'],
-                    'slug' => ['required', 'string', 'max:255', 'regex:/\A[a-z0-9]+(?:-[a-z0-9]+)*\z/', Rule::unique(Game::class, 'slug')->ignore($record)],
-                ])->validate();
+                    'slug' => ['required', 'string', 'max:255', 'regex:/\A[a-z0-9]+(?:-[a-z0-9]+)*\z/', Rule::notIn(GameSlug::reserved()), Rule::unique(Game::class, 'slug')->ignore($record)],
+                ], ['slug.not_in' => 'Ce slug est réservé à une page de l’application. Choisissez un autre identifiant.'])->validate();
 
                 if ($image instanceof UploadedFile) {
                     Validator::make(['image' => $image], [

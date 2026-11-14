@@ -125,6 +125,20 @@ class GameResourceTest extends TestCase
         $this->assertSame([], Storage::disk('public')->allFiles('games'));
     }
 
+    public function test_reserved_slugs_are_reported_on_the_game_form(): void
+    {
+        Livewire::test(CreateGame::class)
+            ->fillForm(['name' => 'Un jeu', 'slug' => 'login'])
+            ->call('create')->assertHasFormErrors(['slug']);
+
+        $game = Game::factory()->create(['slug' => 'pokemon']);
+        Livewire::test(EditGame::class, ['record' => $game->id])
+            ->fillForm(['slug' => 'dashboard'])
+            ->call('save')->assertHasFormErrors(['slug']);
+
+        $this->assertSame('pokemon', $game->fresh()->slug);
+    }
+
     public function test_a_tampered_form_cannot_attach_another_games_image(): void
     {
         $first = $this->createWithImage('Pokémon');

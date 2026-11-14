@@ -7,8 +7,8 @@ depuis une topbar. `/` est une landing page multi-TCG ; `/{game.slug}` est
 l’entrée de chaque jeu. Les composants restent en shadcn/ui.
 
 Le 14 novembre 2026, l’utilisateur a choisi la direction **Immersive** parmi
-les deux maquettes présentées. La direction visuelle est choisie ; ce document
-reste à valider avant réalisation.
+les deux maquettes présentées. Le périmètre a ensuite été validé, avec demande
+explicite de réalisation sur une nouvelle branche Git : `codex/immersive-landing`.
 
 Références : [accueil CardCodex](https://cardcodex.com/) et
 [page Pokémon](https://cardcodex.com/pokemon/?lang=en).
