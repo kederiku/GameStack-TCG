@@ -1,7 +1,9 @@
 import { Form, Head } from '@inertiajs/react';
+import { LockKeyhole, Save } from 'lucide-react';
 import { useRef } from 'react';
 import SecurityController from '@/actions/App/Http/Controllers/Settings/SecurityController';
-import Heading from '@/components/heading';
+import SettingsSection from '@/components/settings-section';
+import { Spinner } from '@/components/ui/spinner';
 import InputError from '@/components/input-error';
 import PasswordInput from '@/components/password-input';
 import { Button } from '@/components/ui/button';
@@ -24,17 +26,14 @@ export default function Security(props: Props) {
 
     return (
         <>
-            <Head title="Security settings" />
+            <Head title="Sécurité" />
 
-            <h1 className="sr-only">Security settings</h1>
-
-            <div className="space-y-6">
-                <Heading
-                    variant="small"
-                    title="Update password"
-                    description="Ensure your account is using a long, random password to stay secure"
-                />
-
+            <SettingsSection
+                id="password"
+                title="Mot de passe"
+                description="Choisissez un mot de passe long et unique pour protéger votre compte."
+                icon={LockKeyhole}
+            >
                 <Form
                     {...SecurityController.update.form()}
                     options={{
@@ -55,13 +54,13 @@ export default function Security(props: Props) {
                             currentPasswordInput.current?.focus();
                         }
                     }}
-                    className="space-y-6"
+                    className="max-w-2xl space-y-5"
                 >
                     {({ errors, processing }) => (
                         <>
                             <div className="grid gap-2">
                                 <Label htmlFor="current_password">
-                                    Current password
+                                    Mot de passe actuel
                                 </Label>
 
                                 <PasswordInput
@@ -70,14 +69,16 @@ export default function Security(props: Props) {
                                     name="current_password"
                                     className="mt-1 block w-full"
                                     autoComplete="current-password"
-                                    placeholder="Current password"
+                                    placeholder="Mot de passe actuel"
                                 />
 
                                 <InputError message={errors.current_password} />
                             </div>
 
                             <div className="grid gap-2">
-                                <Label htmlFor="password">New password</Label>
+                                <Label htmlFor="password">
+                                    Nouveau mot de passe
+                                </Label>
 
                                 <PasswordInput
                                     id="password"
@@ -85,7 +86,7 @@ export default function Security(props: Props) {
                                     name="password"
                                     className="mt-1 block w-full"
                                     autoComplete="new-password"
-                                    placeholder="New password"
+                                    placeholder="Nouveau mot de passe"
                                     passwordrules={props.passwordRules}
                                 />
 
@@ -94,7 +95,7 @@ export default function Security(props: Props) {
 
                             <div className="grid gap-2">
                                 <Label htmlFor="password_confirmation">
-                                    Confirm password
+                                    Confirmer le mot de passe
                                 </Label>
 
                                 <PasswordInput
@@ -102,7 +103,7 @@ export default function Security(props: Props) {
                                     name="password_confirmation"
                                     className="mt-1 block w-full"
                                     autoComplete="new-password"
-                                    placeholder="Confirm password"
+                                    placeholder="Confirmer le mot de passe"
                                     passwordrules={props.passwordRules}
                                 />
 
@@ -111,18 +112,28 @@ export default function Security(props: Props) {
                                 />
                             </div>
 
-                            <div className="flex items-center gap-4">
+                            <div className="flex flex-wrap items-center gap-4 border-t border-border pt-5">
                                 <Button
                                     disabled={processing}
                                     data-test="update-password-button"
                                 >
-                                    Save
+                                    {processing ? (
+                                        <Spinner />
+                                    ) : (
+                                        <Save
+                                            className="size-4"
+                                            aria-hidden="true"
+                                        />
+                                    )}
+                                    {processing
+                                        ? 'Enregistrement…'
+                                        : 'Mettre à jour le mot de passe'}
                                 </Button>
                             </div>
                         </>
                     )}
                 </Form>
-            </div>
+            </SettingsSection>
 
             <ManageTwoFactor
                 canManageTwoFactor={props.canManageTwoFactor}
@@ -141,7 +152,7 @@ export default function Security(props: Props) {
 Security.layout = {
     breadcrumbs: [
         {
-            title: 'Security settings',
+            title: 'Sécurité',
             href: edit(),
         },
     ],

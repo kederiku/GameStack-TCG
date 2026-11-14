@@ -1,7 +1,9 @@
 import { router } from '@inertiajs/react';
 import { KeyRound } from 'lucide-react';
 import { destroy } from '@/actions/Laravel/Passkeys/Http/Controllers/PasskeyRegistrationController';
-import Heading from '@/components/heading';
+import SettingsSection from '@/components/settings-section';
+import { EmptyState } from '@/components/empty-state';
+import { Badge } from '@/components/ui/badge';
 import PasskeyItem from '@/components/passkey-item';
 import PasskeyRegistration from '@/components/passkey-register';
 import type { Passkey } from '@/types/auth';
@@ -9,20 +11,6 @@ import type { Passkey } from '@/types/auth';
 export type Props = {
     canManagePasskeys?: boolean;
     passkeys?: Passkey[];
-};
-
-const EmptyState = () => {
-    return (
-        <div className="p-8 text-center">
-            <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-muted">
-                <KeyRound className="h-7 w-7 text-muted-foreground" />
-            </div>
-            <p className="font-medium">No passkeys yet</p>
-            <p className="mt-1 text-sm text-muted-foreground">
-                Add a passkey to sign in without a password
-            </p>
-        </div>
-    );
 };
 
 export default function ManagePasskeys(props: Props) {
@@ -44,28 +32,42 @@ export default function ManagePasskeys(props: Props) {
     }
 
     return (
-        <div className="space-y-6">
-            <Heading
-                variant="small"
-                title="Passkeys"
-                description="Manage your passkeys for passwordless sign-in"
-            />
-
-            <div className="overflow-hidden rounded-lg border border-border">
-                {passkeys.length > 0 ? (
-                    passkeys.map((passkey) => (
-                        <PasskeyItem
-                            key={passkey.id}
-                            passkey={passkey}
-                            onDelete={handleDelete}
+        <SettingsSection
+            id="passkeys"
+            title="Clés d’accès"
+            description="Connectez-vous avec votre appareil, sans saisir de mot de passe."
+            icon={KeyRound}
+            action={
+                <Badge variant="secondary">
+                    {passkeys.length}{' '}
+                    {passkeys.length > 1
+                        ? 'clés enregistrées'
+                        : 'clé enregistrée'}
+                </Badge>
+            }
+        >
+            <div className="space-y-5">
+                <div className="min-w-0 overflow-hidden rounded-xl border border-border bg-background/50">
+                    {passkeys.length > 0 ? (
+                        passkeys.map((passkey) => (
+                            <PasskeyItem
+                                key={passkey.id}
+                                passkey={passkey}
+                                onDelete={handleDelete}
+                            />
+                        ))
+                    ) : (
+                        <EmptyState
+                            icon={KeyRound}
+                            title="Votre prochaine clé"
+                            description="Ajoutez une clé d’accès pour retrouver votre espace avec votre empreinte, votre visage ou le verrouillage de votre appareil."
+                            className="border-0 bg-transparent py-8"
                         />
-                    ))
-                ) : (
-                    <EmptyState />
-                )}
-            </div>
+                    )}
+                </div>
 
-            <PasskeyRegistration onSuccess={handleRegisterSuccess} />
-        </div>
+                <PasskeyRegistration onSuccess={handleRegisterSuccess} />
+            </div>
+        </SettingsSection>
     );
 }

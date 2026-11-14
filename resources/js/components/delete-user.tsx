@@ -1,7 +1,8 @@
 import { Form } from '@inertiajs/react';
+import { Trash2 } from 'lucide-react';
 import { useRef } from 'react';
 import ProfileController from '@/actions/App/Http/Controllers/Settings/ProfileController';
-import Heading from '@/components/heading';
+import SettingsSection from '@/components/settings-section';
 import InputError from '@/components/input-error';
 import PasswordInput from '@/components/password-input';
 import { Button } from '@/components/ui/button';
@@ -20,17 +21,21 @@ export default function DeleteUser() {
     const passwordInput = useRef<HTMLInputElement>(null);
 
     return (
-        <div className="space-y-6">
-            <Heading
-                variant="small"
-                title="Delete account"
-                description="Delete your account and all of its resources"
-            />
-            <div className="space-y-4 rounded-lg border border-red-100 bg-red-50 p-4 dark:border-red-200/10 dark:bg-red-700/10">
-                <div className="relative space-y-0.5 text-red-600 dark:text-red-100">
-                    <p className="font-medium">Warning</p>
+        <SettingsSection
+            id="delete-account"
+            title="Supprimer mon compte"
+            description="La suppression du compte et de ses données est définitive."
+            icon={Trash2}
+            destructive
+        >
+            <div className="space-y-4">
+                <div className="space-y-1 text-sm leading-6 text-muted-foreground">
+                    <p className="font-medium text-foreground">
+                        Une action irréversible
+                    </p>
                     <p className="text-sm">
-                        Please proceed with caution, this cannot be undone.
+                        Assurez-vous de vouloir quitter GameStackr avant de
+                        continuer.
                     </p>
                 </div>
 
@@ -40,18 +45,17 @@ export default function DeleteUser() {
                             variant="destructive"
                             data-test="delete-user-button"
                         >
-                            Delete account
+                            Supprimer mon compte
                         </Button>
                     </DialogTrigger>
                     <DialogContent>
                         <DialogTitle>
-                            Are you sure you want to delete your account?
+                            Supprimer définitivement votre compte ?
                         </DialogTitle>
                         <DialogDescription>
-                            Once your account is deleted, all of its resources
-                            and data will also be permanently deleted. Please
-                            enter your password to confirm you would like to
-                            permanently delete your account.
+                            Votre compte et toutes ses données seront supprimés.
+                            Saisissez votre mot de passe pour confirmer cette
+                            action. Vous ne pourrez pas revenir en arrière.
                         </DialogDescription>
 
                         <Form
@@ -66,18 +70,15 @@ export default function DeleteUser() {
                             {({ resetAndClearErrors, processing, errors }) => (
                                 <>
                                     <div className="grid gap-2">
-                                        <Label
-                                            htmlFor="password"
-                                            className="sr-only"
-                                        >
-                                            Password
+                                        <Label htmlFor="password">
+                                            Mot de passe
                                         </Label>
 
                                         <PasswordInput
                                             id="password"
                                             name="password"
                                             ref={passwordInput}
-                                            placeholder="Password"
+                                            placeholder="Votre mot de passe"
                                             autoComplete="current-password"
                                         />
 
@@ -92,7 +93,7 @@ export default function DeleteUser() {
                                                     resetAndClearErrors()
                                                 }
                                             >
-                                                Cancel
+                                                Annuler
                                             </Button>
                                         </DialogClose>
 
@@ -105,7 +106,7 @@ export default function DeleteUser() {
                                                 type="submit"
                                                 data-test="confirm-delete-user-button"
                                             >
-                                                Delete account
+                                                Supprimer mon compte
                                             </button>
                                         </Button>
                                     </DialogFooter>
@@ -115,6 +116,6 @@ export default function DeleteUser() {
                     </DialogContent>
                 </Dialog>
             </div>
-        </div>
+        </SettingsSection>
     );
 }
