@@ -28,7 +28,7 @@ export default function SettingsSection({
             )}
         >
             <header className="flex flex-wrap items-start justify-between gap-4 border-b border-border px-5 py-5 sm:px-6">
-                <div className="flex min-w-0 flex-1 items-start gap-3">
+                <div className="flex min-w-0 flex-1 basis-64 items-start gap-3">
                     <span
                         className={cn(
                             'flex size-10 shrink-0 items-center justify-center rounded-xl',

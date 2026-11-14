@@ -53,10 +53,14 @@ redirections. Les comptes réels et la session Chrome ne sont pas modifiés.
   accueil, page de jeu et sept pages auth. Aucun débordement horizontal.
 - Profil et apparence inspectés en clair/sombre à 1440 px, sidebar ouverte
   et repliée. Noms et adresses longs testés à 320 px.
+- Huit écrans contrôlés à 768 et 1440 px (trois réglages, dashboard, accueil,
+  jeu, connexion et inscription) : aucun débordement horizontal.
 - Profil : erreurs de formulaire simulées après soumission, adresse non
   vérifiée, fenêtre de suppression sans confirmation, labels persistants.
 - Sécurité : 2FA activée/inactive, configuration, OTP, codes de récupération,
   passkeys vides et noms de clés très longs. Aucun secret réel utilisé.
+- Fonctions 2FA/passkeys désactivées et navigateur sans WebAuthn simulés :
+  commandes masquées ou message de disponibilité conformes aux props.
 - Fenêtre 2FA à 320 × 500 : défilement interne et boutons accessibles.
   Le bouton OTP trop étroit a été observé puis corrigé en donnant au formulaire
   toute la largeur disponible ; le libellé est désormais entier.
@@ -64,6 +68,9 @@ redirections. Les comptes réels et la session Chrome ne sont pas modifiés.
   reproduit puis corrigé vers « Poursuivre la configuration ».
 - Tiroir mobile : navigation vers une autre page et fermeture ; aperçu tablette
   à 768 px, grille d’apparence élargie après constat de choix trop serrés.
+- Menu utilisateur : ouverture par Entrée, déplacement par flèche, fermeture
+  par Échap et retour du focus au déclencheur. Menu de jeux ouvert au clavier.
+- Console navigateur : aucun avertissement ni erreur relevé pendant les essais.
 
 La validation d’une authentification WebAuthn par un appareil physique et
 les changements de mot de passe du compte réel ne font pas partie des essais
@@ -73,4 +80,14 @@ leur langue actuelle, conformément au périmètre du design.
 
 ## Relecture
 
-Revue indépendante de la branche à consigner après réception.
+Revue indépendante de `e719b01..839ce33` terminée : aucun défaut critique,
+un défaut responsive important, aucun autre constat actionnable.
+
+À 320 px, les badges comprimaient le texte des en-têtes 2FA à 98,7 px et
+passkeys à 51,1 px. Une base de flex de 16 rem donne désormais 179 px au texte
+et place le badge sur la ligne suivante. Le contrôle navigateur confirme des
+titres lisibles sans débordement ; à 1440 px, les badges restent sur la même
+ligne. La suite complète et le build ont été relancés après cette correction :
+119 tests et 757 assertions réussis, tous les contrôles passent.
+
+Branche conservée localement. Prévisualisation et fixtures temporaires nettoyées.
