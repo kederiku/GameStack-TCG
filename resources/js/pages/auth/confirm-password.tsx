@@ -21,7 +21,7 @@ export default function ConfirmPassword() {
                     options: confirmOptions(),
                     submit: confirmStore(),
                 }}
-                label="Confirmer avec une passkey"
+                label="Confirmer avec une clé d’accès"
                 loadingLabel="Vérification en cours…"
                 separator="Ou avec votre mot de passe"
             />
@@ -68,5 +68,5 @@ export default function ConfirmPassword() {
 ConfirmPassword.layout = {
     title: 'Confirmez votre identité',
     description:
-        'Pour accéder à cette page, confirmez votre identité avec votre mot de passe ou une passkey.',
+        'Pour accéder à cette page, confirmez votre identité avec votre mot de passe ou une clé d’accès.',
 };

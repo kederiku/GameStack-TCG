@@ -45,7 +45,7 @@ export default function AppearanceTabs({
             lang="fr"
             className={cn(
                 preview
-                    ? 'grid gap-4 sm:grid-cols-3'
+                    ? 'grid grid-cols-[repeat(auto-fit,minmax(min(100%,13rem),1fr))] gap-4'
                     : 'inline-flex max-w-full flex-wrap gap-1 rounded-xl border border-border bg-secondary/50 p-1',
                 className,
             )}
@@ -127,7 +127,7 @@ export default function AppearanceTabs({
                         {preview && (
                             <span
                                 className={cn(
-                                    'ml-auto flex size-5 items-center justify-center rounded-full border',
+                                    'ml-auto flex size-5 shrink-0 items-center justify-center rounded-full border',
                                     appearance === value
                                         ? 'border-primary bg-primary text-primary-foreground'
                                         : 'border-border',

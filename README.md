@@ -158,11 +158,19 @@ La navigation du compte et les réglages partagent la palette GameStackr de
 l’accueil et de l’authentification, avec les modes clair, sombre et système.
 La sidebar se replie sur ordinateur et devient un tiroir sur mobile.
 
+Les pages **Mon profil**, **Sécurité** et **Apparence** prolongent cette identité
+avec des panneaux partagés et une navigation compacte. Les formulaires, fenêtres
+de confirmation, clés d’accès et étapes de double authentification sont en
+français ; les messages fournis par le serveur ou le navigateur conservent leur
+langue. L’apparence propose des aperçus Clair/Sombre/Système et partage son état
+avec le sélecteur de la topbar.
+
 Pour les nouveaux écrans React, réutiliser :
 
 - `components/brand-logo.tsx` et `components/card-fan.tsx` pour la marque ;
 - `components/games/` pour les images, le sélecteur et la grille de jeux ;
 - `components/empty-state.tsx` pour les états vides ;
+- `components/settings-section.tsx` pour les panneaux des réglages du compte ;
 - les primitives `components/ui/` et les tokens de `resources/css/app.css`.
 
 La grille de jeux est commune à l’accueil et au dashboard. Les états vides
@@ -170,6 +178,7 @@ sont partagés avec les pages de jeu ; les menus utilisent les mêmes couleurs,
 même lorsqu’ils sont rendus en dehors du layout.
 
 Voir [les vérifications du dashboard](docs/superpowers/dashboard-verification.md).
+Voir aussi [les vérifications de l’harmonisation](docs/superpowers/design-harmonization-verification.md).
 
 ## Commandes
 

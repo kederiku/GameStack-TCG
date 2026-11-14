@@ -32,6 +32,7 @@ export default function ManageTwoFactor(props: Props) {
     } = useTwoFactorAuth();
     const [showSetupModal, setShowSetupModal] = useState<boolean>(false);
     const prevTwoFactorEnabled = useRef(twoFactorEnabled);
+    const setupButtonRef = useRef<HTMLButtonElement>(null);
 
     useEffect(() => {
         if (prevTwoFactorEnabled.current && !twoFactorEnabled) {
@@ -75,6 +76,7 @@ export default function ManageTwoFactor(props: Props) {
                         <Form {...disable.form()}>
                             {({ processing }) => (
                                 <Button
+                                    ref={setupButtonRef}
                                     variant="destructive"
                                     type="submit"
                                     disabled={processing}
@@ -102,7 +104,10 @@ export default function ManageTwoFactor(props: Props) {
 
                     <div>
                         {hasSetupData ? (
-                            <Button onClick={() => setShowSetupModal(true)}>
+                            <Button
+                                ref={setupButtonRef}
+                                onClick={() => setShowSetupModal(true)}
+                            >
                                 <ShieldCheck />
                                 Poursuivre la configuration
                             </Button>
@@ -112,7 +117,11 @@ export default function ManageTwoFactor(props: Props) {
                                 onSuccess={() => setShowSetupModal(true)}
                             >
                                 {({ processing }) => (
-                                    <Button type="submit" disabled={processing}>
+                                    <Button
+                                        ref={setupButtonRef}
+                                        type="submit"
+                                        disabled={processing}
+                                    >
                                         {processing
                                             ? 'Activation…'
                                             : 'Activer la double authentification'}
@@ -127,6 +136,7 @@ export default function ManageTwoFactor(props: Props) {
             <TwoFactorSetupModal
                 isOpen={showSetupModal}
                 onClose={() => setShowSetupModal(false)}
+                onClosed={() => setupButtonRef.current?.focus()}
                 requiresConfirmation={requiresConfirmation}
                 twoFactorEnabled={twoFactorEnabled}
                 qrCodeSvg={qrCodeSvg}

@@ -34,7 +34,7 @@ export default function Login({
             )}
 
             <PasskeyVerify
-                label="Se connecter avec une passkey"
+                label="Se connecter avec une clé d’accès"
                 loadingLabel="Connexion en cours…"
                 separator="Ou avec votre e-mail"
             />

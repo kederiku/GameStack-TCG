@@ -156,6 +156,7 @@ function TwoFactorVerificationStep({
     return (
         <Form
             {...confirm.form()}
+            className="w-full min-w-0"
             onSuccess={() => onClose()}
             resetOnError
             resetOnSuccess
@@ -233,6 +234,7 @@ function TwoFactorVerificationStep({
 type Props = {
     isOpen: boolean;
     onClose: () => void;
+    onClosed: () => void;
     requiresConfirmation: boolean;
     twoFactorEnabled: boolean;
     qrCodeSvg: string | null;
@@ -245,6 +247,7 @@ type Props = {
 export default function TwoFactorSetupModal({
     isOpen,
     onClose,
+    onClosed,
     requiresConfirmation,
     twoFactorEnabled,
     qrCodeSvg,
@@ -325,7 +328,13 @@ export default function TwoFactorSetupModal({
 
     return (
         <Dialog open={isOpen} onOpenChange={(open) => !open && handleClose()}>
-            <DialogContent className="sm:max-w-md">
+            <DialogContent
+                className="sm:max-w-md"
+                onCloseAutoFocus={(event) => {
+                    event.preventDefault();
+                    onClosed();
+                }}
+            >
                 <DialogHeader className="flex items-center justify-center">
                     <GridScanIcon />
                     <DialogTitle className="px-4 text-center">

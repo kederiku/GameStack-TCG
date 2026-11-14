@@ -70,7 +70,10 @@ export default function SettingsLayout({ children }: PropsWithChildren) {
                                         : 'text-muted-foreground hover:bg-accent hover:text-foreground',
                                 )}
                             >
-                                <Icon className="size-4" aria-hidden="true" />
+                                <Icon
+                                    className="hidden size-4 sm:block"
+                                    aria-hidden="true"
+                                />
                                 {label}
                             </Link>
                         );
