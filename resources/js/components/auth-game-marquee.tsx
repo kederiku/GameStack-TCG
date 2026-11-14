@@ -1,6 +1,6 @@
 import { Layers3, Pause, Play } from 'lucide-react';
 import { useState } from 'react';
-import { GameImage } from '@/components/public/game-image';
+import { GameImage } from '@/components/games/game-image';
 import { Button } from '@/components/ui/button';
 import type { PublicGame } from '@/types/game';
 

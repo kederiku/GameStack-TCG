@@ -1,6 +1,7 @@
 import { Head, Link } from '@inertiajs/react';
 import { ArrowLeft, Layers2 } from 'lucide-react';
-import { GameImage } from '@/components/public/game-image';
+import { EmptyState } from '@/components/empty-state';
+import { GameImage } from '@/components/games/game-image';
 import { Button } from '@/components/ui/button';
 import { home } from '@/routes';
 import type { PublicGame } from '@/types/game';
@@ -37,18 +38,13 @@ export default function GameShow({ currentGame }: { currentGame: PublicGame }) {
                 <p className="mt-4 max-w-lg [overflow-wrap:anywhere] text-muted-foreground">
                     Bienvenue dans l’espace {currentGame.name} de GameStackr.
                 </p>
-                <div className="mt-10 w-full max-w-lg rounded-2xl border border-dashed border-border bg-card/50 px-6 py-9">
-                    <Layers2
-                        className="mx-auto mb-4 size-6 text-brand-highlight"
-                        aria-hidden="true"
-                    />
-                    <h2 className="font-display text-3xl font-extrabold uppercase">
-                        Le catalogue se prépare
-                    </h2>
-                    <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
-                        Les cartes et extensions arriveront ici prochainement.
-                    </p>
-                </div>
+                <EmptyState
+                    icon={Layers2}
+                    title="Le catalogue se prépare"
+                    titleAs="h2"
+                    description="Les cartes et extensions arriveront ici prochainement."
+                    className="mt-10 w-full max-w-lg"
+                />
             </section>
         </>
     );

@@ -65,49 +65,6 @@
     --color-sidebar-ring: var(--sidebar-ring);
 }
 
-/* Public pages and their portalled shadcn menus share these scoped tokens. */
-.public-theme {
-    --background: #f4f6fa;
-    --foreground: #172131;
-    --card: #ffffff;
-    --card-foreground: #172131;
-    --popover: #ffffff;
-    --popover-foreground: #172131;
-    --primary: #315de0;
-    --primary-foreground: #ffffff;
-    --secondary: #e9eef7;
-    --secondary-foreground: #172131;
-    --muted: #e9eef7;
-    --muted-foreground: #59677b;
-    --accent: #e4ebf8;
-    --accent-foreground: #172131;
-    --border: #d9e0eb;
-    --input: #d9e0eb;
-    --ring: #3767ef;
-    --brand-highlight: #2859d3;
-}
-
-.dark .public-theme {
-    --background: #181e29;
-    --foreground: #f3f6fb;
-    --card: #212937;
-    --card-foreground: #f3f6fb;
-    --popover: #212937;
-    --popover-foreground: #f3f6fb;
-    --primary: #3767ef;
-    --primary-foreground: #ffffff;
-    --secondary: #283244;
-    --secondary-foreground: #f3f6fb;
-    --muted: #283244;
-    --muted-foreground: #a9b6cb;
-    --accent: #2d3c56;
-    --accent-foreground: #f3f6fb;
-    --border: #344056;
-    --input: #344056;
-    --ring: #86b9ff;
-    --brand-highlight: #86b9ff;
-}
-
 .brand-logo {
     display: inline-flex;
     align-items: center;
@@ -157,7 +114,7 @@
     font-size: 12px;
 }
 
-.public-hero {
+.brand-surface {
     background:
         radial-gradient(
             ellipse at 20% 0%,
@@ -388,74 +345,76 @@
 }
 
 :root {
-    --background: oklch(1 0 0);
-    --foreground: oklch(0.145 0 0);
-    --card: oklch(1 0 0);
-    --card-foreground: oklch(0.145 0 0);
-    --popover: oklch(1 0 0);
-    --popover-foreground: oklch(0.145 0 0);
-    --primary: oklch(0.205 0 0);
-    --primary-foreground: oklch(0.985 0 0);
-    --secondary: oklch(0.97 0 0);
-    --secondary-foreground: oklch(0.205 0 0);
-    --muted: oklch(0.97 0 0);
-    --muted-foreground: oklch(0.556 0 0);
-    --accent: oklch(0.97 0 0);
-    --accent-foreground: oklch(0.205 0 0);
+    --background: #f4f6fa;
+    --foreground: #172131;
+    --card: #ffffff;
+    --card-foreground: #172131;
+    --popover: #ffffff;
+    --popover-foreground: #172131;
+    --primary: #315de0;
+    --primary-foreground: #ffffff;
+    --secondary: #e9eef7;
+    --secondary-foreground: #172131;
+    --muted: #e9eef7;
+    --muted-foreground: #59677b;
+    --accent: #e4ebf8;
+    --accent-foreground: #172131;
     --destructive: oklch(0.577 0.245 27.325);
     --destructive-foreground: oklch(0.577 0.245 27.325);
-    --border: oklch(0.922 0 0);
-    --input: oklch(0.922 0 0);
-    --ring: oklch(0.87 0 0);
+    --border: #d9e0eb;
+    --input: #d9e0eb;
+    --ring: #3767ef;
     --chart-1: oklch(0.646 0.222 41.116);
     --chart-2: oklch(0.6 0.118 184.704);
     --chart-3: oklch(0.398 0.07 227.392);
     --chart-4: oklch(0.828 0.189 84.429);
     --chart-5: oklch(0.769 0.188 70.08);
     --radius: 0.625rem;
-    --sidebar: oklch(0.985 0 0);
-    --sidebar-foreground: oklch(0.145 0 0);
-    --sidebar-primary: oklch(0.205 0 0);
-    --sidebar-primary-foreground: oklch(0.985 0 0);
-    --sidebar-accent: oklch(0.97 0 0);
-    --sidebar-accent-foreground: oklch(0.205 0 0);
-    --sidebar-border: oklch(0.922 0 0);
-    --sidebar-ring: oklch(0.87 0 0);
+    --sidebar: var(--card);
+    --sidebar-foreground: var(--foreground);
+    --sidebar-primary: var(--primary);
+    --sidebar-primary-foreground: var(--primary-foreground);
+    --sidebar-accent: var(--accent);
+    --sidebar-accent-foreground: var(--foreground);
+    --sidebar-border: var(--border);
+    --sidebar-ring: var(--ring);
+    --brand-highlight: #2859d3;
 }
 
 .dark {
-    --background: oklch(0.145 0 0);
-    --foreground: oklch(0.985 0 0);
-    --card: oklch(0.145 0 0);
-    --card-foreground: oklch(0.985 0 0);
-    --popover: oklch(0.145 0 0);
-    --popover-foreground: oklch(0.985 0 0);
-    --primary: oklch(0.985 0 0);
-    --primary-foreground: oklch(0.205 0 0);
-    --secondary: oklch(0.269 0 0);
-    --secondary-foreground: oklch(0.985 0 0);
-    --muted: oklch(0.269 0 0);
-    --muted-foreground: oklch(0.708 0 0);
-    --accent: oklch(0.269 0 0);
-    --accent-foreground: oklch(0.985 0 0);
+    --background: #181e29;
+    --foreground: #f3f6fb;
+    --card: #212937;
+    --card-foreground: #f3f6fb;
+    --popover: #212937;
+    --popover-foreground: #f3f6fb;
+    --primary: #3767ef;
+    --primary-foreground: #ffffff;
+    --secondary: #283244;
+    --secondary-foreground: #f3f6fb;
+    --muted: #283244;
+    --muted-foreground: #a9b6cb;
+    --accent: #2d3c56;
+    --accent-foreground: #f3f6fb;
     --destructive: oklch(0.396 0.141 25.723);
     --destructive-foreground: oklch(0.637 0.237 25.331);
-    --border: oklch(0.269 0 0);
-    --input: oklch(0.269 0 0);
-    --ring: oklch(0.439 0 0);
+    --border: #344056;
+    --input: #344056;
+    --ring: #86b9ff;
     --chart-1: oklch(0.488 0.243 264.376);
     --chart-2: oklch(0.696 0.17 162.48);
     --chart-3: oklch(0.769 0.188 70.08);
     --chart-4: oklch(0.627 0.265 303.9);
     --chart-5: oklch(0.645 0.246 16.439);
-    --sidebar: oklch(0.205 0 0);
-    --sidebar-foreground: oklch(0.985 0 0);
-    --sidebar-primary: oklch(0.985 0 0);
-    --sidebar-primary-foreground: oklch(0.985 0 0);
-    --sidebar-accent: oklch(0.269 0 0);
-    --sidebar-accent-foreground: oklch(0.985 0 0);
-    --sidebar-border: oklch(0.269 0 0);
-    --sidebar-ring: oklch(0.439 0 0);
+    --sidebar: var(--card);
+    --sidebar-foreground: var(--foreground);
+    --sidebar-primary: var(--primary);
+    --sidebar-primary-foreground: var(--primary-foreground);
+    --sidebar-accent: var(--accent);
+    --sidebar-accent-foreground: var(--foreground);
+    --sidebar-border: var(--border);
+    --sidebar-ring: var(--ring);
+    --brand-highlight: #86b9ff;
 }
 
 @layer base {
@@ -465,5 +424,21 @@
 
     body {
         @apply bg-background text-foreground;
+    }
+}
+
+/* The same decorative card fan adapts to the compact dashboard welcome panel. */
+.dashboard-card-fan {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    width: 40%;
+    height: 100%;
+    margin: 0;
+}
+
+@media (max-width: 1279px) {
+    .dashboard-card-fan {
+        display: none;
     }
 }

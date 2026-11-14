@@ -1,7 +1,7 @@
 import { Link, usePage } from '@inertiajs/react';
 import { ArrowUpRight, UserRound } from 'lucide-react';
-import { BrandLogo } from '@/components/public/brand-logo';
-import { GameSelector } from '@/components/public/game-selector';
+import { BrandLogo } from '@/components/brand-logo';
+import { GameSelector } from '@/components/games/game-selector';
 import { Button } from '@/components/ui/button';
 import {
     DropdownMenu,
@@ -75,7 +75,7 @@ export function PublicHeader() {
                                     <DropdownMenuContent
                                         lang="fr"
                                         align="end"
-                                        className="public-theme w-48"
+                                        className="w-48"
                                     >
                                         <DropdownMenuItem asChild>
                                             <Link href={login()}>

@@ -1,7 +1,7 @@
 import { Link, usePage } from '@inertiajs/react';
 import { ArrowLeft } from 'lucide-react';
 import { AuthGameMarquee } from '@/components/auth-game-marquee';
-import { BrandLogo } from '@/components/public/brand-logo';
+import { BrandLogo } from '@/components/brand-logo';
 import { home } from '@/routes';
 import type { AuthLayoutProps } from '@/types';
 import type { PublicGame } from '@/types/game';
@@ -16,7 +16,7 @@ export default function AuthImmersiveLayout({
     return (
         <div
             lang="fr"
-            className="public-theme flex min-h-svh flex-col justify-center bg-background p-4 text-foreground sm:p-6 lg:p-8"
+            className="flex min-h-svh flex-col justify-center bg-background p-4 text-foreground sm:p-6 lg:p-8"
         >
             <a
                 href="#auth-content"

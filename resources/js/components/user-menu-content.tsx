@@ -14,13 +14,19 @@ import type { User } from '@/types';
 
 type Props = {
     user: User;
+    onNavigate?: () => void;
 };
 
-export function UserMenuContent({ user }: Props) {
+export function UserMenuContent({ user, onNavigate }: Props) {
     const cleanup = useMobileNavigation();
 
-    const handleLogout = () => {
+    const handleNavigate = () => {
         cleanup();
+        onNavigate?.();
+    };
+
+    const handleLogout = () => {
+        handleNavigate();
         router.flushAll();
     };
 
@@ -38,10 +44,10 @@ export function UserMenuContent({ user }: Props) {
                         className="block w-full cursor-pointer"
                         href={edit()}
                         prefetch
-                        onClick={cleanup}
+                        onClick={handleNavigate}
                     >
                         <Settings className="mr-2" />
-                        Settings
+                        Paramètres
                     </Link>
                 </DropdownMenuItem>
             </DropdownMenuGroup>
@@ -55,7 +61,7 @@ export function UserMenuContent({ user }: Props) {
                     data-test="logout-button"
                 >
                     <LogOut className="mr-2" />
-                    Log out
+                    Se déconnecter
                 </Link>
             </DropdownMenuItem>
         </>

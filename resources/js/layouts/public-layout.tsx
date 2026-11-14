@@ -1,6 +1,6 @@
 import { Link } from '@inertiajs/react';
 import type { PropsWithChildren } from 'react';
-import { BrandLogo } from '@/components/public/brand-logo';
+import { BrandLogo } from '@/components/brand-logo';
 import { PublicHeader } from '@/components/public/public-header';
 import { home } from '@/routes';
 
@@ -8,7 +8,7 @@ export default function PublicLayout({ children }: PropsWithChildren) {
     return (
         <div
             lang="fr"
-            className="public-theme flex min-h-screen flex-col bg-background text-foreground"
+            className="flex min-h-screen flex-col bg-background text-foreground"
         >
             <a
                 href="#main-content"

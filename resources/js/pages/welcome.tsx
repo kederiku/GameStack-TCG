@@ -1,7 +1,7 @@
-import { Head, Link } from '@inertiajs/react';
+import { Head } from '@inertiajs/react';
 import { ArrowRight, Layers2, Sparkles } from 'lucide-react';
-import { CardFan } from '@/components/public/card-fan';
-import { GameImage } from '@/components/public/game-image';
+import { CardFan } from '@/components/card-fan';
+import { GameGrid } from '@/components/games/game-grid';
 import { Button } from '@/components/ui/button';
 import type { PublicGamePageProps } from '@/types/game';
 
@@ -14,7 +14,7 @@ export default function Welcome({ games }: PublicGamePageProps) {
                     content="GameStackr prépare votre espace de gestion de collections multi-TCG : organiser vos cartes, suivre vos séries et repérer les cartes manquantes."
                 />
             </Head>
-            <section className="public-hero relative isolate overflow-hidden rounded-3xl border border-border px-5 pt-10 text-center sm:px-10 sm:pt-14 lg:pt-16">
+            <section className="brand-surface relative isolate overflow-hidden rounded-3xl border border-border px-5 pt-10 text-center sm:px-10 sm:pt-14 lg:pt-16">
                 <p className="inline-flex items-center justify-center gap-2 text-[0.65rem] font-semibold tracking-[0.18em] text-brand-highlight uppercase sm:text-xs">
                     <Layers2 className="size-4 shrink-0" aria-hidden="true" />
                     La collection, au cœur du jeu
@@ -57,49 +57,7 @@ export default function Welcome({ games }: PublicGamePageProps) {
                         Retrouvez les jeux que vous collectionnez.
                     </p>
                 </div>
-                {games.length > 0 ? (
-                    <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                        {games.map((game) => (
-                            <li key={game.id} className="min-w-0">
-                                <Link
-                                    href={game.url}
-                                    className="group flex h-full min-w-0 items-center gap-4 rounded-xl border border-border bg-card px-5 py-6 transition-colors hover:border-primary/70 hover:bg-accent/40 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ring"
-                                >
-                                    <GameImage
-                                        game={game}
-                                        className="size-14 rounded-xl p-2"
-                                    />
-                                    <span className="min-w-0 flex-1">
-                                        <span className="block font-medium [overflow-wrap:anywhere]">
-                                            {game.name}
-                                        </span>
-                                        <span className="mt-1 block text-xs text-muted-foreground">
-                                            Découvrir ce TCG
-                                        </span>
-                                    </span>
-                                    <ArrowRight
-                                        className="size-4 shrink-0 text-muted-foreground transition-colors group-hover:text-brand-highlight"
-                                        aria-hidden="true"
-                                    />
-                                </Link>
-                            </li>
-                        ))}
-                    </ul>
-                ) : (
-                    <div className="rounded-xl border border-dashed border-border bg-card/50 px-6 py-10 text-center">
-                        <Layers2
-                            className="mx-auto mb-4 size-6 text-muted-foreground"
-                            aria-hidden="true"
-                        />
-                        <h3 className="font-medium">
-                            Les premiers TCG arrivent bientôt
-                        </h3>
-                        <p className="mt-2 text-sm text-muted-foreground">
-                            Les jeux à collectionner rejoindront bientôt cet
-                            espace. Votre prochaine collection commence ici.
-                        </p>
-                    </div>
-                )}
+                <GameGrid games={games} />
             </section>
 
             <section

@@ -1,6 +1,6 @@
 import { Link } from '@inertiajs/react';
 import { Check, ChevronDown, House, Layers2 } from 'lucide-react';
-import { GameImage } from '@/components/public/game-image';
+import { GameImage } from '@/components/games/game-image';
 import { Button } from '@/components/ui/button';
 import {
     DropdownMenu,
@@ -58,7 +58,7 @@ export function GameSelector({
                 lang="fr"
                 align="start"
                 sideOffset={8}
-                className="public-theme max-h-[min(26rem,var(--radix-dropdown-menu-content-available-height))] w-72 max-w-[calc(100vw-2rem)] overflow-y-auto rounded-xl p-1.5"
+                className="max-h-[min(26rem,var(--radix-dropdown-menu-content-available-height))] w-72 max-w-[calc(100vw-2rem)] overflow-y-auto rounded-xl p-1.5"
             >
                 <DropdownMenuLabel className="px-2.5 py-2 text-xs font-medium tracking-widest text-muted-foreground uppercase">
                     Vos univers

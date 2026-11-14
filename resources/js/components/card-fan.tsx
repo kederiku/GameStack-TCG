@@ -1,8 +1,9 @@
 import { Diamond, Layers2, Sparkles, Star } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
-export function CardFan() {
+export function CardFan({ className }: { className?: string }) {
     return (
-        <div className="card-fan" aria-hidden="true">
+        <div className={cn('card-fan', className)} aria-hidden="true">
             {[Diamond, Layers2, Sparkles, Star].map((Icon, index) => (
                 <div className="fan-card" key={index}>
                     <span className="fan-card-edition">TCG</span>

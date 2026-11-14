@@ -147,6 +147,30 @@ Aucun jeu ni compte de démonstration n’est ajouté.
 
 Voir [les vérifications de la navigation publique](docs/superpowers/public-navigation-verification.md).
 
+## Dashboard et composants partagés
+
+`/dashboard` propose **Mon espace** aux comptes connectés et vérifiés : accueil
+personnalisé, panneau de collection en préparation, accès aux jeux de Filament
+et raccourcis vers les réglages. Aucun chiffre de collection ou prix fictif
+n’est affiché. Le dashboard fonctionne aussi sans jeu enregistré.
+
+La navigation du compte et les réglages partagent la palette GameStackr de
+l’accueil et de l’authentification, avec les modes clair, sombre et système.
+La sidebar se replie sur ordinateur et devient un tiroir sur mobile.
+
+Pour les nouveaux écrans React, réutiliser :
+
+- `components/brand-logo.tsx` et `components/card-fan.tsx` pour la marque ;
+- `components/games/` pour les images, le sélecteur et la grille de jeux ;
+- `components/empty-state.tsx` pour les états vides ;
+- les primitives `components/ui/` et les tokens de `resources/css/app.css`.
+
+La grille de jeux est commune à l’accueil et au dashboard. Les états vides
+sont partagés avec les pages de jeu ; les menus utilisent les mêmes couleurs,
+même lorsqu’ils sont rendus en dehors du layout.
+
+Voir [les vérifications du dashboard](docs/superpowers/dashboard-verification.md).
+
 ## Commandes
 
 | Commande                     | Effet                                            |

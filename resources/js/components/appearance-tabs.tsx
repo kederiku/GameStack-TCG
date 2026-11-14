@@ -5,39 +5,48 @@ import type { Appearance } from '@/hooks/use-appearance';
 import { useAppearance } from '@/hooks/use-appearance';
 import { cn } from '@/lib/utils';
 
-export default function AppearanceToggleTab({
-    className = '',
+export default function AppearanceTabs({
+    className,
+    compact = false,
     ...props
-}: HTMLAttributes<HTMLDivElement>) {
+}: HTMLAttributes<HTMLDivElement> & { compact?: boolean }) {
     const { appearance, updateAppearance } = useAppearance();
-
     const tabs: { value: Appearance; icon: LucideIcon; label: string }[] = [
-        { value: 'light', icon: Sun, label: 'Light' },
-        { value: 'dark', icon: Moon, label: 'Dark' },
-        { value: 'system', icon: Monitor, label: 'System' },
+        { value: 'light', icon: Sun, label: 'Clair' },
+        { value: 'dark', icon: Moon, label: 'Sombre' },
+        { value: 'system', icon: Monitor, label: 'Système' },
     ];
 
     return (
         <div
+            role="group"
+            aria-label="Thème"
+            lang="fr"
             className={cn(
-                'inline-flex gap-1 rounded-lg bg-neutral-100 p-1 dark:bg-neutral-800',
+                'inline-flex max-w-full flex-wrap gap-1 rounded-xl border border-border bg-secondary/50 p-1',
                 className,
             )}
             {...props}
         >
             {tabs.map(({ value, icon: Icon, label }) => (
                 <button
+                    type="button"
                     key={value}
+                    title={label}
+                    aria-pressed={appearance === value}
                     onClick={() => updateAppearance(value)}
                     className={cn(
-                        'flex items-center rounded-md px-3.5 py-1.5 transition-colors',
+                        'flex min-h-9 items-center justify-center rounded-lg transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring',
+                        compact ? 'size-9' : 'gap-2 px-3',
                         appearance === value
-                            ? 'bg-white shadow-xs dark:bg-neutral-700 dark:text-neutral-100'
-                            : 'text-neutral-500 hover:bg-neutral-200/60 hover:text-black dark:text-neutral-400 dark:hover:bg-neutral-700/60',
+                            ? 'bg-card text-brand-highlight shadow-xs'
+                            : 'text-muted-foreground hover:bg-accent hover:text-foreground',
                     )}
                 >
-                    <Icon className="-ml-1 h-4 w-4" />
-                    <span className="ml-1.5 text-sm">{label}</span>
+                    <Icon className="size-4" aria-hidden="true" />
+                    <span className={compact ? 'sr-only' : 'text-sm'}>
+                        {label}
+                    </span>
                 </button>
             ))}
         </div>
