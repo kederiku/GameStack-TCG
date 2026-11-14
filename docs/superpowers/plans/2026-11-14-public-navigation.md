@@ -101,13 +101,13 @@ Les routes et la validation Filament utilisent la même liste de slugs réservé
 
 **Interfaces:** toutes les fonctionnalités des tâches 1 et 2.
 
-- [ ] Exécuter `docker compose exec -T app composer ci:check`,
+- [x] Exécuter `docker compose exec -T app composer ci:check`,
       `docker compose exec -T app npm run build`, `git diff --check` ; tous passent.
-- [ ] Faire relire la branche par un agent indépendant selon
+- [x] Faire relire la branche par un agent indépendant selon
       `superpowers:requesting-code-review`, puis traiter les défauts importants.
-- [ ] Documenter les vérifications et les limites dans
+- [x] Documenter les vérifications et les limites dans
       `docs/superpowers/public-navigation-verification.md`, mettre à jour README.
-- [ ] Commit de vérification, puis laisser la branche prête à examiner, sans
+- [x] Commit de vérification, puis laisser la branche prête à examiner, sans
       fusion ni publication non demandée.
 
 ## Execution

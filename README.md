@@ -111,6 +111,31 @@ utiliser `$game->delete()` ou `Game::destroy($ids)` : les mises à jour/suppress
 SQL de masse et les méthodes `*Quietly()` contournent les événements Eloquent
 responsables du nettoyage.
 
+## Navigation publique
+
+`/` présente la landing multi-TCG. Le menu de la topbar et les tuiles utilisent
+les jeux créés dans Filament ; choisir un jeu ouvre `/{slug}`, par exemple
+`/pokemon` ou `/yugioh`. Une URL inconnue renvoie 404. Modifier un slug change
+son URL publique, sans redirection depuis l’ancienne.
+
+Les segments utilisés par l’application (`admin`, `login`, `settings`, etc.)
+sont réservés par `App\Support\GameSlug`, qui inclut aussi les préfixes des
+routes enregistrées. Filament et `SaveGame` refusent ces slugs. Un ancien jeu
+utilisant un segment réservé est masqué de la navigation publique ; lui donner
+un autre slug dans Filament le rend accessible.
+
+Les pages publiques partagent un layout React avec les composants shadcn/ui
+existants. Le logo utilise Big Shoulders Display avec « TCG » vertical, chargée
+par le pipeline de polices Vite. La palette publique suit le choix
+clair/sombre/système de l’application. Une image absente ou impossible à charger
+laisse place aux initiales du jeu.
+
+La page d’un jeu affiche actuellement un état « Le catalogue se prépare ».
+Les cartes, extensions, collections et prix ne sont pas encore implémentés.
+Aucun jeu ni compte de démonstration n’est ajouté.
+
+Voir [les vérifications de la navigation publique](docs/superpowers/public-navigation-verification.md).
+
 ## Commandes
 
 | Commande                     | Effet                                            |
