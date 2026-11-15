@@ -103,6 +103,48 @@ class ConvertGameImagesTest extends TestCase
         Storage::disk('public')->assertExists('other/logo.webp');
     }
 
+    public function test_a_different_existing_backup_prevents_conversion_without_overwriting_files(): void
+    {
+        $game = $this->legacyGame();
+        $original = Storage::disk('public')->get($game->image);
+        $backup = 'game-images-before-avif/'.$game->image;
+        Storage::disk('local')->put($backup, 'A previous backup');
+
+        $this->artisan('games:convert-images-to-avif')->assertFailed();
+
+        $this->assertSame($game->image, $game->fresh()->image);
+        $this->assertSame($original, Storage::disk('public')->get($game->image));
+        $this->assertSame('A previous backup', Storage::disk('local')->get($backup));
+        $this->assertSame([$game->image], Storage::disk('public')->allFiles());
+    }
+
+    public function test_conversion_can_resume_with_an_identical_existing_backup(): void
+    {
+        $game = $this->legacyGame();
+        $original = Storage::disk('public')->get($game->image);
+        $backup = 'game-images-before-avif/'.$game->image;
+        Storage::disk('local')->put($backup, $original);
+
+        $this->artisan('games:convert-images-to-avif')->assertSuccessful();
+
+        $this->assertSame('image/avif', Storage::disk('public')->mimeType($game->fresh()->image));
+        $this->assertSame($original, Storage::disk('local')->get($backup));
+        Storage::disk('public')->assertMissing($game->image);
+    }
+
+    public function test_a_cancelled_save_keeps_the_original_and_backup_without_leaving_an_avif(): void
+    {
+        $game = $this->legacyGame();
+        $original = Storage::disk('public')->get($game->image);
+        Game::updating(fn (): bool => false);
+
+        $this->artisan('games:convert-images-to-avif')->assertFailed();
+
+        $this->assertSame($game->image, $game->fresh()->image);
+        $this->assertSame([$game->image], Storage::disk('public')->allFiles());
+        $this->assertSame($original, Storage::disk('local')->get('game-images-before-avif/'.$game->image));
+    }
+
     private function legacyGame(string $extension = 'webp'): Game
     {
         $path = 'games/'.Str::uuid().'/legacy.'.$extension;

@@ -30,6 +30,7 @@ conservent les valeurs omises et les valeurs vides effacent les informations.
 ### Task 1: Persistance et formulaires des informations facultatives
 
 **Files:**
+
 - Create: `database/migrations/2026_11_15_120000_add_details_to_games_table.php`
 - Modify: `app/Models/Game.php`
 - Modify: `app/Actions/Games/SaveGame.php`
@@ -43,7 +44,7 @@ quatre clés facultatives et conserve celles qui sont omises. `Game` expose les
 années sous forme `?int`, les autres informations sous forme `?string`.
 
 - [x] Écrire les tests de sauvegarde et Filament pour les quatre champs,
-  leur effacement et préservation, les années isolées/égales et les erreurs.
+      leur effacement et préservation, les années isolées/égales et les erreurs.
 - [x] Exécuter les tests ciblés et constater les échecs liés aux champs absents.
 - [x] Ajouter migration, modèle, validation et formulaire ; actualiser le README.
 - [x] Exécuter les tests ciblés puis Pint, PHPStan et la suite complète.

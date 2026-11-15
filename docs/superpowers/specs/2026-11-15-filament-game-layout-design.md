@@ -31,6 +31,7 @@ Inspecter création, modification et liste dans le navigateur, y compris en larg
 mobile, puis exécuter Pint, PHPStan et la suite complète.
 
 Références officielles :
+
 - https://filamentphp.com/docs/5.x/schemas/layouts
 - https://filamentphp.com/docs/5.x/schemas/sections
 - https://filamentphp.com/docs/5.x/tables/columns/text

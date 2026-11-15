@@ -395,4 +395,33 @@ class GameResourceTest extends TestCase
     {
         return app(SaveGame::class)->handle(new Game, ['name' => $name, 'image' => UploadedFile::fake()->image('logo.png')]);
     }
+
+    public function test_a_previously_open_delete_action_cannot_run_after_admin_access_is_revoked(): void
+    {
+        $game = $this->createWithImage('Pokémon');
+        $page = Livewire::test(EditGame::class, ['record' => $game->id])
+            ->mountAction(DeleteAction::class)->assertActionMounted(DeleteAction::class);
+
+        $this->actingAs(User::factory()->create());
+        $page->call('callMountedAction');
+
+        $this->assertModelExists($game);
+        Storage::disk('public')->assertExists($game->image);
+    }
+
+    public function test_a_previously_open_bulk_delete_cannot_run_after_admin_access_is_revoked(): void
+    {
+        $games = [$this->createWithImage('Pokémon'), $this->createWithImage('Magic')];
+        $page = Livewire::test(ListGames::class)
+            ->mountTableBulkAction(DeleteBulkAction::class, $games)
+            ->assertTableBulkActionMounted(DeleteBulkAction::class);
+
+        $this->actingAs(User::factory()->create());
+        $page->call('callMountedAction');
+
+        foreach ($games as $game) {
+            $this->assertModelExists($game);
+            Storage::disk('public')->assertExists($game->image);
+        }
+    }
 }

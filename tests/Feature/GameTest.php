@@ -285,4 +285,24 @@ class GameTest extends TestCase
 
         $this->assertSame([$old], Storage::disk('public')->allFiles('games'));
     }
+
+    public function test_a_cancelled_save_rolls_back_details_and_removes_the_prepared_image(): void
+    {
+        $game = $this->createWithImage();
+        $old = $game->image;
+        Game::updating(fn (): bool => false);
+
+        try {
+            app(SaveGame::class)->handle($game, [
+                'name' => 'Changed', 'is_visible' => false,
+                'image' => UploadedFile::fake()->image('replacement.png'),
+            ]);
+            $this->fail('A cancelled save was reported as successful.');
+        } catch (RuntimeException) {
+            $this->assertSame('Pokémon', $game->fresh()->name);
+            $this->assertTrue($game->fresh()->is_visible);
+            $this->assertSame($old, $game->fresh()->image);
+            $this->assertSame([$old], Storage::disk('public')->allFiles('games'));
+        }
+    }
 }

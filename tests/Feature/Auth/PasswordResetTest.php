@@ -5,6 +5,7 @@ namespace Tests\Feature\Auth;
 use App\Models\User;
 use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Notification;
 use Laravel\Fortify\Features;
 use Tests\TestCase;
@@ -67,13 +68,24 @@ class PasswordResetTest extends TestCase
             $response = $this->post(route('password.update'), [
                 'token' => $notification->token,
                 'email' => $user->email,
-                'password' => 'password',
-                'password_confirmation' => 'password',
+                'password' => 'a-new-password-123',
+                'password_confirmation' => 'a-new-password-123',
             ]);
 
             $response
                 ->assertSessionHasNoErrors()
                 ->assertRedirect(route('login'));
+
+            $this->assertTrue(Hash::check('a-new-password-123', $user->fresh()->password));
+            $this->assertFalse(Hash::check('password', $user->fresh()->password));
+
+            $this->post(route('password.update'), [
+                'token' => $notification->token,
+                'email' => $user->email,
+                'password' => 'another-password-456',
+                'password_confirmation' => 'another-password-456',
+            ])->assertSessionHasErrors('email');
+            $this->assertTrue(Hash::check('a-new-password-123', $user->fresh()->password));
 
             return true;
         });

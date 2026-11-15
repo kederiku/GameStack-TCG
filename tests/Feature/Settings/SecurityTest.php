@@ -115,4 +115,59 @@ class SecurityTest extends TestCase
             ->assertSessionHasErrors('current_password')
             ->assertRedirect(route('security.edit'));
     }
+
+    public function test_users_cannot_delete_another_accounts_passkey(): void
+    {
+        $owner = User::factory()->create();
+        $passkey = $owner->passkeys()->create([
+            'name' => 'Laptop', 'credential_id' => 'owner-key', 'credential' => [],
+        ]);
+
+        $this->actingAs(User::factory()->create())
+            ->withSession(['auth.password_confirmed_at' => time()])
+            ->delete(route('passkey.destroy', $passkey))
+            ->assertForbidden();
+
+        $this->assertModelExists($passkey);
+    }
+
+    public function test_the_owner_must_confirm_their_password_before_deleting_a_passkey(): void
+    {
+        $owner = User::factory()->create();
+        $passkey = $owner->passkeys()->create([
+            'name' => 'Laptop', 'credential_id' => 'owner-key', 'credential' => [],
+        ]);
+
+        $this->actingAs($owner)->delete(route('passkey.destroy', $passkey))
+            ->assertRedirect(route('password.confirm'));
+        $this->assertModelExists($passkey);
+
+        $this->withSession(['auth.password_confirmed_at' => time()])
+            ->from(route('security.edit'))
+            ->delete(route('passkey.destroy', $passkey))
+            ->assertRedirect(route('security.edit'));
+        $this->assertModelMissing($passkey);
+    }
+
+    public function test_security_only_exposes_the_owners_passkey_metadata(): void
+    {
+        $owner = User::factory()->create();
+        $passkey = $owner->passkeys()->create([
+            'name' => 'My laptop', 'credential_id' => 'owner-key', 'credential' => ['secret' => 'private-data'],
+        ]);
+        User::factory()->create()->passkeys()->create([
+            'name' => 'Another account', 'credential_id' => 'other-key', 'credential' => [],
+        ]);
+
+        $this->actingAs($owner)
+            ->withSession(['auth.password_confirmed_at' => time()])
+            ->get(route('security.edit'))->assertOk()
+            ->assertInertia(fn (Assert $page) => $page
+                ->has('passkeys', 1)
+                ->where('passkeys.0.id', $passkey->id)
+                ->where('passkeys.0.name', 'My laptop')
+                ->missing('passkeys.0.credential')
+                ->missing('passkeys.0.credential_id')
+                ->missing('passkeys.0.user_id'));
+    }
 }
