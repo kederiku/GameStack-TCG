@@ -31,7 +31,7 @@ class RelationsRelationManager extends CatalogRelationManager
                 ->helperText('Point de départ du lien : lisez « source → type de lien → cible ».')
                 ->getOptionLabelUsing(fn (mixed $value): ?string => $this->expansionLabel($value)),
             Select::make('target_expansion_id')->label('Extension cible')->required()->searchable()->disabledOn('edit')
-                ->helperText('Recherchez un autre ensemble du même jeu, éventuellement dans un autre catalogue. À la création, l’extension ouverte est la source du lien.')
+                ->helperText('Recherchez un autre ensemble du même jeu, éventuellement dans un autre catalogue. Pour « Adaptée de » et « Inclut du contenu de », l’extension ouverte est la source du lien.')
                 ->getSearchResultsUsing(fn (string $search): array => $this->candidateExpansions($search))
                 ->getOptionLabelUsing(fn (mixed $value): ?string => $this->expansionLabel($value)),
             CatalogFields::enum('type', 'Type', CatalogLabels::RELATION_TYPES)->disabledOn('edit')
