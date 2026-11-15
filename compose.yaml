@@ -12,8 +12,30 @@ x-app: &app
     init: true
     volumes:
         - .:/var/www/html
+        - service-status:/var/run/development-status:ro
 
 services:
+    service-status:
+        # Make enables the local profile; other APP_ENV values leave this stopped.
+        profiles: ['${APP_ENV:-disabled}']
+        image: gamestackr-tcg-app:dev
+        command: ['php', '/collector/collect.php']
+        user: '0:0'
+        init: true
+        restart: on-failure
+        network_mode: none
+        read_only: true
+        cap_drop: [ALL]
+        security_opt: ['no-new-privileges:true']
+        environment:
+            APP_ENV: ${APP_ENV:-production}
+            COMPOSE_PROJECT_NAME: ${COMPOSE_PROJECT_NAME:-gamestackr-tcg}
+        volumes:
+            - /var/run/docker.sock:/var/run/docker.sock:ro
+            - ./docker/development/collect.php:/collector/collect.php:ro
+            - ./app/Support/Development/DockerCollector.php:/collector/DockerCollector.php:ro
+            - service-status:/status
+
     garage:
         image: dxflrs/garage:v2.4.0
         command: ['/garage', '-c', '/etc/garage/garage.toml', 'server']
@@ -128,6 +150,7 @@ services:
             - '127.0.0.1:${MAILPIT_PORT:-8025}:8025'
 
 volumes:
+    service-status:
     postgres-data:
     garage-data:
     garage-meta:
