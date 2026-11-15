@@ -9,7 +9,7 @@ RUN := $(DC) run --rm --no-deps app
 EXEC := $(DC) exec app
 ARGS ?=
 
-.PHONY: help env init up down stop restart logs ps admin artisan composer npm shell migrate test check build assets format storage-init storage-password
+.PHONY: help env init up down stop restart logs ps admin artisan composer npm shell migrate test test-storage check build assets format storage-init storage-password
 
 help: ## Afficher les commandes disponibles
 	@awk 'BEGIN {FS = ":.*## "} /^[a-zA-Z_-]+:.*## / {printf "  %-12s %s\n", $$1, $$2}' $(MAKEFILE_LIST)
@@ -82,6 +82,10 @@ migrate: ## Exécuter les migrations
 test: ## Exécuter les tests dans une base PostgreSQL dédiée
 	$(RUN) php artisan config:clear
 	$(RUN) php artisan test $(ARGS)
+
+test-storage: ## Vérifier le cycle des images sur Garage réel (après make up)
+	$(RUN) php artisan config:clear
+	$(RUN) php artisan test tests/Integration/GarageStorageTest.php
 
 check: ## Vérifier PHP, frontend, types et tests
 	$(RUN) composer test

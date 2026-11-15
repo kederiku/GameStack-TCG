@@ -272,7 +272,7 @@ La suite habituelle utilise des disques simulés et une base de test séparée.
 Pour vérifier explicitement Garage réel, après `make up` :
 
 ```sh
-docker compose exec -T app php artisan test tests/Integration/GarageStorageTest.php
+make test-storage
 ```
 
 Ces tests utilisent `gamestackr_testing`, créent leurs propres chemins UUID et
@@ -394,6 +394,7 @@ modification du code des jobs : `make artisan ARGS='queue:restart'`, puis
 ```sh
 make check
 make assets
+make test-storage
 ```
 
 Les tests utilisent **uniquement `gamestackr_testing`**, créée au premier
@@ -401,8 +402,18 @@ démarrage PostgreSQL. `phpunit.xml` force cette base et le bootstrap des tests
 refuse une configuration pointant vers une autre base. Les migrations des tests
 ne touchent pas `gamestackr`.
 
-Le workflow GitHub Actions exécute les mêmes commandes Docker/Make.
+Le workflow GitHub Actions `tests` s’exécute sur les PR vers `main` et les push
+sur `main`. Son job `ci` installe le projet depuis les lockfiles avec `make init`
+(qui compile aussi les assets), puis lance `make check` et `make test-storage`
+contre Garage réel. Les anciens runs d’une même PR sont annulés et chaque job
+est limité à 30 minutes.
 `composer.lock` et `package-lock.json` fixent les versions installées.
+
+Le parcours des agents est décrit dans [AGENTS.md](AGENTS.md) : branche dédiée,
+revue indépendante tracée, PR, CI verte sur le commit revu, puis fusion squash.
+Le propriétaire autorise cette fusion sans nouvelle confirmation une fois ces
+conditions remplies. GitHub protège `main` avec PR et check `ci` obligatoires,
+branche à jour et discussions résolues, y compris pour l’administrateur.
 
 Si un volume PostgreSQL préexistant ne contient pas la base de tests, la créer
 avec les identifiants de `.env` (valeur par défaut ci-dessous) :
