@@ -1,5 +1,10 @@
 <?php
 
+$garageConfig = storage_path('app/private/garage/s3.json');
+$garage = is_file($garageConfig)
+    ? json_decode((string) file_get_contents($garageConfig), true, flags: JSON_THROW_ON_ERROR)
+    : [];
+
 return [
 
     /*
@@ -49,13 +54,15 @@ return [
 
         's3' => [
             'driver' => 's3',
-            'key' => env('AWS_ACCESS_KEY_ID'),
-            'secret' => env('AWS_SECRET_ACCESS_KEY'),
-            'region' => env('AWS_DEFAULT_REGION'),
-            'bucket' => env('AWS_BUCKET'),
-            'url' => env('AWS_URL'),
-            'endpoint' => env('AWS_ENDPOINT'),
-            'use_path_style_endpoint' => env('AWS_USE_PATH_STYLE_ENDPOINT', false),
+            'key' => env('AWS_ACCESS_KEY_ID') ?: ($garage['key'] ?? null),
+            'secret' => env('AWS_SECRET_ACCESS_KEY') ?: ($garage['secret'] ?? null),
+            'region' => env('AWS_DEFAULT_REGION') ?: ($garage['region'] ?? 'garage'),
+            'bucket' => env('AWS_BUCKET') ?: ($garage['bucket'] ?? null),
+            'url' => env('AWS_URL') ?: ($garage['url'] ?? null),
+            'endpoint' => env('AWS_ENDPOINT') ?: ($garage['endpoint'] ?? null),
+            'use_path_style_endpoint' => env('AWS_ENDPOINT') ? env('AWS_USE_PATH_STYLE_ENDPOINT', false) : true,
+            'http' => ['connect_timeout' => 2, 'timeout' => 15],
+            'retries' => 2,
             'throw' => false,
             'report' => false,
         ],

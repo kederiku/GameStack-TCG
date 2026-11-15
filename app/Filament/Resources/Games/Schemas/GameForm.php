@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Games\Schemas;
 
+use App\Services\GameImages;
 use App\Support\GameSlug;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Textarea;
@@ -87,7 +88,7 @@ class GameForm
                                 ->label('Image du jeu')
                                 ->hiddenLabel()
                                 ->image()
-                                ->disk('public')
+                                ->disk(fn (): string => GameImages::diskName())
                                 ->visibility('public')
                                 ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp', 'image/avif', 'image/svg+xml'])
                                 ->maxSize(5120)

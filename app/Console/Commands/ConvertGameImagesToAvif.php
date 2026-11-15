@@ -24,8 +24,9 @@ class ConvertGameImagesToAvif extends Command
         $dryRun = (bool) $this->option('dry-run');
 
         foreach (Game::query()->whereNotNull('image')->lazyById() as $game) {
+            $temporary = null;
             try {
-                $changed = $game->getConnection()->transaction(function () use ($game, $images, $dryRun): bool {
+                $changed = $game->getConnection()->transaction(function () use ($game, $images, $dryRun, &$temporary): bool {
                     $record = Game::query()->lockForUpdate()->find($game->id);
                     $path = $record?->image;
 
@@ -33,13 +34,20 @@ class ConvertGameImagesToAvif extends Command
                         return false;
                     }
 
-                    $disk = Storage::disk('public');
+                    $disk = GameImages::disk();
 
                     if (! $images->isManagedPath($path) || ! $disk->exists($path)) {
                         throw new RuntimeException('Image absente ou chemin non géré : '.$path);
                     }
 
-                    $upload = new UploadedFile($disk->path($path), basename($path), test: true);
+                    $contents = $disk->get($path);
+                    $temporary = tempnam(sys_get_temp_dir(), 'game-image-');
+
+                    if ($contents === null || $temporary === false || file_put_contents($temporary, $contents) !== strlen($contents)) {
+                        throw new RuntimeException('Impossible de préparer l’image pour conversion : '.$path);
+                    }
+
+                    $upload = new UploadedFile($temporary, basename($path), test: true);
                     Validator::make(['image' => $upload], [
                         'image' => ['required', 'image:allow_svg', 'mimetypes:image/webp,image/svg+xml', 'max:5120', 'dimensions:max_width=4096,max_height=4096'],
                     ])->validate();
@@ -50,12 +58,11 @@ class ConvertGameImagesToAvif extends Command
                         return true;
                     }
 
-                    $contents = $disk->get($path);
                     $backup = 'game-images-before-avif/'.$path;
                     $private = Storage::disk('local');
 
                     // Verify existing backups too: never replace a record without its exact original.
-                    if ($contents === null || (! $private->exists($backup) && ! $private->put($backup, $contents, 'private')) || $private->get($backup) !== $contents) {
+                    if ((! $private->exists($backup) && ! $private->put($backup, $contents, 'private')) || $private->get($backup) !== $contents) {
                         throw new RuntimeException('Impossible de sauvegarder l’original : '.$path);
                     }
 
@@ -74,6 +81,10 @@ class ConvertGameImagesToAvif extends Command
                 $failed++;
                 $this->error("Jeu #{$game->id} : {$exception->getMessage()}");
                 report($exception);
+            } finally {
+                if (is_string($temporary) && is_file($temporary)) {
+                    unlink($temporary);
+                }
             }
         }
 
