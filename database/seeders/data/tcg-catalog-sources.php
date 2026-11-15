@@ -1,0 +1,56 @@
+<?php
+
+// Each key is used by a factual field (or group of fields) in tcg-catalog-examples.php.
+$consultedOn = '2026-11-15';
+
+$sources = [
+    'language-tags' => ['https://www.w3.org/International/articles/language-tags/', 'Tags de langue et d’écriture ; les libellés français sont éditoriaux.'],
+    'P1' => ['https://www.pokemon.com/fr/actus-pokemon/mettez-la-main-sur-le-boitier-strategies-et-combats-ecarlate-et-violet-du-jcc-pokemon', 'Extension française Écarlate et Violet, série et date de sortie.'],
+    'P2' => ['https://press.pokemon.com/en/releases/First-Expansion-of-the-Pokemon-Trading-Game-Scarlet-Violet-Series-Comi', 'Série, extension anglaise Scarlet & Violet et date de sortie.'],
+    'P3' => ['https://www.pokemon.com/fr/actualites/retrouvez-ectoplasma-tetarte-et-dautres-pokemon-dans-lextension-ecarlate-et-violet-151', 'Édition française 151 et sortie.'],
+    'P4' => ['https://press.pokemon.com/en/Items/Schedule/Pokemon-Trading-Card-Game?types=3', 'Calendrier Pokémon EN, notamment 151.'],
+    'P5' => ['https://www.pokemon-card.com/ex/sv/index.html', 'Série japonaise et deux ensembles indépendants au lancement.'],
+    'P6' => ['https://www.pokemon-card.com/ex/sv2a/', 'Nom, édition et lancement japonais de 151.'],
+    'P7' => ['https://pokemoncard.co.kr/card/551', 'Nom, série et lancement coréens de 151. Index officiel ; ouverture directe instable.'],
+    'P8' => ['https://asia.pokemon-card.com/tw/archive/special/card/sv2a/index.html', 'Nom, série et lancement taïwanais de 151.'],
+    'P9' => ['https://asia.pokemon-card.com/tw/archive/card/sun_moon_series/booster_pack_b.html', 'Nom, série et édition traditionnelle du SET B ; date non retenue.'],
+    'P10' => ['https://www.pokemon.cn/tcg/product/15486.html', 'Deux ensembles 151 séparés en chinois simplifié, série et dates en Chine continentale.'],
+    'pokemon-logo-fr' => ['https://pokemon.gamespress.com/fr/Pokemon-TCG-Scarlet-Violet', 'Aperçu public SV01_Logo_FR, pas l’original restreint ; voir assets/tcg-catalog/README.md.'],
+    'pokemon-logo-en' => ['https://press.pokemon.com/en/releases/First-Expansion-of-the-Pokemon-Trading-Game-Scarlet-Violet-Series-Comi', 'Aperçu officiel transparent Pokemon_TCG_Scarlet_Violet_Logo ; voir assets/tcg-catalog/README.md.'],
+    'M1' => ['https://magic.wizards.com/en/news/making-magic/whims-fate-reforged-part-2-2015-01-05', 'Bloc Khans of Tarkir et noms de ses trois extensions anglaises.'],
+    'magic-tarkir-releases' => ['https://magic.wizards.com/en/news/making-magic/looking-back-part-2', 'Rétrospective Wizards : sorties de boosters des trois ensembles de Tarkir.'],
+    'M2' => ['https://magic.wizards.com/en/news/announcements/announcing-magic-the-gathering-foundations', 'Nom, édition anglaise et lancement de Foundations.'],
+    'magic-foundations-release' => ['https://magic.wizards.com/en/products/foundations', 'Produit disponible physiquement et date de sortie confirmée.'],
+    'O1' => ['https://www.onepiece-cardgame.com/products/boosters/op01.php', 'ROMANCE DAWN : édition japonaise, code OP-01, date.'],
+    'O2' => ['https://en.onepiece-cardgame.com/products/boosters/op01.php', 'ROMANCE DAWN : édition anglaise, code présenté OP01, date.'],
+    'Y1' => ['https://www.yugioh-card.com/japan/products/dabl/', 'DARKWING BLAST : ensemble OCG japonais et date.'],
+    'Y2' => ['https://www.yugioh-card.com/eu/fr/product/explosion-de-laile-des-tenebres/', 'Nom français, cartes françaises et lancement TCG en France.'],
+    'Y3' => ['https://www.yugioh-card.com/en/products/dabl/', 'Nom et édition anglaise ; dates générales et OTS distinctes aux États-Unis.'],
+    'L1' => ['https://disneylorcana.com/fr/product-archive/', 'Premier Chapitre : archive FR retrouvée dans l’index officiel, accès direct instable.'],
+    'L2' => ['https://disneylorcana.com/en/product-archive/', 'The First Chapter : nom anglais et date de lancement général.'],
+    'cyberpunk-print' => ['https://cyberpunktcg.com/cards/floor-it', 'Welcome to Night City en anglais ; Beta et Retail sont des tirages.'],
+    'cyberpunk-release' => ['https://press.cdprojektred.com/en/news/1915/cyberpunk-trading-card-game-celebrates-official-release', 'Lancement international physique du 6 novembre 2026.'],
+    'fab-wtr' => ['https://legacy.fabtcg.com/en/collectors-centre/welcome-rathe/', 'Welcome to Rathe : Alpha en anglais, boutiques spécialisées aux États-Unis. Index officiel ; ouverture directe instable.'],
+    'fab-wtr-date' => ['https://legacy.fabtcg.com/en/resources/rules-and-policy-center/release-notes/welcome-rathe/', 'Lancement au 11 octobre 2019.'],
+    'fab-history' => ['https://legacy.fabtcg.com/en/collectors-centre/history-pack-1/', 'History Pack 1 en anglais, lancement dans les boutiques spécialisées américaines. Index officiel ; ouverture directe instable.'],
+    'riftbound-sets' => ['https://playriftbound.com/en-us/news/announcements/what-to-expect-during-preview-season/', 'Origins (OGN) et cartes Proving Grounds (OGS) du coffret d’initiation.'],
+    'riftbound-release' => ['https://playriftbound.com/en-us/news/announcements/how-to-buy-riftbound/', 'Commercialisation anglaise d’Origins et Proving Grounds le 31 octobre 2025.'],
+    'riftbound-launch' => ['https://playriftbound.com/en-us/news/announcements/riftbound-origins-launch-learnings/', 'Retour sur le lancement anglais effectivement réalisé.'],
+    'mythos-set' => ['https://www.narutotcgmythos.com/collection-guide', 'Konoha Shidō : il existe deux tirages, distingués par l’éditeur.'],
+    'mythos-language' => ['https://www.narutotcgmythos.com/excellence-becomes-legend-the-naruto-mythos-tcg-gold-card', 'Éditions imprimées anglaise et française.'],
+    'mythos-release' => ['https://www.narutotcgmythos.com/updates-about-1st-set-2nd-edition', 'Des joueurs ont déjà reçu des cartes du premier tirage ; aucun jour de sortie retenu.'],
+    'ff-chapter' => ['https://fftcg.square-enix-games.com/en/news/from-the-producer-special-vol-7-the-chapter-series', 'Chapter distribué uniquement au Japon, en japonais.'],
+    'ff-chapter-i' => ['https://www.square-enix-shop.com/jp/ff-tcg/column/column542.html', 'Nom Chapter I et lancement japonais le 25 février 2011.'],
+    'ff-dreamlike' => ['https://fftcg.square-enix-games.com/na/release/dreamlike-oceans', 'Dreamlike Oceans : nom, cartes anglaises, publication Opus.'],
+    'swu-en' => ['https://starwarsunlimited.com/articles/launch-sequence', 'Spark of Rebellion : nom, cartes anglaises, lancement.'],
+    'swu-fr' => ['https://starwarsunlimited.com/fr/articles/launch-sequence-fr', 'Étincelle de Rébellion : nom, cartes françaises, lancement. Accès direct parfois instable.'],
+    'swu-global-release' => ['https://starwarsunlimited.com/fr/articles/star-wars-unlimited-first-look-fr', 'Nom des éditions anglaise et française, et leurs disponibilités à la sortie mondiale du 8 mars 2024.'],
+    'altered-physical' => ['https://www.altered.gg/en-us/news/organized-play-season-1/', 'Beyond the Gates : lancement mondial des produits physiques au 13 septembre 2024 (date dans le texte).'],
+    'altered-language' => ['https://www.altered.gg/en-us/news/unique-cards-explained/', 'Exemples de cartes physiques en anglais.'],
+    'bandai-naruto' => ['https://www.naruto-cardgame.com/en/news/nycc-report.php', 'Annonce du jeu Bandai pour juin 2027, sans jour ni langue d’impression retenus.'],
+];
+
+return array_map(
+    fn (array $source): array => ['url' => $source[0], 'consulted_on' => $consultedOn, 'note' => $source[1]],
+    $sources,
+);

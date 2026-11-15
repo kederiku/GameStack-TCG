@@ -317,7 +317,7 @@ les nettoient. Voir [le rapport de validation](docs/superpowers/local-image-stor
 `/` présente le projet de gestion de collections multi-TCG et précise que les
 outils de collection sont en préparation. Le menu de la topbar et les tuiles utilisent
 les jeux créés dans Filament ; choisir un jeu ouvre `/{slug}`, par exemple
-`/pokemon` ou `/yugioh`. Une URL inconnue renvoie 404. Modifier un slug change
+`/pokemon` ou `/yu-gi-oh`. Une URL inconnue renvoie 404. Modifier un slug change
 son URL publique, sans redirection depuis l’ancienne.
 
 Les segments utilisés par l’application (`admin`, `login`, `settings`, etc.)
@@ -333,10 +333,45 @@ clair/sombre/système de l’application. Une image absente ou impossible à cha
 laisse place aux initiales du jeu.
 
 La page d’un jeu affiche actuellement un état « Le catalogue se prépare ».
-Les cartes, extensions, collections et prix ne sont pas encore implémentés.
-Aucun jeu ni compte de démonstration n’est ajouté.
+Le catalogue se gère déjà dans Filament ; son affichage public, les cartes,
+les collections et les prix restent à venir.
 
 Voir [les vérifications de la navigation publique](docs/superpowers/public-navigation-verification.md).
+
+## Catalogue TCG dans Filament
+
+Les administrateurs peuvent gérer les catalogues, séries et extensions dans
+`/admin`. Les fiches d’extension distinguent le nom d’affichage, les éditions
+imprimées et les sorties de chaque édition par marché et canal.
+
+Pour charger l’échantillon réel après avoir démarré l’application :
+
+```sh
+make migrate
+make artisan ARGS='db:seed --class=TcgCatalogExamplesSeeder'
+```
+
+Ce seeder est facultatif et s’exécute uniquement sur demande. Il ne crée aucun
+compte et ne télécharge rien. Sur une base sans catalogue, le manifeste couvre
+12 jeux et 19 catalogues, avec 29 ensembles, 34 éditions linguistiques et 27
+sorties documentées. L’annonce de Naruto Card Game (Bandai) reste une note
+sourcée tant que les langues d’impression ne sont pas confirmées. Les nouveaux
+jeux et exemples sont masqués de publication par défaut.
+
+La commande compte les fiches créées, conservées et recréées. Elle réutilise les
+fiches identifiées sans ambiguïté et conserve leurs champs, y compris les noms,
+visibilités et images modifiés ou laissés vides. Après la première exécution, un
+jeu reste associé à son catalogue même si son slug change. Si une fiche a été
+supprimée, la commande la recrée avec ses valeurs initiales ; masquez-la pour
+la conserver durablement hors publication. En cas de conflit, toute l’opération
+est annulée. Par exemple, si une sortie publiée manquante changerait le statut
+d’une édition existante, vérifiez l’édition et la sortie signalées avant de relancer.
+
+Les [exemples](database/seeders/data/tcg-catalog-examples.php), leurs
+[sources](database/seeders/data/tcg-catalog-sources.php) et les
+[visuels officiels](database/seeders/assets/tcg-catalog/README.md) sont versionnés.
+Une date ou un code peut être absent quand il n’a pas été confirmé ou retenu
+pour cet échantillon.
 
 ## Dashboard et composants partagés
 
