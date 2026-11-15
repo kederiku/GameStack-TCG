@@ -15,8 +15,10 @@ use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
 use Filament\Support\Icons\Heroicon;
+use Filament\View\PanelsRenderHook;
 use Filament\Widgets\AccountWidget;
 use Filament\Widgets\FilamentInfoWidget;
+use Illuminate\Contracts\View\View;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
@@ -33,7 +35,10 @@ class AdminPanelProvider extends PanelProvider
             ->id('admin')
             ->path('admin')
             ->login(AdminLoginController::class)
-            ->brandName(config('app.name').' Admin')
+            ->brandName('GameStackr Admin')
+            ->brandLogo(fn (): View => view('filament.brand-logo'))
+            ->brandLogoHeight('2rem')
+            ->renderHook(PanelsRenderHook::STYLES_AFTER, fn (): View => view('filament.brand-styles'))
             ->colors([
                 'primary' => Color::Amber,
             ])
@@ -43,6 +48,10 @@ class AdminPanelProvider extends PanelProvider
                 Dashboard::class,
             ])
             ->navigationItems([
+                NavigationItem::make('Voir l’application')
+                    ->icon(Heroicon::OutlinedArrowTopRightOnSquare)
+                    ->sort(10)
+                    ->url(fn (): string => route('home'), shouldOpenInNewTab: true),
                 NavigationItem::make('Mailpit')->group('Développement')->sort(20)
                     ->icon(Heroicon::OutlinedEnvelope)
                     ->url(fn (): string => app(ServiceCatalog::class)->links()['mailpit']['url'], shouldOpenInNewTab: true)

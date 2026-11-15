@@ -79,6 +79,9 @@ Les comptes issus de l’inscription publique n’ont jamais accès à Filament,
 y compris en environnement local. Filament lui-même utilise Livewire ;
 l’application et les écrans d’authentification utilisent Inertia/React.
 
+Le logo Filament reprend celui de l’application avec un badge vertical **ADMIN**.
+Le lien **Voir l’application** du menu ouvre l’accueil public dans un nouvel onglet.
+
 ## Services de développement
 
 En environnement `APP_ENV=local`, les administrateurs vérifiés disposent du groupe
