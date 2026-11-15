@@ -32,28 +32,32 @@ class CatalogFields
             ->label('Clé')
             ->disabledOn('edit')
             ->maxLength(255)
-            ->helperText('Utilisez des minuscules, des chiffres et des tirets. Laissez vide pour générer une clé.');
+            ->helperText('Identifiant stable de la fiche, par exemple ecarlate-violet. Laissez vide pour le générer. Minuscules, chiffres et tirets uniquement ; non modifiable après création.');
     }
 
     public static function description(): Textarea
     {
-        return Textarea::make('description')->label('Description')->rows(4)->columnSpanFull();
+        return Textarea::make('description')->label('Description')->rows(4)->columnSpanFull()
+            ->helperText('Facultatif : présentez cette fiche en quelques phrases.');
     }
 
     public static function sourceUrl(): TextInput
     {
-        return TextInput::make('source_url')->label('URL source')->url()->maxLength(2048)->columnSpanFull();
+        return TextInput::make('source_url')->label('URL source')->url()->maxLength(2048)->columnSpanFull()
+            ->helperText('Lien vers la page qui confirme ces informations, de préférence sur le site de l’éditeur.');
     }
 
     public static function order(): TextInput
     {
         return TextInput::make('sort_order')->label('Ordre d’affichage')->integer()
-            ->minValue(0)->maxValue(2147483647)->required()->default(0);
+            ->minValue(0)->maxValue(2147483647)->required()->default(0)
+            ->helperText('Classement souhaité : les petits nombres passent avant les grands. Laissez 0 si aucun ordre n’est prévu. Le tri des listes d’administration reste indépendant.');
     }
 
     public static function visibility(): Toggle
     {
-        return Toggle::make('is_visible')->label('Afficher sur le site')->default(true);
+        return Toggle::make('is_visible')->label('Afficher sur le site')->default(true)
+            ->helperText('Masquer conserve la fiche dans l’administration. Les niveaux au-dessus d’elle doivent aussi être visibles pour permettre son affichage public.');
     }
 
     /** @param array<string, string> $options */
@@ -65,12 +69,14 @@ class CatalogFields
     public static function game(): Select
     {
         return Select::make('game_id')->label('Jeu')->required()->searchable()->disabledOn('edit')
+            ->helperText('Le TCG auquel appartient ce catalogue, par exemple Pokémon. Ce rattachement est définitif après création.')
             ->options(fn (): array => Game::query()->orderBy('name')->pluck('name', 'id')->all());
     }
 
     public static function catalogue(): Select
     {
         return Select::make('catalog_id')->label('Catalogue')->required()->searchable()->disabledOn('edit')
+            ->helperText('Choisissez la version du catalogue du jeu, par exemple Pokémon — International ou Japonais. Ce rattachement est définitif après création.')
             ->options(fn (): array => Catalog::query()->with(['game', 'defaultLanguage'])->orderBy('name')->get()
                 ->mapWithKeys(fn (Catalog $catalog): array => [$catalog->id => self::catalogueLabel($catalog)])->all());
     }
@@ -83,6 +89,7 @@ class CatalogFields
     public static function series(): Select
     {
         return Select::make('series_id')->label('Série')->searchable()
+            ->helperText('Facultatif : choisissez une série ou un bloc du même catalogue. Laissez vide si cet ensemble n’en fait pas partie.')
             ->disabled(fn (Get $get): bool => self::positiveId($get('catalog_id')) === null)
             ->options(function (Get $get): array {
                 $catalogId = self::positiveId($get('catalog_id'));
@@ -110,7 +117,7 @@ class CatalogFields
                 ->mapWithKeys(fn (Language $language): array => [$language->id => "{$language->name} ({$language->code})"])->all());
     }
 
-    public static function image(string $label): FileUpload
+    public static function image(string $label, string $description = ''): FileUpload
     {
         return FileUpload::make('image')->label($label)
             ->image()
@@ -121,16 +128,17 @@ class CatalogFields
             ->rules(['dimensions:max_width=4096,max_height=4096'])
             ->preventFilePathTampering()
             ->storeFiles(false)
-            ->helperText('JPEG, PNG, WebP, AVIF ou SVG. Taille maximale de 5 Mio et 4096 × 4096 px hors SVG.');
+            ->helperText(trim($description.' JPEG, PNG, WebP, AVIF ou SVG. Taille maximale de 5 Mio et 4096 × 4096 px hors SVG.'));
     }
 
     /**
      * @param  list<Component>  $presentation
      * @param  list<Component>  $publication
      */
-    public static function layout(Schema $schema, array $presentation, array $publication = [], ?FileUpload $image = null): Schema
+    public static function layout(Schema $schema, array $presentation, array $publication = [], ?FileUpload $image = null, ?string $description = null): Schema
     {
         $main = Section::make('Présentation')->icon(Heroicon::OutlinedIdentification)
+            ->description($description)
             ->columns(['default' => 1, 'md' => 2])->schema($presentation)->columnSpanFull();
 
         if ($publication === [] && $image === null) {
@@ -142,7 +150,9 @@ class CatalogFields
             $sidebar[] = Section::make('Visuel')->icon(Heroicon::OutlinedPhoto)->schema([$image]);
         }
         if ($publication !== []) {
-            $sidebar[] = Section::make('Publication')->icon(Heroicon::OutlinedGlobeAlt)->schema($publication);
+            $sidebar[] = Section::make('Publication')->icon(Heroicon::OutlinedGlobeAlt)
+                ->description('L’affichage public du catalogue est en préparation. Ces réglages sont déjà conservés.')
+                ->schema($publication);
         }
 
         return $schema->columns(['default' => 1, 'lg' => 1, 'xl' => 3])->components([

@@ -12,6 +12,6 @@ class SeriesLocalizationsRelationManager extends LocalizationsRelationManager
 
     protected function imageField(): FileUpload
     {
-        return CatalogFields::image('Image de la série dans cette langue');
+        return CatalogFields::image('Image de la série dans cette langue', 'Logo ou visuel de la série dans la langue choisie. Sans image, aucun visuel d’une autre langue n’est repris.');
     }
 }
