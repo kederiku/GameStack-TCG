@@ -6,7 +6,7 @@ le cache et les jobs. L’environnement Docker est prévu pour le développement
 
 ## Démarrage
 
-Prérequis : Docker Desktop démarré (ou Docker Engine avec Compose v2+) et Make.
+Prérequis : Docker Desktop démarré (ou Docker Engine avec Compose 2.30+) et Make.
 PHP, Composer et Node sont fournis dans les conteneurs.
 Sur Linux, Make reprend automatiquement l’UID/GID de l’utilisateur hôte pour
 les permissions des fichiers. Ils peuvent être remplacés avec `DOCKER_UID` et
@@ -18,7 +18,8 @@ make init
 
 Cette commande crée `.env` si nécessaire, construit l’image PHP 8.4/Node 24,
 installe les dépendances verrouillées, génère la clé applicative si elle manque,
-exécute les migrations, compile le frontend et démarre tous les services.
+initialise Garage et son interface, exécute les migrations, compile le frontend
+et démarre tous les services.
 Les lancements suivants utilisent simplement :
 
 ```sh
@@ -26,8 +27,8 @@ make up
 make down
 ```
 
-`make down` conserve les données PostgreSQL. `make init` peut être relancé et
-ne réinitialise ni les données ni la clé existante.
+`make down` conserve les données PostgreSQL et les images Garage. `make init`
+peut être relancé et ne réinitialise ni les données ni les accès existants.
 
 | Service                            | Adresse                        |
 | ---------------------------------- | ------------------------------ |
@@ -37,6 +38,8 @@ ne réinitialise ni les données ni la clé existante.
 | Administration Filament            | http://localhost:8000/admin    |
 | E-mails de développement (Mailpit) | http://localhost:8025          |
 | PostgreSQL depuis l’hôte           | localhost:5432                 |
+| Garage Web UI                      | http://localhost:3909          |
+| API S3 depuis l’hôte               | http://localhost:3900          |
 
 Vite tourne sur le port 5173 et recharge React à chaque modification.
 Ouvrir l’application sur **localhost**, comme configuré pour le rechargement Vite.
@@ -108,10 +111,11 @@ l’éditeur sont masqués pour alléger le tableau, qui conserve son défilemen
 Les images JPEG, PNG, WebP et AVIF sont acceptées jusqu’à **5 Mio** et **4096 ×
 4096 pixels**. Le serveur les réencode en **AVIF** (qualité 85), conserve la
 transparence et corrige l’orientation EXIF des JPEG. Le fichier porte le nom
-normalisé du jeu, par exemple `games/{uuid}/pokemon.avif`, sur le disque local
-`public` (`storage/app/public`). Le dossier unique évite les collisions et le
-cache d’une ancienne image. Le lien `public/storage` est créé par `make init`.
-L’aperçu des imports AVIF est également disponible dans Filament.
+normalisé du jeu, par exemple `games/{uuid}/pokemon.avif`, sur le disque choisi
+par `GAME_IMAGES_DISK` : `s3` pour Garage, `public` pour le stockage historique
+dans `storage/app/public`. Le dossier unique évite les collisions et le cache
+d’une ancienne image. Le lien historique `public/storage` reste créé par
+`make init`. L’aperçu des imports AVIF est également disponible dans Filament.
 
 Les **SVG** sont acceptés jusqu’à **5 Mio**. Leur contenu est nettoyé avec
 `enshrined/svg-sanitize`, puis rasterisé par librsvg en conservant les proportions
@@ -135,8 +139,8 @@ fournis par l’image Docker) :
 
 ```sh
 make build
-make up
 make composer ARGS='install --no-interaction'
+make up
 make migrate
 ```
 
@@ -168,6 +172,111 @@ Pour supprimer,
 utiliser `$game->delete()` ou `Game::destroy($ids)` : les mises à jour/suppressions
 SQL de masse et les méthodes `*Quietly()` contournent les événements Eloquent
 responsables du nettoyage.
+
+## Stockage S3 local et interface
+
+[Garage](https://garagehq.deuxfleurs.fr/) 2.4.0 fournit le stockage compatible S3.
+[Garage Web UI](https://github.com/khairul169/garage-webui) 1.1.0 permet de
+parcourir les buckets et les fichiers, voir leur taille, les télécharger et
+prévisualiser les images prises en charge par le navigateur, dont les AVIF.
+Les deux logiciels tournent dans Docker, sans compte cloud ni abonnement.
+
+Ouvrir **http://localhost:3909**. Le compte est `admin` ; son mot de passe
+aléatoire est enregistré dans le fichier local privé :
+
+```sh
+cat storage/app/private/garage/login.txt
+```
+
+`make storage-password` génère un nouveau mot de passe et redémarre l’interface.
+`make storage-init` prépare uniquement le stockage ; `make up` l’appelle déjà.
+Les secrets, la configuration et les accès S3 sont générés sous
+`storage/app/private/garage/`, ignorés par Git, avec des permissions privées.
+Une relance conserve les clés, le mot de passe, le layout et les objets.
+Ne pas supprimer ce dossier pour « réinitialiser » une installation existante.
+
+Dans l’interface, choisir **Buckets → gamestackr-images → Browse → games**.
+Les modifications métier passent par **Filament → Jeux** : déposer, renommer
+ou supprimer directement un objet dans Garage ne met pas à jour PostgreSQL.
+L’application fonctionne indépendamment de l’interface Web UI.
+
+Laravel utilise `http://garage:3900` dans le réseau Docker. Le navigateur lit
+les images via `http://gamestackr-images.localhost:3902/games/...`. Ces adresses
+sont distinctes. Les ports 3900, 3902 et 3909 sont liés à `127.0.0.1` ; RPC et
+API d’administration restent internes. Le bucket contient uniquement des
+images publiques ; les fichiers privés de Laravel gardent leur disque local.
+Le CORS autorise les lectures depuis `APP_URL`.
+
+Les nouvelles installations choisissent `GAME_IMAGES_DISK=s3`. Une ancienne
+installation sans cette variable reste sur `public` jusqu’à sa migration.
+Les paramètres Garage locaux proviennent de `storage/app/private/garage/s3.json`.
+Les variables `AWS_*` **non vides** de `.env` ont priorité. Pour utiliser un autre
+service S3, renseigner un ensemble cohérent : clé, secret, région, bucket,
+endpoint, URL publique et `AWS_USE_PATH_STYLE_ENDPOINT`. Ne pas mélanger des
+identifiants externes avec les valeurs locales de repli. L’initialisation
+Garage ne réécrit pas ces variables. Les ports et le nom du bucket local sont
+réglables avec `GARAGE_*` dans `.env`. Après un changement de région, arrêter
+puis redémarrer les services pour recharger la configuration Garage.
+
+### Migrer les images existantes
+
+Installer les dépendances et lancer `make up` avant la migration. Garder
+`GAME_IMAGES_DISK=public` dans `.env` jusqu’à la réussite de la copie. Suspendre
+les écritures pendant toute la copie et la bascule :
+
+```sh
+docker compose exec app php artisan down
+docker compose stop queue
+docker compose exec app php artisan games:copy-images-to-s3 --dry-run
+docker compose exec app php artisan games:copy-images-to-s3
+```
+
+La commande copie toutes les images référencées, y compris celles des jeux
+masqués, avec leurs chemins inchangés. Elle relit chaque objet et compare son
+SHA-256. Une copie identique est ignorée ; une destination différente n’est
+jamais écrasée. Les sources locales, la base et la configuration ne sont pas
+modifiées. Une source manquante, un chemin non géré ou une erreur de stockage
+produit un code de sortie non nul. Corriger la cause avant de relancer.
+
+**Uniquement après une copie réussie**, passer `GAME_IMAGES_DISK=s3` dans `.env`,
+puis :
+
+```sh
+docker compose exec app php artisan config:clear
+docker compose exec app php artisan up
+docker compose restart app queue
+```
+
+En cas d’échec, garder `public`, rétablir le site avec `php artisan up` et
+redémarrer la queue. Pour revenir au disque local immédiatement après la
+bascule, remettre `GAME_IMAGES_DISK=public`, vider le cache et redémarrer les
+services. Si des images ont été ajoutées, remplacées ou renommées depuis,
+les recopier de S3 vers `storage/app/public` aux chemins actuels de la base,
+puis vérifier leur contenu avant ce retour. Les anciennes copies seules
+ne suffisent plus ; aucune synchronisation automatique n’est mise en place.
+
+### Persistance et vérifications
+
+Sauvegarder ensemble la base PostgreSQL, les volumes Docker `garage-data` et
+`garage-meta`, ainsi que `storage/app/private/garage/`. Faire une sauvegarde
+cohérente services arrêtés. `make down` conserve les volumes ; `down -v` les
+détruit. Les anciennes images locales et les originaux de conversion AVIF
+restent disponibles indépendamment de Garage.
+
+La configuration utilise un seul nœud et une seule copie des objets : elle
+est destinée au développement. Un serveur de production demandera une
+configuration dédiée pour HTTPS, domaines, accès, sauvegardes et disponibilité.
+L’API S3 permet de garder l’intégration Laravel lors de ce changement.
+
+La suite habituelle utilise des disques simulés et une base de test séparée.
+Pour vérifier explicitement Garage réel, après `make up` :
+
+```sh
+docker compose exec -T app php artisan test tests/Integration/GarageStorageTest.php
+```
+
+Ces tests utilisent `gamestackr_testing`, créent leurs propres chemins UUID et
+les nettoient. Voir [le rapport de validation](docs/superpowers/local-image-storage-verification.md).
 
 ## Navigation publique
 
