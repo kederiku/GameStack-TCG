@@ -81,4 +81,4 @@
 - [x] Suspendre les écritures locales, exécuter simulation et copie des images existantes, vérifier tous les contenus ; seulement en cas de succès, activer `GAME_IMAGES_DISK=s3`, vider le cache, redémarrer et vérifier l’affichage.
 - [x] Documenter installation, accès, mot de passe, migration, sauvegardes/limites et retour au stockage local. Consigner les résultats réels.
 - [x] Commit `docs: document and verify local image storage`.
-- [ ] Faire relire toute la branche par un agent indépendant ; corriger les défauts importants avec tests de régression, puis conserver la branche pour l’utilisateur sans fusion ni push implicite.
+- [x] Faire relire toute la branche par un agent indépendant ; corriger les défauts importants avec tests de régression, puis conserver la branche pour l’utilisateur sans fusion ni push implicite.

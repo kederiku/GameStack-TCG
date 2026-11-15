@@ -71,3 +71,18 @@ Garage ne sont pas versionnés.
 - Revenir au disque `public` après de nouvelles écritures S3 nécessite d’abord
   de recopier les fichiers actuels. Les sources historiques seules ne couvrent
   pas les ajouts et remplacements effectués depuis la migration.
+
+## Revue indépendante
+
+La totalité des changements `aba0eea..ce439fc` a été relue dans un contexte
+indépendant, avec la spécification, le plan et les règles de cycle de vie
+existantes. Aucun défaut critique, important ou mineur à corriger n’a été
+identifié. La revue est favorable dans le périmètre local approuvé.
+
+Les limites laissées à cette étape ont été confirmées : production à préparer
+séparément ; nettoyage d’objets orphelins potentiellement manuel après un arrêt
+brutal ; écritures suspendues pendant la migration ; copie distincte nécessaire
+pour changer de bucket ou de fournisseur ; miniatures natives dépendantes du
+navigateur. Ces limites ne sont pas des mécanismes de récupération automatiques.
+
+La branche est conservée pour l’utilisateur, sans fusion ni push.
