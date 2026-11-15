@@ -1,0 +1,22 @@
+@import '../brand-logo.css';
+
+.admin-brand-logo {
+    --font-display: 'Big Shoulders Display', 'Arial Narrow', sans-serif;
+    --foreground: #18181b;
+    --background: #fff;
+
+    color: var(--foreground);
+}
+
+.dark .admin-brand-logo {
+    --foreground: #fff;
+    --background: #18181b;
+}
+
+.admin-brand-logo .brand-logo-name {
+    font-size: 2rem;
+}
+
+.admin-brand-logo .brand-logo-tag > span {
+    font-size: 12px;
+}

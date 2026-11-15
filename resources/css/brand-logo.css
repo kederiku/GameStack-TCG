@@ -1,0 +1,48 @@
+.brand-logo {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: inherit;
+    white-space: nowrap;
+}
+
+.brand-logo-name {
+    font-family: var(--font-display);
+    font-size: clamp(1.9rem, 3vw, 2.25rem);
+    font-weight: 900;
+    letter-spacing: -0.045em;
+    line-height: 1;
+    text-transform: uppercase;
+}
+
+.brand-logo-tag {
+    display: flex;
+    width: 18px;
+    height: 32px;
+    align-items: center;
+    justify-content: center;
+    border-radius: 2px;
+    background: var(--foreground);
+    color: var(--background);
+}
+
+.brand-logo-tag > span {
+    font-family: var(--font-display);
+    font-size: 16px;
+    font-weight: 900;
+    line-height: 1;
+    transform: rotate(-90deg);
+}
+
+.brand-logo-small .brand-logo-name {
+    font-size: 1.6rem;
+}
+
+.brand-logo-small .brand-logo-tag {
+    width: 14px;
+    height: 24px;
+}
+
+.brand-logo-small .brand-logo-tag > span {
+    font-size: 12px;
+}
