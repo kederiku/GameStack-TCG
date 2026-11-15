@@ -2,6 +2,10 @@
 
 Statut : proposition à valider avant implémentation. Date : 15 novembre 2026.
 
+Cette version intègre l’[audit des treize jeux enregistrés](../multitcg-compatibility-audit.md).
+Les précisions issues de cet audit restent des propositions de conception ; aucune
+table, page applicative ou donnée de jeu n’a été modifiée.
+
 ## Intention et décisions de l’utilisateur
 
 Organiser plusieurs jeux de cartes à collectionner, leurs séries/blocs et leurs
@@ -23,7 +27,7 @@ illustrations, tampons promotionnels et premières éditions. Chaque carte et ch
 variante doit avoir son image, et chaque édition traduite de la carte sa propre
 image également. Ces besoins futurs sont explicitement demandés par l’utilisateur.
 
-Les détails ci-dessous, notamment les cinq jeux exemples, les champs, les règles
+Les détails ci-dessous, notamment les jeux exemples, les champs, les règles
 de suppression et le fonctionnement du seeder, sont des propositions de l’agent.
 Ils ne constituent pas encore une validation du document par l’utilisateur.
 
@@ -74,8 +78,8 @@ pour les jeux qui n’utilisent pas ce regroupement.
 | `Game` | Jeu existant, conservé. Un jeu possède plusieurs catalogues. |
 | `Catalog` | Catalogue éditorial appartenant à un jeu. |
 | `Series` | Regroupement éditorial dans un catalogue ; présenté comme série ou bloc. |
-| `Expansion` | Extension d’un catalogue, avec une série facultative de ce même catalogue. |
-| `ExpansionEdition` | Édition réellement publiée d’une extension dans une langue/écriture. |
+| `Expansion` | Ensemble éditorial de cartes d’un catalogue, avec une série facultative : extension, promos, ensemble propre à un deck ou collection de réimpressions. |
+| `ExpansionEdition` | Version linguistique identifiée de cet ensemble, annoncée ou effectivement publiée, avec un statut explicite. |
 | `ExpansionRelease` | Sortie d’une édition sur un marché et pour un canal de distribution. |
 | `SeriesLocalization` | Nom, description et visuel de présentation d’une série dans une langue. |
 | `ExpansionLocalization` | Nom et description d’affichage d’une extension dans une langue. |
@@ -99,19 +103,35 @@ plusieurs langues et une édition peut avoir plusieurs marchés.
 - `Series` : catalogue, clé, libellé d’administration, type `series` ou `block`,
   ordre, visibilité. Les noms et images localisés sont dans ses localisations.
 - `Expansion` : catalogue, série nullable, clé, libellé d’administration, type
-  `main`, `special` ou `promo`, ordre, visibilité. Ces types décrivent notre
+  `main`, `special`, `promo`, `deck` ou `reprint`, ordre, visibilité. Ces types décrivent notre
   classement ; ils ne traduisent pas automatiquement les catégories d’un éditeur.
+  Un deck commercial ne crée un ensemble `deck` que si ses références éditoriales
+  le justifient. Des cartes starter exclusives peuvent appartenir à une extension
+  existante. Le libellé Filament proposé devient « Extensions et ensembles ».
 - `ExpansionEdition` : extension, langue, nom officiel dans son écriture d’origine,
-  code officiel facultatif, logo/image facultatif, visibilité. Une seule édition
+  code officiel facultatif, logo/image facultatif, visibilité, état `announced`,
+  `released` ou `cancelled` déclaré à partir des sources. Une seule édition
   linguistique par couple extension/langue dans cette V1. Ce terme ne désigne
   ni un produit commercial, ni une première édition physique, ni un tirage :
   plusieurs produits, impressions et variantes pourront dépendre de cette même
   édition linguistique. Des ensembles éditoriaux réellement distincts d’une même
   langue restent représentables par des extensions/catalogues distincts.
 - `ExpansionRelease` : édition, marché, canal (`general`, `specialist`,
-  `prerelease`), date nullable, URL source facultative. Unicité édition/marché/canal.
+  `prerelease`, `crowdfunding`, `event`), date nullable, période annoncée textuelle
+  facultative, état `announced`, `released` ou `cancelled`, URL source facultative.
+  Unicité édition/marché/canal pour le premier lancement, pas pour tous les tirages futurs.
   La date est un jour civil local, pas un instant UTC. Une date inconnue reste
   inconnue ; ne pas la remplacer par la première date d’un autre marché.
+  « Juin 2027 » peut être conservé comme période d’annonce avec date exacte nulle.
+  Une édition publiée peut avoir d’autres marchés encore annoncés. Enregistrer
+  une sortie publiée établit la publication de son édition, pas celle des autres
+  sorties. Refuser un état annulé/annoncé sur l’édition tant qu’une sortie reste
+  publiée ; sans sortie documentée, son état peut être établi directement par une
+  source. Aucun état ne change automatiquement au passage de la date annoncée.
+  Ces champs supposent une langue d’impression confirmée. Tant qu’elle est
+  inconnue, une annonce générale de jeu/ensemble reste une note sourcée dans la
+  documentation ou le manifeste d’exemples ; ne pas créer d’édition pour la porter.
+  La V1 ne prévoit pas de calendrier structuré des annonces sans langue confirmée.
 - Localisations : unicité parent/langue, nom, description nullable ; image nullable
   pour les séries. La localisation d’une extension ne crée jamais d’édition.
 - Ne pas ajouter de compteur de cartes dans cette V1 : les conventions de comptage
@@ -182,6 +202,28 @@ La visibilité actuelle des jeux et leurs URL publiques restent compatibles.
 Cette section fixe les points d’attache et les erreurs à éviter. Les noms de
 modèles futurs sont indicatifs ; leurs tables, écrans et seeders ne font pas partie
 de la V1. Le choix de leurs attributs détaillés nécessitera leur propre conception.
+Le périmètre de départ est le catalogue de cartes physiques : une disponibilité
+numérique seule n’atteste pas une publication papier. Les sorties purement
+numériques, les droits de propriété distants et leur synchronisation sont exclus
+de cette V1 ; les futures impressions physiques/POD documentées restent possibles.
+
+### Tirages, sous-ensembles et exemplaires
+
+L’audit des jeux présents impose de prévoir un niveau futur de tirage/édition
+physique sous `ExpansionEdition` : Alpha/Unlimited, Beta/Retail, première/deuxième
+édition. Le tirage peut avoir ses propres contenus, textes, codes et images, sans
+constituer une nouvelle langue ou automatiquement un nouvel ensemble. Les produits,
+impressions et variantes pourront être rattachés au tirage pertinent. Ne pas réduire
+cette notion à un unique booléen de finition.
+
+Prévoir aussi des regroupements de cartes internes aux ensembles (Galerie de Galar,
+par exemple), sans les transformer en blocs. Leur modèle fin sera conçu avec les
+cartes. Un code de carte peut être conservé dans une réimpression d’un autre ensemble :
+l’appartenance de l’impression sera explicite, jamais déduite de ce code.
+
+Une version sérialisée possède un traitement de catalogue, tandis que son numéro
+de série (par exemple 42/500) et la photo de cet exemplaire appartiennent au futur
+exemplaire physique. Le numéro de collection et le numéro de série sont distincts.
 
 ### Produits scellés
 
@@ -227,10 +269,15 @@ Envisager trois niveaux distincts :
    leur identité est établie. Ce n’est pas l’espèce/personnage (« Pikachu »), et
    un nom identique ne prouve pas des caractéristiques ou règles identiques.
    Ce rapprochement peut rester absent lors de l’import d’une impression locale.
+   Le pitch rouge/jaune/bleu de Flesh and Blood ou les caractéristiques générées
+   d’un Unique Altered participent à cette identité ; ce ne sont pas de simples
+   variantes cosmétiques. Des identités différentes peuvent partager une famille.
 2. Une entrée de carte dans une édition linguistique (`CardPrinting`), liée à
    `ExpansionEdition`, avec son numéro/code de collection et ses données locales.
 3. Une version collectionnable (`CardVariant`) de cette entrée, permettant de
-   distinguer les illustrations, finitions, tampons et éditions de tirage. Ces axes
+   distinguer les illustrations, finitions et tampons, avec rattachement au tirage
+   documenté lorsque nécessaire. La mention de première édition reflète ce tirage
+   et ne constitue pas une deuxième identité de tirage indépendante. Ces axes
    doivent être combinables : une version peut avoir une illustration alternative,
    une finition holographique, un tampon promotionnel et une mention de première
    édition. L’utilisateur souhaite suivre toutes ces catégories, pas en choisir
@@ -247,6 +294,8 @@ une entrée distincte reliée à la même identité de carte ; plusieurs illustr
 sous le même numéro restent possibles. Le numéro imprimé est du texte et reste
 distinct d’un identifiant technique. Une variante n’est pas automatiquement
 transposable dans les autres langues ou catalogues.
+Ne pas imposer non plus l’unicité du numéro à l’intérieur d’une édition/langue :
+History Pack 1 de Flesh and Blood fournit un contre-exemple documenté dans l’audit.
 
 ### Images des cartes et variantes
 
@@ -265,8 +314,11 @@ transposable dans les autres langues ou catalogues.
 - Si une image manque pendant la saisie, le futur écran doit signaler ce manque
   explicitement ; la fiche sera considérée incomplète pour ce besoin. Un placeholder
   n’est pas une image de carte vérifiée. Aucun scan de carte ne sera inventé par IA.
-- La gestion précise des fichiers et de leurs éventuels rectos/versos sera définie
-  avec le domaine cartes. Préserver dès maintenant les règles existantes de gestion
+- Les cartes à plusieurs faces auront des caractéristiques et des images par
+  face, par impression/variante et par langue (notamment leaders SWU et cartes
+  recto-verso Magic). L’image principale ne limite donc pas la fiche à une seule
+  image au total. La gestion précise des fichiers sera définie avec le domaine
+  cartes. Préserver dès maintenant les règles existantes de gestion
   de fichiers, sans imposer de table média globale à la V1 du catalogue.
 
 ### Distribution et collection
@@ -335,7 +387,11 @@ Il ne crée aucun utilisateur et ne lance jamais de suppression/réinitialisatio
   vidés sur une fiche existante. Le rapport de fin distingue ces recréations ;
   pour conserver durablement une fiche masquée, utiliser sa visibilité.
 - Réutiliser les jeux existants lorsqu’ils sont identifiés sans ambiguïté
-  (slugs conventionnels initiaux `pokemon`, `magic`, `yugioh`, `one-piece`, `lorcana`).
+  (slugs constatés notamment `pokemon`, `magic`, `yu-gi-oh`, `one-piece`, `lorcana`).
+  Pour les autres exemples, réutiliser notamment `flesh-and-blood`, `riftbound`,
+  `cyberpunk`, `naturo-mythos`, `naruto-card-game`, `final-fantasy-tcg`,
+  `star-wars-unlimited` et `altered`. Ne pas renommer un jeu ou son URL pour corriger
+  une coquille présumée ; ne pas créer `yugioh` à côté du `yu-gi-oh` existant.
   En cas de collision ambiguë, échouer avec un diagnostic plutôt que fusionner.
   Le suivi des associations entre clés du manifeste et IDs doit résister au
   renommage ultérieur du slug du jeu ; le mécanisme de suivi persistant est laissé
@@ -349,8 +405,14 @@ Il ne crée aucun utilisateur et ne lance jamais de suppression/réinitialisatio
 
 ### Jeu de données proposé
 
-19 extensions réparties sur cinq jeux et onze catalogues. Il ne s’agit pas
-d’un catalogue exhaustif. Les marchés ci-dessous décrivent seulement les sorties
+Le noyau initial ci-dessous compte 19 extensions sur cinq jeux et onze catalogues.
+Il sera complété par les exemples des jeux réellement présents décrits dans
+l’[audit de compatibilité](../multitcg-compatibility-audit.md#conséquence-pour-les-exemples),
+avec vérification des champs et langues avant insertion. Le jeu Naruto Bandai
+reste masqué ; ne pas créer d’édition publiée fictive pour remplir l’échantillon.
+Son annonce générale pour juin 2027 reste documentée dans le manifeste tant que
+les langues d’impression nécessaires aux éditions ne sont pas confirmées.
+Il ne s’agit pas d’un catalogue exhaustif. Les marchés ci-dessous décrivent seulement les sorties
 documentées pour l’échantillon, pas toutes les disponibilités réelles.
 Les textes descriptifs seront de courtes synthèses originales, pas des copies
 de textes promotionnels. Noms officiels et codes natifs sont conservés.
@@ -401,7 +463,9 @@ limite dans la provenance plutôt que prétendre à une liste de cartes vérifi�
 ## Validation attendue lors de l’implémentation
 
 Tests utiles : contraintes de catalogue/série et de langue, éditions distinctes,
-sorties par marché/canal, validation des relations, droits Filament, suppressions
+sorties par marché/canal, périodes sans jour précis, cohérence des états annoncé /
+publié / annulé sans transition automatique par date, ensembles de decks et de
+réimpressions, validation des relations, droits Filament, suppressions
 bloquées, traductions sans édition imprimée, repli sans confusion de langue,
 images et nettoyage transactionnel, héritage de visibilité.
 
@@ -416,7 +480,7 @@ série localisée, extension sans série, édition, sorties multiples, rapproche
 
 Avant PR : diff complet, `make check`, `make assets`, `make up` puis
 `make test-storage`, `git diff --check`, revue indépendante et workflow GitHub
-selon AGENTS.md. La présente étape ne modifie que ce document ; ces contrôles
+selon AGENTS.md. La présente étape ne modifie que la documentation ; ces contrôles
 applicatifs ne constituent pas une validation déjà exécutée.
 
 ## Sources de l’échantillon
@@ -453,11 +517,15 @@ rapprochements autorisés également au sein d’un même catalogue. Ce n’est 
 revue de code ni une validation utilisateur.
 La section ajoutée sur les futurs produits scellés, cartes et variantes a également
 été relue par cet agent : aucun obstacle identifié dans le socle V1 proposé.
+Le delta de l’audit des treize jeux a fait l’objet d’une nouvelle relecture :
+l’annonce générale sans langue confirmée reste une note sourcée hors des sorties
+structurées. Ce choix de l’agent évite d’inventer une édition linguistique.
 
 L’utilisateur doit valider ce document avant l’écriture du code. Les principaux
-choix proposés sont les cinq jeux de l’échantillon, le seeder explicite et non
+choix proposés sont les exemples étendus aux jeux présents selon l’audit, le seeder explicite et non
 destructif, les images officielles limitées à quelques exemples, les sorties par
-canal et l’absence de nouvelles pages publiques dans cette livraison.
+canal avec état et période d’annonce, les ensembles de decks et de réimpressions,
+et l’absence de nouvelles pages publiques dans cette livraison.
 Les produits scellés, cartes et variantes restent un objectif ultérieur annoncé
 par l’utilisateur ; leur section de compatibilité ne les ajoute pas à la V1.
 
