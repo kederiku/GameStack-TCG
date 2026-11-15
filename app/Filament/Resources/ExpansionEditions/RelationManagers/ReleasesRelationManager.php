@@ -7,6 +7,7 @@ use App\Filament\Support\Catalog\CatalogFields;
 use App\Filament\Support\Catalog\CatalogLabels;
 use App\Filament\Support\Catalog\CatalogRelationManager;
 use App\Filament\Support\Catalog\CatalogTables;
+use App\Models\ExpansionEdition;
 use App\Models\ExpansionRelease;
 use App\Models\Market;
 use Filament\Forms\Components\DatePicker;
@@ -51,7 +52,24 @@ class ReleasesRelationManager extends CatalogRelationManager
                 TextColumn::make('source_url')->label('Source')->limit(40)->url(fn (ExpansionRelease $record): ?string => $record->source_url, true),
             ])
             ->defaultSort('released_on', 'desc')
-            ->headerActions([$this->createCatalogAction('Créer une sortie', 'edition_id')])
-            ->recordActions([$this->editCatalogAction(), CatalogActions::delete()]);
+            ->headerActions([
+                $this->createCatalogAction('Créer une sortie', 'edition_id')->after($this->notifyEditionStatusChange(...)),
+            ])
+            ->recordActions([
+                $this->editCatalogAction()->after($this->notifyEditionStatusChange(...)),
+                CatalogActions::delete(),
+            ]);
+    }
+
+    private function notifyEditionStatusChange(): void
+    {
+        $edition = $this->getOwnerRecord();
+        assert($edition instanceof ExpansionEdition);
+
+        $previousStatus = $edition->status;
+
+        if ($edition->refresh()->status !== $previousStatus) {
+            $this->dispatch('expansion-edition-status-changed');
+        }
     }
 }

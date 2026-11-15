@@ -35,6 +35,7 @@ use Illuminate\Foundation\Testing\DatabaseMigrations;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Livewire;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\Concerns\BuildsCatalog;
 use Tests\TestCase;
 
@@ -193,6 +194,50 @@ class CatalogResourcesTest extends TestCase
 
         Livewire::test(EditExpansionEdition::class, ['record' => $edition->id])
             ->fillForm(['status' => 'announced'])->call('save')->assertHasFormErrors(['status']);
+    }
+
+    #[DataProvider('releasePublicationModes')]
+    public function test_publishing_a_release_refreshes_the_open_edition_status(bool $editExisting): void
+    {
+        $edition = $this->edition($this->expansion($this->catalog()));
+        $market = $this->market();
+        $page = Livewire::test(EditExpansionEdition::class, ['record' => $edition->id])
+            ->assertFormSet(['status' => 'announced'])
+            ->fillForm(['name' => 'Nom en cours de saisie', 'official_code' => 'BROUILLON']);
+        $releases = Livewire::test(ReleasesRelationManager::class, [
+            'ownerRecord' => $edition, 'pageClass' => EditExpansionEdition::class,
+        ]);
+
+        if ($editExisting) {
+            $releases->callTableAction(CreateAction::class, data: [
+                'market_id' => $market->id, 'channel' => 'general', 'status' => 'announced',
+            ])->assertHasNoActionErrors()->assertNotDispatched('expansion-edition-status-changed');
+            $releases->callTableAction(EditAction::class, $edition->releases()->sole(), ['status' => 'released']);
+        } else {
+            $releases->callTableAction(CreateAction::class, data: [
+                'market_id' => $market->id, 'channel' => 'general', 'status' => 'released',
+            ]);
+        }
+
+        $releases->assertHasNoActionErrors();
+        $this->assertSame('released', $edition->refresh()->status);
+        $releases->assertDispatched('expansion-edition-status-changed');
+
+        $page->dispatch('expansion-edition-status-changed')->assertOk()
+            ->assertFormSet([
+                'status' => 'released', 'name' => 'Nom en cours de saisie', 'official_code' => 'BROUILLON',
+            ])
+            ->call('save')->assertHasNoFormErrors();
+
+        $this->assertDatabaseHas('expansion_editions', [
+            'id' => $edition->id, 'status' => 'released', 'name' => 'Nom en cours de saisie', 'official_code' => 'BROUILLON',
+        ]);
+    }
+
+    /** @return array<string, array{bool}> */
+    public static function releasePublicationModes(): array
+    {
+        return ['create' => [false], 'edit' => [true]];
     }
 
     public function test_relation_errors_are_mapped_to_the_modal_form_fields(): void

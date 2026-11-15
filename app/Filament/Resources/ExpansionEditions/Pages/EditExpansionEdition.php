@@ -11,6 +11,7 @@ use App\Models\ExpansionEdition;
 use Filament\Actions\Action;
 use Filament\Support\Components\Attributes\Unexposed;
 use Filament\Support\Icons\Heroicon;
+use Livewire\Attributes\On;
 
 class EditExpansionEdition extends EditCatalogRecord
 {
@@ -51,6 +52,13 @@ class EditExpansionEdition extends EditCatalogRecord
     protected function getCancelFormAction(): Action
     {
         return parent::getCancelFormAction()->url($this->expansionUrl());
+    }
+
+    #[On('expansion-edition-status-changed')]
+    public function refreshStatusAfterReleaseChange(): void
+    {
+        $this->getRecord()->refresh();
+        $this->refreshFormData(['status']);
     }
 
     protected function afterSave(): void
