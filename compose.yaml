@@ -14,6 +14,43 @@ x-app: &app
         - .:/var/www/html
 
 services:
+    garage:
+        image: dxflrs/garage:v2.4.0
+        command: ['/garage', '-c', '/etc/garage/garage.toml', 'server']
+        restart: unless-stopped
+        volumes:
+            - ./storage/app/private/garage:/etc/garage:ro
+            - garage-data:/var/lib/garage/data
+            - garage-meta:/var/lib/garage/meta
+        ports:
+            - '127.0.0.1:${GARAGE_API_PORT:-3900}:3900'
+            - '127.0.0.1:${GARAGE_WEB_PORT:-3902}:3902'
+        healthcheck:
+            test: ['CMD', '/garage', '-c', '/etc/garage/garage.toml', 'status']
+            interval: 5s
+            timeout: 5s
+            retries: 12
+            start_period: 5s
+
+    garage-webui:
+        image: khairul169/garage-webui:1.1.0
+        restart: unless-stopped
+        volumes:
+            - ./storage/app/private/garage:/etc/garage:ro
+        env_file:
+            - path: ./storage/app/private/garage/webui.env
+              required: false
+              format: raw
+        environment:
+            CONFIG_PATH: /etc/garage/garage.toml
+            API_BASE_URL: http://garage:3903
+            S3_ENDPOINT_URL: http://garage:3900
+        ports:
+            - '127.0.0.1:${GARAGE_UI_PORT:-3909}:3909'
+        depends_on:
+            garage:
+                condition: service_healthy
+
     app:
         <<: *app
         ports:
@@ -92,3 +129,5 @@ services:
 
 volumes:
     postgres-data:
+    garage-data:
+    garage-meta:

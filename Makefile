@@ -9,7 +9,7 @@ RUN := $(DC) run --rm --no-deps app
 EXEC := $(DC) exec app
 ARGS ?=
 
-.PHONY: help env init up down stop restart logs ps admin artisan composer npm shell migrate test check build assets format
+.PHONY: help env init up down stop restart logs ps admin artisan composer npm shell migrate test check build assets format storage-init storage-password
 
 help: ## Afficher les commandes disponibles
 	@awk 'BEGIN {FS = ":.*## "} /^[a-zA-Z_-]+:.*## / {printf "  %-12s %s\n", $$1, $$2}' $(MAKEFILE_LIST)
@@ -24,16 +24,27 @@ init: env ## Installer le projet puis démarrer tous les services
 	$(RUN) composer install --no-interaction --prefer-dist
 	$(RUN) php artisan config:clear
 	$(RUN) php docker/initialize-key.php
+	$(MAKE) storage-init
 	$(RUN) php artisan migrate --force
 	$(RUN) sh -c 'test -L public/storage || php artisan storage:link'
 	$(RUN) npm ci
 	$(RUN) npm run build
 	$(DC) up -d --wait
 
-up: env ## Démarrer les services (après make init)
+up: env storage-init ## Démarrer les services (après make init)
 	$(DC) up -d --wait
 
-down: ## Arrêter les services en conservant la base de données
+storage-init: env ## Initialiser Garage sans effacer les objets ni renouveler les accès
+	$(RUN) php docker/garage/configure.php
+	$(DC) up -d --wait garage
+	$(RUN) php docker/garage/initialize.php
+	$(RUN) php artisan config:clear
+
+storage-password: env ## Renouveler le mot de passe Web UI (fichier privé garage/login.txt)
+	$(RUN) php docker/garage/configure.php --password
+	$(DC) up -d --no-deps --force-recreate garage-webui
+
+down: ## Arrêter les services en conservant la base et les images
 	$(DC) down --remove-orphans
 	@rm -f public/hot
 
