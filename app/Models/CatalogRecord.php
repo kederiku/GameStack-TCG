@@ -31,7 +31,11 @@ abstract class CatalogRecord extends Model
         );
     }
 
-    /** @param array<string, mixed> $data */
+    /**
+     * @param  array<string, mixed>  $data
+     *
+     * @internal Called by SaveCatalogRecord.
+     */
     public function saveCatalogAttributes(array $data): bool
     {
         return app(SaveCatalogRecord::class)->persist(
@@ -39,6 +43,7 @@ abstract class CatalogRecord extends Model
             fn () => $this->fill($data),
             fn () => parent::save(),
             $data,
+            acceptImageUpload: true,
         );
     }
 

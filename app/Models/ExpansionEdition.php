@@ -2,7 +2,9 @@
 
 namespace App\Models;
 
+use App\Observers\CatalogImageObserver;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -20,6 +22,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property-read Collection<int, ExpansionRelease> $releases
  */
 #[Fillable(['expansion_id', 'language_id', 'name', 'official_code', 'image', 'is_visible', 'status'])]
+#[ObservedBy([CatalogImageObserver::class])]
 class ExpansionEdition extends CatalogRecord
 {
     public const STATUSES = ['announced', 'released', 'cancelled'];

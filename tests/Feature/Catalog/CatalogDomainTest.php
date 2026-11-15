@@ -14,7 +14,9 @@ use Closure;
 use DateTimeImmutable;
 use Illuminate\Database\QueryException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
 use Tests\Concerns\BuildsCatalog;
 use Tests\TestCase;
@@ -266,13 +268,20 @@ class CatalogDomainTest extends TestCase
         $expansion = $this->expansion($catalog, $series);
         $presentation = app(CatalogPresentation::class);
 
-        $series->localizations()->create(['language_id' => $english->id, 'name' => 'Scarlet & Violet', 'image' => 'catalog/series/scarlet.avif']);
+        Storage::fake('public');
+        $englishLocalization = $this->saveCatalog(new SeriesLocalization, [
+            'series_id' => $series->id,
+            'language_id' => $english->id,
+            'name' => 'Scarlet & Violet',
+            'image' => UploadedFile::fake()->image('series.png'),
+        ]);
         $series->localizations()->create(['language_id' => $french->id, 'name' => 'Écarlate et Violet']);
         $expansion->localizations()->create(['language_id' => $english->id, 'name' => 'Scarlet & Violet—151']);
 
         $this->assertSame(['name' => 'Scarlet & Violet—151', 'language' => 'en', 'fallback' => true], $presentation->name($expansion, 'fr'));
         $this->assertSame(['name' => 'Écarlate et Violet', 'language' => 'fr', 'fallback' => false], $presentation->name($series, 'fr'));
-        $this->assertSame('catalog/series/scarlet.avif', $presentation->seriesImage($series, 'en'));
+        $this->assertNotNull($englishLocalization->image);
+        $this->assertSame($englishLocalization->image, $presentation->seriesImage($series, 'en'));
         $this->assertNull($presentation->seriesImage($series, 'fr'));
         $this->assertSame(['name' => 'Scarlet & Violet', 'language' => 'en', 'fallback' => true], $presentation->name($series, 'de'));
         $this->assertNull($presentation->seriesImage($series, 'de'));

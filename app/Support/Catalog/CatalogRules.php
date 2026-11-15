@@ -197,7 +197,7 @@ class CatalogRules
             ],
             $record instanceof SeriesLocalization => [
                 'series_id' => $fk('series'), 'language_id' => $fk('languages'),
-                'name' => $text, 'description' => $description, 'image' => $optionalText,
+                'name' => $text, 'description' => $description,
             ],
             $record instanceof Expansion => [
                 'catalog_id' => $fk('catalogs'), 'series_id' => ['bail', 'nullable', 'integer', Rule::exists($table.'series', 'id')],
@@ -209,7 +209,7 @@ class CatalogRules
             ],
             $record instanceof ExpansionEdition => [
                 'expansion_id' => $fk('expansions'), 'language_id' => $fk('languages'),
-                'name' => $text, 'official_code' => $optionalText, 'image' => $optionalText,
+                'name' => $text, 'official_code' => $optionalText,
                 'status' => ['required', 'string', Rule::in(ExpansionEdition::STATUSES)], 'is_visible' => $visibility,
             ],
             $record instanceof ExpansionRelease => [

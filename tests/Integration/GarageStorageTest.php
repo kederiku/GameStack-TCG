@@ -4,6 +4,8 @@ namespace Tests\Integration;
 
 use App\Actions\Games\SaveGame;
 use App\Models\Game;
+use App\Models\SeriesLocalization;
+use App\Services\CatalogImages;
 use App\Services\GameImages;
 use App\Support\PublicGames;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
@@ -12,12 +14,14 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Tests\Concerns\BuildsCatalog;
 use Tests\TestCase;
 
 // Explicit opt-in: php artisan test tests/Integration/GarageStorageTest.php
 // Uses the dedicated testing database and removes only its own UUID objects.
 class GarageStorageTest extends TestCase
 {
+    use BuildsCatalog;
     use DatabaseMigrations;
 
     /** @var list<string> */
@@ -95,5 +99,41 @@ class GarageStorageTest extends TestCase
         $this->assertSame('image/avif', GameImages::disk()->mimeType($converted));
         $this->assertFalse(GameImages::disk()->exists($path));
         $this->assertSame($contents, Storage::disk('local')->get('game-images-before-avif/'.$path));
+    }
+
+    public function test_catalog_images_follow_the_database_lifecycle_on_real_storage(): void
+    {
+        $series = $this->series($this->catalog());
+        $localization = $this->saveCatalog(new SeriesLocalization, [
+            'series_id' => $series->id,
+            'language_id' => $this->language()->id,
+            'name' => 'Garage catalogue',
+            'image' => UploadedFile::fake()->image('catalogue.png', 32, 16),
+        ]);
+        $this->paths[] = $original = $localization->image;
+        $disk = CatalogImages::disk();
+        $this->assertStringStartsWith('catalog/', $original);
+        $this->assertSame('image/avif', $disk->mimeType($original));
+
+        DB::beginTransaction();
+        try {
+            $updated = $this->saveCatalog($localization, ['image' => UploadedFile::fake()->image('rollback.png', 10, 10)]);
+            $this->paths[] = $rolledBack = $updated->image;
+            $this->assertTrue($disk->exists($rolledBack));
+        } finally {
+            DB::rollBack();
+        }
+
+        $this->assertSame($original, $localization->fresh()->image);
+        $this->assertTrue($disk->exists($original));
+        $this->assertFalse($disk->exists($rolledBack));
+
+        $updated = $this->saveCatalog($localization, ['image' => UploadedFile::fake()->image('replacement.png', 12, 12)]);
+        $this->paths[] = $replacement = $updated->image;
+        $this->assertFalse($disk->exists($original));
+        $this->assertTrue($disk->exists($replacement));
+
+        $series->delete();
+        $this->assertFalse($disk->exists($replacement));
     }
 }

@@ -2,7 +2,9 @@
 
 namespace App\Models;
 
+use App\Observers\CatalogImageObserver;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
@@ -15,6 +17,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property-read Language $language
  */
 #[Fillable(['series_id', 'language_id', 'name', 'description', 'image'])]
+#[ObservedBy([CatalogImageObserver::class])]
 class SeriesLocalization extends CatalogRecord
 {
     public function isEffectivelyVisible(): bool
