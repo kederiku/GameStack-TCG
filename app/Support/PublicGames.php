@@ -3,8 +3,8 @@
 namespace App\Support;
 
 use App\Models\Game;
+use App\Services\GameImages;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Storage;
 
 /** @phpstan-type PublicGame array{id: int, name: string, slug: string, imageUrl: string|null, url: string} */
 class PublicGames
@@ -27,7 +27,7 @@ class PublicGames
             'id' => $game->id,
             'name' => $game->name,
             'slug' => $game->slug,
-            'imageUrl' => $game->image ? Storage::disk('public')->url($game->image) : null,
+            'imageUrl' => $game->image ? GameImages::disk()->url($game->image) : null,
             'url' => route('games.show', ['game' => $game->slug], absolute: false),
         ];
     }

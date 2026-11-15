@@ -8,6 +8,7 @@ use DOMXPath;
 use enshrined\svgSanitize\Sanitizer;
 use GdImage;
 use Illuminate\Database\Connection;
+use Illuminate\Filesystem\FilesystemAdapter;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -18,6 +19,16 @@ use Symfony\Component\Process\Process;
 
 class GameImages
 {
+    public static function diskName(): string
+    {
+        return (string) config('game-images.disk', 'public');
+    }
+
+    public static function disk(): FilesystemAdapter
+    {
+        return Storage::disk(self::diskName());
+    }
+
     public function store(UploadedFile $upload, string $name, Connection $connection): string
     {
         if (! (gd_info()['AVIF Support'] ?? false)) {
@@ -64,7 +75,7 @@ class GameImages
 
     public function rename(string $path, string $name, Connection $connection): ?string
     {
-        $disk = Storage::disk('public');
+        $disk = self::disk();
 
         if (! $this->isManagedPath($path) || ! $disk->exists($path)) {
             return null;
@@ -85,7 +96,7 @@ class GameImages
             return;
         }
 
-        $disk = Storage::disk('public');
+        $disk = self::disk();
 
         // Each revision owns its directory. Never delete an arbitrary submitted path.
         if (! $disk->deleteDirectory(dirname($path))) {
@@ -165,7 +176,7 @@ class GameImages
         // Register before writing: even a partially failed write must be removed.
         $connection->afterRollBack(fn () => rescue(fn () => $this->deleteUnused($path)));
 
-        if (! Storage::disk('public')->put($path, $contents, 'public')) {
+        if (! self::disk()->put($path, $contents, 'public')) {
             throw ValidationException::withMessages(['image' => 'Impossible d’enregistrer l’image. Veuillez réessayer.']);
         }
 

@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Games\Tables;
 
 use App\Models\Game;
+use App\Services\GameImages;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
@@ -21,7 +22,7 @@ class GamesTable
             ->columns([
                 ImageColumn::make('image')
                     ->label('Visuel')
-                    ->disk('public')
+                    ->disk(fn (): string => GameImages::diskName())
                     ->visibility('public')
                     ->imageHeight(40)
                     ->visibleFrom('md'),

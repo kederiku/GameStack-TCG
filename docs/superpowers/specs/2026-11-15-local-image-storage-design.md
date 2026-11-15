@@ -1,6 +1,6 @@
 # Stockage local des images avec Garage et interface web
 
-Statut : proposition à approuver avant implémentation.
+Statut : approuvé par l’utilisateur le 15 novembre 2026.
 Branche : `codex/local-image-storage`, créée depuis `main`.
 
 ## Intention et besoins exprimés
@@ -25,9 +25,8 @@ miniatures sont souhaitables, mais ne sont pas indispensables.
   fournit pas de service S3. Une interface devrait être ajoutée séparément.
 
 MinIO n’est pas retenu pour cette nouvelle installation : son dépôt
-communautaire est archivé. Le choix technique Garage + Garage Web UI reste
-une proposition de l’agent, et non une décision explicitement formulée par
-l’utilisateur. L’approbation de ce document confirmera ce choix.
+communautaire est archivé. L’utilisateur a approuvé la proposition technique
+Garage + Garage Web UI avec ce document le 15 novembre 2026.
 
 ## Périmètre
 
