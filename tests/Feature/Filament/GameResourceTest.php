@@ -185,6 +185,19 @@ class GameResourceTest extends TestCase
             ->assertSet('data.slug', 'custom');
     }
 
+    public function test_game_forms_stay_stacked_until_the_sidebar_breakpoint(): void
+    {
+        $game = Game::factory()->create();
+
+        foreach ([Livewire::test(CreateGame::class), Livewire::test(EditGame::class, ['record' => $game->id])] as $page) {
+            $columns = $page->instance()->getSchema('form')->getColumns();
+
+            $this->assertSame(1, $columns['default']);
+            $this->assertSame(1, $columns['lg']);
+            $this->assertSame(3, $columns['xl']);
+        }
+    }
+
     public function test_uploading_and_replacing_an_image_uses_webp_and_cleans_up(): void
     {
         Livewire::test(CreateGame::class)
@@ -300,6 +313,17 @@ class GameResourceTest extends TestCase
 
         $this->assertDatabaseMissing('games', ['id' => $pokemon->id]);
         Storage::disk('public')->assertMissing($pokemon->image);
+    }
+
+    public function test_list_search_finds_a_game_by_its_slug_when_the_column_is_hidden(): void
+    {
+        $game = Game::factory()->create(['name' => 'Un jeu', 'slug' => 'custom-identifier']);
+        $other = Game::factory()->create(['name' => 'Autre jeu', 'slug' => 'other']);
+
+        Livewire::test(ListGames::class)
+            ->searchTable('custom-identifier')
+            ->assertCanSeeTableRecords([$game])
+            ->assertCanNotSeeTableRecords([$other]);
     }
 
     public function test_bulk_deletion_cleans_each_image(): void

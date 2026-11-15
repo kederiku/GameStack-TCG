@@ -98,6 +98,13 @@ Filament indique sa visibilité. Cette option est indépendante de l’année de
 et conserve les informations et l’image du jeu. La migration laisse les jeux
 existants visibles.
 
+Les formulaires regroupent les champs en sections **Présentation**, **Historique**,
+**Visuel** et **Publication**. Sur grand écran, l’image et la visibilité occupent
+une colonne latérale ; sur petit écran, les sections s’empilent. La liste affiche
+le slug sous le nom, l’éditeur et un badge de visibilité. Le sélecteur de colonnes
+permet de retrouver les colonnes Slug et Modifié le. Sur mobile, les visuels et
+l’éditeur sont masqués pour alléger le tableau, qui conserve son défilement horizontal.
+
 Les images JPEG, PNG et WebP sont acceptées jusqu’à **5 Mio** et **4096 × 4096
 pixels**. Le serveur les convertit en WebP (qualité 85), conserve la transparence
 et corrige l’orientation EXIF des JPEG. Le fichier porte le nom normalisé du jeu,
