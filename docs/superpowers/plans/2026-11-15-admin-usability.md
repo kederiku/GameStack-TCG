@@ -52,9 +52,10 @@
 
 ## Résultats de validation
 
-- `make check` réussi : Pint, PHPStan, **262 tests / 1868 assertions**, lint frontend et TypeScript.
+- `make check` réussi : Pint, PHPStan, **263 tests / 1880 assertions**, lint frontend et TypeScript.
 - `make assets` réussi. Aucun changement de stockage ou de traitement des images ; suite Garage locale non requise, exécutée par la CI de la PR.
 - Navigateur sur `gamestackr_testing` : accueil vide puis rempli, clair/sombre, série → extensions filtrées → création préremplie et enregistrée, recherche par jeu après Livewire, aides ouvertes au clavier, formulaires et accueil à 390 px, tableau à défilement horizontal contenu, noms longs.
 - Une erreur métier dans une section repliée a été reproduite, couverte par un test en échec, corrigée et revérifiée dans le navigateur : ouverture automatique et message visible.
 - Traductions françaises ajoutées pour les libellés d’accessibilité manquants de Filament.
 - Choix d’exécution : checkout existant sur branche dédiée, pour conserver le montage Docker de l’application.
+- Revue indépendante : correction du préchargement des jeux dans les tableaux séries/extensions lorsque leur colonne est masquée. Test ciblé rouge (3 requêtes supplémentaires), puis vert (0 requête pendant l’affichage des descriptions). `make check` relancé avec succès.

@@ -13,6 +13,7 @@ use App\Filament\Widgets\CatalogOverview;
 use App\Models\User;
 use Filament\Facades\Filament;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
+use Illuminate\Support\Facades\DB;
 use Livewire\Livewire;
 use Tests\Concerns\BuildsCatalog;
 use Tests\TestCase;
@@ -150,5 +151,32 @@ class AdminUsabilityTest extends TestCase
             ->call('save')->assertHasFormErrors(['series_id']);
         $page->assertDispatched('form-validation-error', livewireId: $page->instance()->getId());
         $this->assertNull($expansion->fresh()->series_id);
+    }
+
+    public function test_table_descriptions_do_not_query_each_game_when_its_column_is_hidden(): void
+    {
+        foreach (range(1, 3) as $index) {
+            $catalog = $this->catalog();
+            $this->expansion($catalog, $this->series($catalog));
+        }
+
+        foreach ([ListSeries::class, ListExpansions::class] as $component) {
+            $page = Livewire::test($component)->instance();
+            $this->assertTrue($page->getTable()->getColumn('catalog.game.name')->isToggledHidden());
+            $records = $page->getFilteredTableQuery()->get();
+            $this->assertCount(3, $records);
+            $column = $page->getTable()->getColumn('catalog.name');
+
+            DB::enableQueryLog();
+            DB::flushQueryLog();
+            try {
+                foreach ($records as $record) {
+                    $this->assertNotEmpty($column->record($record)->getDescriptionBelow());
+                }
+                $this->assertCount(0, DB::getQueryLog(), 'Rendering catalogue descriptions must not fetch each game separately.');
+            } finally {
+                DB::disableQueryLog();
+            }
+        }
     }
 }
