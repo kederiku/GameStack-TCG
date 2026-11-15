@@ -14,6 +14,7 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
+use UnitEnum;
 
 /** @extends resource<Catalog> */
 class CatalogResource extends Resource
@@ -27,6 +28,10 @@ class CatalogResource extends Resource
     protected static ?string $pluralModelLabel = 'catalogues';
 
     protected static ?string $navigationLabel = 'Catalogues';
+
+    protected static string|UnitEnum|null $navigationGroup = 'Catalogue';
+
+    protected static ?int $navigationSort = 20;
 
     protected static ?string $recordTitleAttribute = 'name';
 

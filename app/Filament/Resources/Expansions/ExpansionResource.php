@@ -18,6 +18,7 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
+use UnitEnum;
 
 /** @extends resource<Expansion> */
 class ExpansionResource extends Resource
@@ -30,7 +31,11 @@ class ExpansionResource extends Resource
 
     protected static ?string $pluralModelLabel = 'extensions et ensembles';
 
-    protected static ?string $navigationLabel = 'Extensions et ensembles';
+    protected static ?string $navigationLabel = 'Extensions';
+
+    protected static string|UnitEnum|null $navigationGroup = 'Catalogue';
+
+    protected static ?int $navigationSort = 40;
 
     protected static ?string $recordTitleAttribute = 'name';
 

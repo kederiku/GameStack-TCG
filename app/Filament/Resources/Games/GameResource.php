@@ -14,6 +14,7 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
+use UnitEnum;
 
 /** @extends resource<Game> */
 class GameResource extends Resource
@@ -27,6 +28,10 @@ class GameResource extends Resource
     protected static ?string $pluralModelLabel = 'jeux';
 
     protected static ?string $navigationLabel = 'Jeux';
+
+    protected static string|UnitEnum|null $navigationGroup = 'Catalogue';
+
+    protected static ?int $navigationSort = 10;
 
     protected static ?string $recordTitleAttribute = 'name';
 

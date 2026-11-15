@@ -1,6 +1,6 @@
 # Administration lisible — Implementation Plan
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [x]`) syntax for tracking.
 
 **Goal:** Rendre l’administration Filament compréhensible et confortable pour un nouvel utilisateur.
 
@@ -32,11 +32,11 @@
 
 **Interfaces:** `CatalogOverview::canView(): bool` autorise l’administrateur vérifié ; sa vue reçoit les effectifs réels et les liens des ressources. `SetAdminLocale::handle(Request, Closure): Response` applique fr à la requête puis restaure la langue précédente. Paramètres de création `catalog` et `series` ; filtres existants `filters[catalog][value]`, `filters[series][value]`.
 
-- [ ] Écrire les tests : accueil vide puis effectifs exacts, refus direct du widget, locale HTTP fr sans fuite, liens filtrés ne montrant que les enfants du parent, création préremplie cohérente et paramètres invalides ignorés.
-- [ ] Exécuter `make test ARGS='tests/Feature/Filament/AdminUsabilityTest.php'` ; constater les échecs correspondant aux fonctionnalités manquantes.
-- [ ] Ajouter le widget, le middleware persistant du panneau, les groupes de navigation et les liens/préremplissages décrits.
-- [ ] Relancer les tests ciblés et ceux de `CatalogResourcesTest.php` ; résultat attendu : réussite.
-- [ ] Enregistrer le lot fonctionnel et son résultat dans le journal.
+- [x] Écrire les tests : accueil vide puis effectifs exacts, refus direct du widget, locale HTTP fr sans fuite, liens filtrés ne montrant que les enfants du parent, création préremplie cohérente et paramètres invalides ignorés.
+- [x] Exécuter `make test ARGS='tests/Feature/Filament/AdminUsabilityTest.php'` ; constater les échecs correspondant aux fonctionnalités manquantes.
+- [x] Ajouter le widget, le middleware persistant du panneau, les groupes de navigation et les liens/préremplissages décrits.
+- [x] Relancer les tests ciblés et ceux de `CatalogResourcesTest.php` ; résultat attendu : réussite.
+- [x] Enregistrer le lot fonctionnel et son résultat dans le journal.
 
 ### Task 2: Formulaires, tableaux et présentation
 
