@@ -1,10 +1,10 @@
 # Catalogue multi-TCG, administration Filament et exemples réels
 
-Statut : proposition à valider avant implémentation. Date : 15 novembre 2026.
+Statut : conception validée par l’utilisateur le 15 novembre 2026 (« maintenant place au développement »). V1 implémentée ; voir le [rapport de vérification](../multitcg-catalog-verification.md).
 
 Cette version intègre l’[audit des treize jeux enregistrés](../multitcg-compatibility-audit.md).
-Les précisions issues de cet audit restent des propositions de conception ; aucune
-table, page applicative ou donnée de jeu n’a été modifiée.
+Les précisions issues de cet audit font partie de la conception validée.
+Le [plan d’implémentation](../plans/2026-11-15-multitcg-catalog.md) suit sa réalisation.
 
 ## Intention et décisions de l’utilisateur
 
@@ -29,7 +29,7 @@ image également. Ces besoins futurs sont explicitement demandés par l’utilis
 
 Les détails ci-dessous, notamment les jeux exemples, les champs, les règles
 de suppression et le fonctionnement du seeder, sont des propositions de l’agent.
-Ils ne constituent pas encore une validation du document par l’utilisateur.
+Ils sont inclus dans la proposition que l’utilisateur a ensuite validée pour le développement.
 
 ## Situation actuelle
 
@@ -73,17 +73,17 @@ pour les jeux qui n’utilisent pas ce regroupement.
 
 ## Vocabulaire et relations
 
-| Entité | Sens et rattachement |
-| --- | --- |
-| `Game` | Jeu existant, conservé. Un jeu possède plusieurs catalogues. |
-| `Catalog` | Catalogue éditorial appartenant à un jeu. |
-| `Series` | Regroupement éditorial dans un catalogue ; présenté comme série ou bloc. |
-| `Expansion` | Ensemble éditorial de cartes d’un catalogue, avec une série facultative : extension, promos, ensemble propre à un deck ou collection de réimpressions. |
-| `ExpansionEdition` | Version linguistique identifiée de cet ensemble, annoncée ou effectivement publiée, avec un statut explicite. |
-| `ExpansionRelease` | Sortie d’une édition sur un marché et pour un canal de distribution. |
-| `SeriesLocalization` | Nom, description et visuel de présentation d’une série dans une langue. |
-| `ExpansionLocalization` | Nom et description d’affichage d’une extension dans une langue. |
-| `ExpansionRelation` | Rapprochement documenté entre deux extensions du même jeu. |
+| Entité                  | Sens et rattachement                                                                                                                                   |
+| ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `Game`                  | Jeu existant, conservé. Un jeu possède plusieurs catalogues.                                                                                           |
+| `Catalog`               | Catalogue éditorial appartenant à un jeu.                                                                                                              |
+| `Series`                | Regroupement éditorial dans un catalogue ; présenté comme série ou bloc.                                                                               |
+| `Expansion`             | Ensemble éditorial de cartes d’un catalogue, avec une série facultative : extension, promos, ensemble propre à un deck ou collection de réimpressions. |
+| `ExpansionEdition`      | Version linguistique identifiée de cet ensemble, annoncée ou effectivement publiée, avec un statut explicite.                                          |
+| `ExpansionRelease`      | Sortie d’une édition sur un marché et pour un canal de distribution.                                                                                   |
+| `SeriesLocalization`    | Nom, description et visuel de présentation d’une série dans une langue.                                                                                |
+| `ExpansionLocalization` | Nom et description d’affichage d’une extension dans une langue.                                                                                        |
+| `ExpansionRelation`     | Rapprochement documenté entre deux extensions du même jeu.                                                                                             |
 
 Référentiels partagés `Language` et `Market`, administrables dans Filament.
 Une langue utilise un tag BCP 47 (`fr`, `en`, `ja`, `ko`, `zh-Hans`, `zh-Hant`).
@@ -417,19 +417,19 @@ documentées pour l’échantillon, pas toutes les disponibilités réelles.
 Les textes descriptifs seront de courtes synthèses originales, pas des copies
 de textes promotionnels. Noms officiels et codes natifs sont conservés.
 
-| Jeu / catalogue | Extensions et éditions à créer | Cas démontré / dates vérifiées |
-| --- | --- | --- |
-| Pokémon / international | Écarlate et Violet / Scarlet & Violet ; Écarlate et Violet – 151 / Scarlet & Violet—151 ; éditions `fr` et `en` | Une extension avec plusieurs langues, série Écarlate et Violet. France/États-Unis : 2023-03-31 pour la base et 2023-09-22 pour 151. Sources P1–P4. |
-| Pokémon / japonais | スカーレットex ; バイオレットex ; ポケモンカード151 ; éditions `ja` | Deux extensions distinctes au lancement, série スカーレット＆バイオレット. Japon : 2023-01-20 pour les deux premières ; 2023-06-16 pour 151. P5–P6. |
-| Pokémon / coréen | 포켓몬 카드 151 ; édition `ko` | Catalogue propre, série 스칼렛&바이올렛 ; Corée du Sud : 2023-07-28. P7. |
-| Pokémon / chinois traditionnel | 寶可夢卡牌151 ; 眾星雲集組合篇 SET B ; éditions `zh-Hant` | Séries 朱＆紫 et 太陽 & 月亮 ; Taïwan : 2023-06-30 pour 151 ; date SET B non renseignée faute de date vérifiée dans la source retenue. P8–P9. |
-| Pokémon / chinois simplifié | 收集啦151 惊 ; 收集啦151 聚 ; éditions `zh-Hans` | Deux extensions distinctes dans 朱&紫 ; Chine continentale : 2025-07-18 et 2025-10-17. Ne pas les traiter comme les traductions de SET B ou comme une édition unique de 151 japonais. P10. |
-| Magic / international | Khans of Tarkir ; Fate Reforged ; Dragons of Tarkir ; Foundations ; éditions `en` | Trois extensions dans le bloc Khans of Tarkir, Foundations sans bloc. Les dates des trois premières restent non renseignées dans cet échantillon ; États-Unis : 2024-11-15 pour Foundations. M1–M2. |
-| One Piece / japonais | ROMANCE DAWN, code officiel OP-01, édition `ja` | Sans série ; Japon : 2022-07-22. O1. |
-| One Piece / international | ROMANCE DAWN, code présenté OP01, édition `en` | Sans série ; États-Unis : 2022-12-02. Même nom, autre catalogue et autre date. O2. |
-| Yu-Gi-Oh! / OCG japonais | DARKWING BLAST, édition `ja` | Sans série artificielle ; Japon : 2022-07-16. Y1. |
-| Yu-Gi-Oh! / TCG | Explosion de l’Aile des Ténèbres / Darkwing Blast, éditions `fr` et `en` | Sans série ; France : 2022-10-20 ; États-Unis : sortie générale 2022-10-21 et canal boutiques spécialisées/OTS 2022-10-19. Y2–Y3. |
-| Disney Lorcana / international | Premier Chapitre / The First Chapter, éditions `fr` et `en` | Un chapitre correspond ici à l’extension, pas à un bloc inventé ; sorties générales France/États-Unis : 2023-09-01. L1–L2. |
+| Jeu / catalogue                | Extensions et éditions à créer                                                                                  | Cas démontré / dates vérifiées                                                                                                                                                                      |
+| ------------------------------ | --------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Pokémon / international        | Écarlate et Violet / Scarlet & Violet ; Écarlate et Violet – 151 / Scarlet & Violet—151 ; éditions `fr` et `en` | Une extension avec plusieurs langues, série Écarlate et Violet. France/États-Unis : 2023-03-31 pour la base et 2023-09-22 pour 151. Sources P1–P4.                                                  |
+| Pokémon / japonais             | スカーレットex ; バイオレットex ; ポケモンカード151 ; éditions `ja`                                             | Deux extensions distinctes au lancement, série スカーレット＆バイオレット. Japon : 2023-01-20 pour les deux premières ; 2023-06-16 pour 151. P5–P6.                                                 |
+| Pokémon / coréen               | 포켓몬 카드 151 ; édition `ko`                                                                                  | Catalogue propre, série 스칼렛&바이올렛 ; Corée du Sud : 2023-07-28. P7.                                                                                                                            |
+| Pokémon / chinois traditionnel | 寶可夢卡牌151 ; 眾星雲集組合篇 SET B ; éditions `zh-Hant`                                                       | Séries 朱＆紫 et 太陽 & 月亮 ; Taïwan : 2023-06-30 pour 151 ; date SET B non renseignée faute de date vérifiée dans la source retenue. P8–P9.                                                       |
+| Pokémon / chinois simplifié    | 收集啦151 惊 ; 收集啦151 聚 ; éditions `zh-Hans`                                                                | Deux extensions distinctes dans 朱&紫 ; Chine continentale : 2025-07-18 et 2025-10-17. Ne pas les traiter comme les traductions de SET B ou comme une édition unique de 151 japonais. P10.          |
+| Magic / international          | Khans of Tarkir ; Fate Reforged ; Dragons of Tarkir ; Foundations ; éditions `en`                               | Trois extensions dans le bloc Khans of Tarkir, Foundations sans bloc. Les dates des trois premières restent non renseignées dans cet échantillon ; États-Unis : 2024-11-15 pour Foundations. M1–M2. |
+| One Piece / japonais           | ROMANCE DAWN, code officiel OP-01, édition `ja`                                                                 | Sans série ; Japon : 2022-07-22. O1.                                                                                                                                                                |
+| One Piece / international      | ROMANCE DAWN, code présenté OP01, édition `en`                                                                  | Sans série ; États-Unis : 2022-12-02. Même nom, autre catalogue et autre date. O2.                                                                                                                  |
+| Yu-Gi-Oh! / OCG japonais       | DARKWING BLAST, édition `ja`                                                                                    | Sans série artificielle ; Japon : 2022-07-16. Y1.                                                                                                                                                   |
+| Yu-Gi-Oh! / TCG                | Explosion de l’Aile des Ténèbres / Darkwing Blast, éditions `fr` et `en`                                        | Sans série ; France : 2022-10-20 ; États-Unis : sortie générale 2022-10-21 et canal boutiques spécialisées/OTS 2022-10-19. Y2–Y3.                                                                   |
+| Disney Lorcana / international | Premier Chapitre / The First Chapter, éditions `fr` et `en`                                                     | Un chapitre correspond ici à l’extension, pas à un bloc inventé ; sorties générales France/États-Unis : 2023-09-01. L1–L2.                                                                          |
 
 Le classement de catalogues, les clés et l’absence de regroupement pour certains
 exemples sont nos choix de modélisation ; les noms et dates ci-dessus sont sourcés.
@@ -521,14 +521,14 @@ Le delta de l’audit des treize jeux a fait l’objet d’une nouvelle relectur
 l’annonce générale sans langue confirmée reste une note sourcée hors des sorties
 structurées. Ce choix de l’agent évite d’inventer une édition linguistique.
 
-L’utilisateur doit valider ce document avant l’écriture du code. Les principaux
-choix proposés sont les exemples étendus aux jeux présents selon l’audit, le seeder explicite et non
+L’utilisateur a validé ce document avant l’écriture du code. Les principaux
+choix retenus sont les exemples étendus aux jeux présents selon l’audit, le seeder explicite et non
 destructif, les images officielles limitées à quelques exemples, les sorties par
 canal avec état et période d’annonce, les ensembles de decks et de réimpressions,
 et l’absence de nouvelles pages publiques dans cette livraison.
 Les produits scellés, cartes et variantes restent un objectif ultérieur annoncé
 par l’utilisateur ; leur section de compatibilité ne les ajoute pas à la V1.
 
-Après validation, préparer le plan d’implémentation avec le skill
-`superpowers:writing-plans`. Ce document ne constitue ni un plan exécuté ni une
-autorisation de considérer les exigences testées.
+Le plan d’implémentation a été préparé avec `superpowers:writing-plans`.
+La validation de conception ne vaut pas preuve de réussite des contrôles :
+les résultats de développement sont consignés séparément.
