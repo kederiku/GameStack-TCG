@@ -33,9 +33,9 @@ class GameImages extends AvifImages
         return $this->write($contents, $name, $connection, pathinfo($path, PATHINFO_EXTENSION));
     }
 
-    public function deleteUnused(?string $path): void
+    public function deleteUnused(?string $path, ?string $connection = null): void
     {
-        if ($path === null || ! $this->isManagedPath($path) || Game::query()->where('image', $path)->exists()) {
+        if ($path === null || ! $this->isManagedPath($path) || Game::on($connection)->where('image', $path)->exists()) {
             return;
         }
 

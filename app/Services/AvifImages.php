@@ -22,7 +22,7 @@ abstract class AvifImages
 
     abstract protected function directory(): string;
 
-    abstract public function deleteUnused(?string $path): void;
+    abstract public function deleteUnused(?string $path, ?string $connection = null): void;
 
     public static function diskName(): string
     {
@@ -150,7 +150,7 @@ abstract class AvifImages
         $path = $this->directory().'/'.Str::uuid().'/'.$filename.'.'.$extension;
 
         // Register before writing: even a partially failed write must be removed.
-        $connection->afterRollBack(fn () => rescue(fn () => $this->deleteUnused($path)));
+        $connection->afterRollBack(fn () => rescue(fn () => $this->deleteUnused($path, $connection->getName())));
 
         if (! self::disk()->put($path, $contents, 'public')) {
             throw ValidationException::withMessages(['image' => 'Impossible d’enregistrer l’image. Veuillez réessayer.']);

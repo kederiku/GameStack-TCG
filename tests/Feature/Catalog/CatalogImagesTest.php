@@ -5,6 +5,7 @@ namespace Tests\Feature\Catalog;
 use App\Models\ExpansionEdition;
 use App\Models\Series;
 use App\Models\SeriesLocalization;
+use App\Services\CatalogImages;
 use Closure;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
 use Illuminate\Http\UploadedFile;
@@ -96,6 +97,35 @@ class CatalogImagesTest extends TestCase
 
         $this->assertSame($original, $localization->fresh()->image);
         $this->assertSame([$original], $disk->allFiles());
+    }
+
+    public function test_savepoint_rollback_keeps_an_image_referenced_on_the_writing_connection(): void
+    {
+        $edition = $this->edition($this->expansion($this->catalog()));
+        config(['database.connections.catalog_image_test' => config('database.connections.pgsql')]);
+        $connection = DB::connection('catalog_image_test');
+
+        $connection->beginTransaction();
+        try {
+            Str::freezeUuids(function ($uuid) use ($connection, $edition): void {
+                $path = 'catalog/'.$uuid.'/existing.avif';
+                $connection->table('expansion_editions')->where('id', $edition->id)->update(['image' => $path]);
+                $this->assertNull($edition->fresh()->image);
+
+                $connection->beginTransaction();
+                try {
+                    app(CatalogImages::class)->store(UploadedFile::fake()->image('existing.png'), 'Existing', $connection);
+                    Storage::disk('s3')->assertExists($path);
+                } finally {
+                    $connection->rollBack();
+                }
+
+                Storage::disk('s3')->assertExists($path);
+            });
+        } finally {
+            $connection->rollBack();
+            DB::purge('catalog_image_test');
+        }
     }
 
     public function test_submitted_paths_can_only_retain_the_locked_records_own_image(): void

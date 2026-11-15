@@ -79,6 +79,37 @@ class AdminAccessTest extends TestCase
         $this->get('/admin')->assertOk();
     }
 
+    public function test_inertia_login_opens_the_intended_catalog_page_as_a_full_navigation(): void
+    {
+        $user = User::factory()->create();
+        $user->forceFill(['is_admin' => true])->save();
+        $destination = '/admin/catalogs?page=2';
+
+        $this->get($destination)->assertRedirect('/admin/login');
+        $this->get('/admin/login')->assertRedirect('/login');
+        $this->post('/login', ['email' => $user->email, 'password' => 'password'], ['X-Inertia' => 'true'])
+            ->assertConflict()
+            ->assertHeader('X-Inertia-Location', url($destination))
+            ->assertSessionMissing('url.intended');
+
+        $this->assertAuthenticatedAs($user);
+        $this->get($destination)->assertOk();
+    }
+
+    public function test_json_login_keeps_the_fortify_response_when_admin_is_intended(): void
+    {
+        $user = User::factory()->create();
+        $user->forceFill(['is_admin' => true])->save();
+
+        $this->get('/admin')->assertRedirect('/admin/login');
+        $this->postJson('/login', ['email' => $user->email, 'password' => 'password'])
+            ->assertOk()
+            ->assertExactJson(['two_factor' => false])
+            ->assertHeaderMissing('X-Inertia-Location');
+
+        $this->assertAuthenticatedAs($user);
+    }
+
     public function test_administrators_must_complete_two_factor_authentication(): void
     {
         $user = User::factory()->withTwoFactor()->create();
@@ -86,14 +117,17 @@ class AdminAccessTest extends TestCase
         $recoveryCode = $user->recoveryCodes()[0];
 
         $this->get('/admin')->assertRedirect('/admin/login');
-        $this->post('/login', ['email' => $user->email, 'password' => 'password'])
-            ->assertRedirect('/two-factor-challenge');
+        $this->post('/login', ['email' => $user->email, 'password' => 'password'], ['X-Inertia' => 'true'])
+            ->assertRedirect('/two-factor-challenge')
+            ->assertHeaderMissing('X-Inertia-Location');
 
         $this->assertGuest();
         $this->get('/admin')->assertRedirect('/admin/login');
 
-        $this->post('/two-factor-challenge', ['recovery_code' => $recoveryCode])
-            ->assertRedirect('/admin');
+        $this->post('/two-factor-challenge', ['recovery_code' => $recoveryCode], ['X-Inertia' => 'true'])
+            ->assertConflict()
+            ->assertHeader('X-Inertia-Location', url('/admin'))
+            ->assertSessionMissing('url.intended');
 
         $this->assertAuthenticatedAs($user);
         $this->get('/admin')->assertOk();
