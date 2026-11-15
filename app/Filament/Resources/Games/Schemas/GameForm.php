@@ -89,12 +89,12 @@ class GameForm
                                 ->image()
                                 ->disk('public')
                                 ->visibility('public')
-                                ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp', 'image/svg+xml'])
+                                ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp', 'image/avif', 'image/svg+xml'])
                                 ->maxSize(5120)
                                 ->rules(['dimensions:max_width=4096,max_height=4096'])
                                 ->preventFilePathTampering()
                                 ->storeFiles(false)
-                                ->helperText('JPEG, PNG, WebP ou SVG. 5 Mio maximum ; 4096 × 4096 px maximum hors SVG.'),
+                                ->helperText('JPEG, PNG, WebP, AVIF ou SVG, convertis en AVIF. 5 Mio maximum ; 4096 × 4096 px maximum hors SVG.'),
                         ]),
                     Section::make('Publication')
                         ->description('Gérez la présence du jeu sur le site.')

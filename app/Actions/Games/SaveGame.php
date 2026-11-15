@@ -59,7 +59,7 @@ class SaveGame
 
                 if ($image instanceof UploadedFile) {
                     Validator::make(['image' => $image], [
-                        'image' => ['required', 'image:allow_svg', 'mimetypes:image/jpeg,image/png,image/webp,image/svg+xml', 'max:5120', 'dimensions:max_width=4096,max_height=4096'],
+                        'image' => ['required', 'image:allow_svg', 'mimetypes:image/jpeg,image/png,image/webp,image/avif,image/svg+xml', 'max:5120', 'dimensions:max_width=4096,max_height=4096'],
                     ])->validate();
                     $image = $this->images->store($image, $attributes['name'], $record->getConnection());
                 } elseif ($image !== null && (! is_string($image) || $image !== $record->image)) {

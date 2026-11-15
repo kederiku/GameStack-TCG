@@ -24,6 +24,8 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->configureDefaults();
+
+        config()->push('livewire.temporary_file_upload.preview_mimes', 'avif');
     }
 
     /**

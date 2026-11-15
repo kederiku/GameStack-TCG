@@ -32,12 +32,12 @@ class GameTest extends TestCase
         $this->assertDatabaseHas('games', ['id' => $game->id, 'slug' => 'pokemon']);
     }
 
-    public function test_an_upload_is_reencoded_as_webp_with_the_game_name(): void
+    public function test_an_upload_is_reencoded_as_avif_with_the_game_name(): void
     {
         $game = $this->createWithImage();
 
-        $this->assertStringEndsWith('/pokemon.webp', $game->image);
-        $this->assertSame('image/webp', Storage::disk('public')->mimeType($game->image));
+        $this->assertStringEndsWith('/pokemon.avif', $game->image);
+        $this->assertSame('image/avif', Storage::disk('public')->mimeType($game->image));
         $this->assertSame([64, 32], array_slice(getimagesize(Storage::disk('public')->path($game->image)), 0, 2));
     }
 
@@ -63,7 +63,7 @@ class GameTest extends TestCase
         $game = app(SaveGame::class)->handle($game, ['name' => 'Magic: The Gathering']);
 
         $this->assertSame('pokemon', $game->slug);
-        $this->assertStringEndsWith('/magic-the-gathering.webp', $game->image);
+        $this->assertStringEndsWith('/magic-the-gathering.avif', $game->image);
         $this->assertSame($contents, Storage::disk('public')->get($game->image));
         Storage::disk('public')->assertMissing($old);
     }
@@ -154,7 +154,7 @@ class GameTest extends TestCase
     public function test_invalid_images_are_rejected_without_modifying_the_game(): void
     {
         $game = $this->createWithImage();
-        foreach ([UploadedFile::fake()->createWithContent('fake.png', '<?php echo 1;'), UploadedFile::fake()->image('wide.png', 4097, 1), UploadedFile::fake()->image('large.png')->size(5121)] as $upload) {
+        foreach ([UploadedFile::fake()->createWithContent('fake.png', '<?php echo 1;'), UploadedFile::fake()->createWithContent('fake.avif', 'not an image'), UploadedFile::fake()->image('wide.png', 4097, 1), UploadedFile::fake()->image('large.png')->size(5121)] as $upload) {
             try {
                 app(SaveGame::class)->handle($game, ['name' => 'Changed', 'image' => $upload]);
                 $this->fail('Invalid image was accepted.');
@@ -192,7 +192,7 @@ class GameTest extends TestCase
         ]);
     }
 
-    public function test_png_transparency_is_preserved_in_webp(): void
+    public function test_png_transparency_is_preserved_in_avif(): void
     {
         $image = imagecreatetruecolor(2, 2);
         imagealphablending($image, false);
@@ -203,7 +203,7 @@ class GameTest extends TestCase
         $upload = UploadedFile::fake()->createWithContent('transparent.png', ob_get_clean());
 
         $game = app(SaveGame::class)->handle(new Game, ['name' => 'Transparent', 'image' => $upload]);
-        $decoded = imagecreatefromwebp(Storage::disk('public')->path($game->image));
+        $decoded = imagecreatefromavif(Storage::disk('public')->path($game->image));
 
         $this->assertSame(127, imagecolorsforindex($decoded, imagecolorat($decoded, 0, 0))['alpha']);
     }
@@ -226,7 +226,7 @@ class GameTest extends TestCase
             $this->assertLessThanOrEqual(185, strlen(basename($game->image)));
             Storage::disk('public')->assertExists($game->image);
         }
-        $this->assertStringEndsWith('/jeu.webp', $game->image);
+        $this->assertStringEndsWith('/jeu.avif', $game->image);
     }
 
     public function test_a_stale_edit_cannot_restore_a_replaced_image(): void

@@ -3,6 +3,8 @@
 namespace App\Services;
 
 use App\Models\Game;
+use DOMDocument;
+use DOMXPath;
 use enshrined\svgSanitize\Sanitizer;
 use GdImage;
 use Illuminate\Database\Connection;
@@ -11,23 +13,21 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use RuntimeException;
+use Symfony\Component\Process\Exception\ExceptionInterface as ProcessException;
+use Symfony\Component\Process\Process;
 
 class GameImages
 {
     public function store(UploadedFile $upload, string $name, Connection $connection): string
     {
+        if (! (gd_info()['AVIF Support'] ?? false)) {
+            throw ValidationException::withMessages(['image' => 'Le serveur ne prend pas en charge la conversion AVIF.']);
+        }
+
         $contents = $upload->get();
 
         if (is_string($contents) && $upload->getMimeType() === 'image/svg+xml') {
-            $sanitizer = new Sanitizer;
-            $sanitizer->removeRemoteReferences(true);
-            $svg = $sanitizer->sanitize($contents);
-
-            if ($svg === false || $svg === '') {
-                throw ValidationException::withMessages(['image' => 'Ce fichier SVG est invalide ou ne peut pas être nettoyé.']);
-            }
-
-            return $this->write($svg, $name, $connection, 'svg');
+            $contents = $this->rasterizeSvg($contents);
         }
 
         $image = $contents === false ? false : @imagecreatefromstring($contents);
@@ -47,17 +47,19 @@ class GameImages
 
         ob_start();
         try {
-            $encoded = imagewebp($image, null, 85);
-            $webp = ob_get_contents();
+            $encoded = imageavif($image, null, 85);
+            $avif = ob_get_contents();
         } finally {
             ob_end_clean();
         }
 
-        if (! $encoded || ! is_string($webp) || $webp === '') {
-            throw ValidationException::withMessages(['image' => 'La conversion WebP a échoué.']);
+        $dimensions = is_string($avif) && $avif !== '' ? @getimagesizefromstring($avif) : false;
+
+        if (! $encoded || ! is_string($avif) || $dimensions === false || $dimensions['mime'] !== 'image/avif') {
+            throw ValidationException::withMessages(['image' => 'La conversion AVIF a échoué.']);
         }
 
-        return $this->write($webp, $name, $connection);
+        return $this->write($avif, $name, $connection);
     }
 
     public function rename(string $path, string $name, Connection $connection): ?string
@@ -91,12 +93,71 @@ class GameImages
         }
     }
 
-    private function isManagedPath(string $path): bool
+    public function isManagedPath(string $path): bool
     {
-        return preg_match('/\Agames\/[a-f0-9-]{36}\/[a-z0-9-]+\.(?:webp|svg)\z/', $path) === 1;
+        return preg_match('/\Agames\/[a-f0-9-]{36}\/[a-z0-9-]+\.(?:avif|webp|svg)\z/', $path) === 1;
     }
 
-    private function write(string $contents, string $name, Connection $connection, string $extension = 'webp'): string
+    private function rasterizeSvg(string $contents): string
+    {
+        $sanitizer = new Sanitizer;
+        $sanitizer->removeRemoteReferences(true);
+        $svg = $sanitizer->sanitize($contents);
+
+        if ($svg === false || $svg === '') {
+            throw ValidationException::withMessages(['image' => 'Ce fichier SVG est invalide ou ne peut pas être nettoyé.']);
+        }
+
+        $this->validateEmbeddedImages($svg);
+
+        // stdin has no base URI, preventing librsvg from resolving local files.
+        // Bound native allocations as well as the output size and rendering time.
+        $process = new Process(['prlimit', '--as=536870912', '--', 'rsvg-convert', '--format=png', '--width=2048', '--height=2048', '--keep-aspect-ratio']);
+        $process->setInput($svg)->setTimeout(10);
+
+        try {
+            $process->mustRun();
+        } catch (ProcessException) {
+            throw ValidationException::withMessages(['image' => 'Ce SVG ne peut pas être converti en AVIF.']);
+        }
+
+        return $process->getOutput();
+    }
+
+    private function validateEmbeddedImages(string $svg): void
+    {
+        $document = new DOMDocument;
+        $document->loadXML($svg, LIBXML_NONET);
+        $pixels = 0;
+
+        // SVG image/feImage can carry raster data despite the outer SVG's small dimensions.
+        // Validate both href and xlink:href before handing any data to native decoders.
+        foreach ((new DOMXPath($document))->query('//@*[local-name() = "href"]') ?: [] as $attribute) {
+            $uri = trim($attribute->nodeValue ?? '');
+
+            if (! str_starts_with(strtolower($uri), 'data:')) {
+                continue;
+            }
+
+            [$header, $payload] = array_pad(explode(',', $uri, 2), 2, '');
+            $contents = str_ends_with(strtolower($header), ';base64')
+                ? base64_decode(rawurldecode($payload), true)
+                : rawurldecode($payload);
+            $size = is_string($contents) && $contents !== '' ? @getimagesizefromstring($contents) : false;
+
+            if ($size === false || $size[0] < 1 || $size[1] < 1 || $size[0] > 4096 || $size[1] > 4096) {
+                throw ValidationException::withMessages(['image' => 'Les images intégrées au SVG doivent être lisibles et limitées à 4096 × 4096 pixels.']);
+            }
+
+            $pixels += $size[0] * $size[1];
+
+            if ($pixels > 4096 * 4096) {
+                throw ValidationException::withMessages(['image' => 'Les images intégrées au SVG sont trop volumineuses au total.']);
+            }
+        }
+    }
+
+    private function write(string $contents, string $name, Connection $connection, string $extension = 'avif'): string
     {
         $filename = substr(Str::slug($name), 0, 180) ?: 'jeu';
         $path = 'games/'.Str::uuid().'/'.$filename.'.'.$extension;

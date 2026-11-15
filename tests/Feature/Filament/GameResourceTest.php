@@ -14,6 +14,7 @@ use Filament\Facades\Filament;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
+use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Livewire\Livewire;
 use Tests\TestCase;
 
@@ -198,7 +199,7 @@ class GameResourceTest extends TestCase
         }
     }
 
-    public function test_uploading_and_replacing_an_image_uses_webp_and_cleans_up(): void
+    public function test_uploading_and_replacing_an_image_uses_avif_and_cleans_up(): void
     {
         Livewire::test(CreateGame::class)
             ->fillForm(['name' => 'Pokémon', 'slug' => 'pokemon', 'image' => UploadedFile::fake()->image('logo.png')])
@@ -207,7 +208,7 @@ class GameResourceTest extends TestCase
 
         $game = Game::query()->sole();
         $old = $game->image;
-        $this->assertSame('image/webp', Storage::disk('public')->mimeType($old));
+        $this->assertSame('image/avif', Storage::disk('public')->mimeType($old));
 
         Livewire::test(EditGame::class, ['record' => $game->id])
             ->fillForm(['name' => 'Pokémon TCG', 'slug' => 'pokemon-tcg', 'image' => UploadedFile::fake()->image('new.jpg')])
@@ -215,9 +216,31 @@ class GameResourceTest extends TestCase
             ->assertHasNoFormErrors();
 
         $this->assertSame('pokemon-tcg', $game->fresh()->slug);
-        $this->assertStringEndsWith('/pokemon-tcg.webp', $game->fresh()->image);
+        $this->assertStringEndsWith('/pokemon-tcg.avif', $game->fresh()->image);
         Storage::disk('public')->assertMissing($old);
         $this->assertCount(1, Storage::disk('public')->allFiles('games'));
+    }
+
+    public function test_an_avif_upload_has_a_preview_and_can_be_saved_and_edited(): void
+    {
+        $image = imagecreatetruecolor(64, 32);
+        ob_start();
+        imageavif($image);
+        $contents = ob_get_clean();
+        Storage::disk('public')->put('livewire-tmp/preview.avif', $contents);
+        $temporary = new TemporaryUploadedFile('preview.avif', 'public');
+        $this->assertNotEmpty($temporary->temporaryUrl());
+
+        Livewire::test(CreateGame::class)
+            ->fillForm(['name' => 'AVIF', 'slug' => 'avif', 'image' => UploadedFile::fake()->createWithContent('logo.avif', $contents)])
+            ->call('create')->assertHasNoFormErrors();
+
+        $game = Game::query()->sole();
+        $this->assertSame('image/avif', Storage::disk('public')->mimeType($game->image));
+        $this->assertSame([64, 32], array_slice(getimagesize(Storage::disk('public')->path($game->image)), 0, 2));
+        Livewire::test(EditGame::class, ['record' => $game->id])
+            ->fillForm(['publisher' => 'An editor'])->call('save')->assertHasNoFormErrors();
+        $this->assertSame($game->image, $game->fresh()->image);
     }
 
     public function test_removing_an_image_is_only_applied_when_saving(): void
@@ -242,11 +265,11 @@ class GameResourceTest extends TestCase
 
         $game = Game::query()->sole();
         $old = $game->image;
-        $this->assertStringEndsWith('/pokemon.svg', $old);
+        $this->assertStringEndsWith('/pokemon.avif', $old);
         Livewire::test(EditGame::class, ['record' => $game->id])
             ->fillForm(['name' => 'Pokémon TCG'])
             ->call('save')->assertHasNoFormErrors();
-        $this->assertStringEndsWith('/pokemon-tcg.svg', $game->fresh()->image);
+        $this->assertStringEndsWith('/pokemon-tcg.avif', $game->fresh()->image);
         Storage::disk('public')->assertMissing($old);
 
         Livewire::test(ListGames::class)->callTableBulkAction(DeleteBulkAction::class, [$game]);

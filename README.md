@@ -105,19 +105,22 @@ le slug sous le nom, l’éditeur et un badge de visibilité. Le sélecteur de c
 permet de retrouver les colonnes Slug et Modifié le. Sur mobile, les visuels et
 l’éditeur sont masqués pour alléger le tableau, qui conserve son défilement horizontal.
 
-Les images JPEG, PNG et WebP sont acceptées jusqu’à **5 Mio** et **4096 × 4096
-pixels**. Le serveur les convertit en WebP (qualité 85), conserve la transparence
-et corrige l’orientation EXIF des JPEG. Le fichier porte le nom normalisé du jeu,
-par exemple `games/{uuid}/pokemon.webp`, sur le disque local `public`
-(`storage/app/public`). Le dossier unique évite les collisions et le cache d’une
-ancienne image. Le lien `public/storage` est créé par `make init`.
+Les images JPEG, PNG, WebP et AVIF sont acceptées jusqu’à **5 Mio** et **4096 ×
+4096 pixels**. Le serveur les réencode en **AVIF** (qualité 85), conserve la
+transparence et corrige l’orientation EXIF des JPEG. Le fichier porte le nom
+normalisé du jeu, par exemple `games/{uuid}/pokemon.avif`, sur le disque local
+`public` (`storage/app/public`). Le dossier unique évite les collisions et le
+cache d’une ancienne image. Le lien `public/storage` est créé par `make init`.
+L’aperçu des imports AVIF est également disponible dans Filament.
 
-Les **SVG** sont également acceptés jusqu’à **5 Mio** et conservent leur format
-vectoriel `.svg`, sans conversion WebP ni limite de dimensions en pixels.
-Leur contenu est nettoyé avec `enshrined/svg-sanitize` avant stockage (scripts,
-attributs actifs et références distantes). Les SVG invalides sont refusés.
-Le renommage, le remplacement et la suppression suivent les mêmes règles que
-les images WebP.
+Les **SVG** sont acceptés jusqu’à **5 Mio**. Leur contenu est nettoyé avec
+`enshrined/svg-sanitize`, puis rasterisé par librsvg en conservant les proportions
+et la transparence, avec un côté maximal de 2048 pixels, avant encodage AVIF.
+Le fichier enregistré n’est donc plus vectoriel. Le rendu est limité à dix
+secondes ; les SVG invalides ou impossibles à convertir sont refusés.
+Les images intégrées dans un SVG sont limitées à 4096 × 4096 pixels chacune et
+16 777 216 pixels au total. Le processus de rendu dispose d’un plafond de
+512 Mio d’espace d’adressage via `prlimit` (util-linux, fourni par Docker).
 
 Une nouvelle image remplace l’ancienne après sauvegarde ; retirer une image ou
 supprimer un jeu la supprime du disque, y compris lors d’une suppression groupée.
@@ -127,7 +130,8 @@ l’image précédente. Une panne disque ou un arrêt brutal reste une limite à
 l’atomicité entre les fichiers et PostgreSQL ; les erreurs de nettoyage sont
 signalées dans les logs Laravel.
 
-Pour mettre à jour un environnement existant (GD/EXIF sont ajoutés à PHP) :
+Pour mettre à jour un environnement existant (GD avec AVIF, EXIF et librsvg sont
+fournis par l’image Docker) :
 
 ```sh
 make build
@@ -135,6 +139,23 @@ make up
 make composer ARGS='install --no-interaction'
 make migrate
 ```
+
+Pour convertir les images de jeux déjà présentes, après reconstruction de Docker :
+
+```sh
+docker compose exec app php artisan games:convert-images-to-avif --dry-run
+docker compose exec app php artisan games:convert-images-to-avif
+```
+
+La simulation ne modifie rien. La conversion conserve les originaux dans
+`storage/app/private/game-images-before-avif/`, avec leur chemin initial
+`games/{uuid}/{nom}.webp` ou `.svg`. Pour restaurer un original, le réimporter
+dans le formulaire du jeu. Chaque jeu est traité dans sa propre transaction ;
+une erreur préserve son image et n’empêche pas le traitement des autres jeux.
+La commande signale ces erreurs avec un code de sortie non nul. Les jeux sans
+image et les images déjà AVIF sont ignorés : relancer la commande est sans effet
+sur les images déjà converties. Les icônes de l’application sont indépendantes
+de ces visuels de jeux.
 
 Côté code, utiliser `App\Actions\Games\SaveGame::handle($game, $data)` pour
 créer/modifier un jeu et son image. `image` accepte un `UploadedFile`, le chemin
