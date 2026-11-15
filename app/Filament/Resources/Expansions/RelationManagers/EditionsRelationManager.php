@@ -30,8 +30,10 @@ class EditionsRelationManager extends CatalogRelationManager
     public function table(Table $table): Table
     {
         return $table->recordTitleAttribute('name')
+            ->description('Les versions réellement imprimées ou annoncées de cet ensemble, une par langue. Ouvrez « Modifier et gérer les sorties » pour préciser les marchés et dates.')
             ->searchPlaceholder('Rechercher')
             ->emptyStateHeading('Aucune édition')
+            ->emptyStateDescription('Créez une édition pour chaque langue confirmée par l’éditeur. Une simple traduction du nom se renseigne dans « Localisations ».')
             ->columns([
                 ImageColumn::make('image')->label('Visuel')->disk(fn (): string => CatalogImages::diskName())
                     ->visibility('public')->imageHeight(40),

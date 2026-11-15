@@ -28,12 +28,16 @@ class RelationsRelationManager extends CatalogRelationManager
         return $schema->components([
             Select::make('source_expansion_id')->label('Extension source')
                 ->visibleOn('edit')->disabled()->native(false)
+                ->helperText('Point de départ du lien : lisez « source → type de lien → cible ».')
                 ->getOptionLabelUsing(fn (mixed $value): ?string => $this->expansionLabel($value)),
             Select::make('target_expansion_id')->label('Extension cible')->required()->searchable()->disabledOn('edit')
+                ->helperText('Recherchez un autre ensemble du même jeu, éventuellement dans un autre catalogue. Pour « Adaptée de » et « Inclut du contenu de », l’extension ouverte est la source du lien.')
                 ->getSearchResultsUsing(fn (string $search): array => $this->candidateExpansions($search))
                 ->getOptionLabelUsing(fn (mixed $value): ?string => $this->expansionLabel($value)),
-            CatalogFields::enum('type', 'Type', CatalogLabels::RELATION_TYPES)->disabledOn('edit'),
-            Textarea::make('notes')->label('Justification')->required()->rows(4)->columnSpanFull(),
+            CatalogFields::enum('type', 'Type', CatalogLabels::RELATION_TYPES)->disabledOn('edit')
+                ->helperText('« Liée à » est réciproque. « Adaptée de » et « Inclut du contenu de » se lisent de la source vers la cible. Le type et les deux ensembles sont définitifs après création.'),
+            Textarea::make('notes')->label('Justification')->required()->rows(4)->columnSpanFull()
+                ->helperText('Expliquez le lien et ses limites. Des noms proches ne suffisent pas à établir que deux ensembles contiennent les mêmes cartes.'),
             CatalogFields::sourceUrl()->required(),
         ]);
     }
@@ -48,8 +52,10 @@ class RelationsRelationManager extends CatalogRelationManager
             ->where(fn (Builder $query): Builder => $query->where('source_expansion_id', $owner->id)->orWhere('target_expansion_id', $owner->id))
             ->with(['sourceExpansion.catalog', 'targetExpansion.catalog']))
             ->recordTitleAttribute('type')
+            ->description('Documentez les liens entre ensembles sans les fusionner ni supposer un contenu identique. Une justification et une source sont nécessaires.')
             ->searchPlaceholder('Rechercher')
             ->emptyStateHeading('Aucun rapprochement')
+            ->emptyStateDescription('Ajoutez un lien seulement si vous disposez d’une source qui le confirme.')
             ->columns([
                 TextColumn::make('sourceExpansion.name')->label('Extension source')->searchable()
                     ->description(fn (ExpansionRelation $record): string => $record->sourceExpansion->catalog->name)

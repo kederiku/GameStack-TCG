@@ -29,11 +29,16 @@ class ReleasesRelationManager extends CatalogRelationManager
     {
         return $schema->components([
             Select::make('market_id')->label('Marché')->required()->searchable()->disabledOn('edit')
+                ->helperText('Territoire où cette édition est commercialisée. Sa langue reste celle de l’édition ; le marché ne peut plus être modifié après création.')
                 ->options(fn (): array => Market::query()->orderBy('name')->pluck('name', 'id')->all()),
-            CatalogFields::enum('channel', 'Canal', CatalogLabels::CHANNELS)->default('general')->disabledOn('edit'),
-            CatalogFields::enum('status', 'État', CatalogLabels::STATUSES)->default('announced'),
-            DatePicker::make('released_on')->label('Date de sortie'),
-            TextInput::make('announced_period')->label('Période annoncée')->maxLength(255),
+            CatalogFields::enum('channel', 'Canal', CatalogLabels::CHANNELS)->default('general')->disabledOn('edit')
+                ->helperText('Mode de distribution : une avant-première ou une sortie en boutiques spécialisées peut précéder la distribution générale. Ce choix est définitif après création.'),
+            CatalogFields::enum('status', 'État', CatalogLabels::STATUSES)->default('announced')
+                ->helperText('Annoncée : sortie à venir ; Publiée : sortie déjà effective ; Annulée : sortie abandonnée. Une sortie publiée fait aussi passer son édition à « Publiée ».'),
+            DatePicker::make('released_on')->label('Date de sortie')
+                ->helperText('Date exacte pour ce marché et ce canal, lorsqu’elle est confirmée. Laissez vide si seule une période est connue.'),
+            TextInput::make('announced_period')->label('Période annoncée')->maxLength(255)
+                ->helperText('Facultatif : indication de l’éditeur, par exemple « deuxième trimestre 2027 ». N’inventez pas de jour précis.'),
             CatalogFields::sourceUrl(),
         ]);
     }
@@ -41,8 +46,10 @@ class ReleasesRelationManager extends CatalogRelationManager
     public function table(Table $table): Table
     {
         return $table->recordTitleAttribute('status')
+            ->description('Une sortie indique où, comment et quand cette édition est commercialisée. Une fiche par marché et canal décrit la première sortie, pas les réapprovisionnements.')
             ->searchPlaceholder('Rechercher')
             ->emptyStateHeading('Aucune sortie')
+            ->emptyStateDescription('Ajoutez les marchés et canaux confirmés. Une date exacte peut rester vide si elle n’est pas connue.')
             ->columns([
                 TextColumn::make('market.name')->label('Marché')->searchable()->sortable(),
                 CatalogTables::enum('channel', 'Canal', CatalogLabels::CHANNELS),

@@ -12,9 +12,10 @@ class SeriesForm
     {
         return CatalogFields::layout($schema, [
             CatalogFields::catalogue(),
-            CatalogFields::enum('type', 'Type', CatalogLabels::SERIES_TYPES),
-            CatalogFields::name(),
+            CatalogFields::enum('type', 'Type', CatalogLabels::SERIES_TYPES)
+                ->helperText('Reprenez le terme utilisé par l’éditeur : série pour Pokémon, bloc pour certains ensembles Magic. Les deux regroupent plusieurs extensions.'),
+            CatalogFields::name()->helperText('Nom de référence, par exemple Écarlate et Violet. Les noms et images par langue se renseignent dans « Localisations » après création.'),
             CatalogFields::key(),
-        ], [CatalogFields::visibility(), CatalogFields::order()]);
+        ], [CatalogFields::visibility(), CatalogFields::order()], description: 'Une série ou un bloc regroupe plusieurs extensions d’un même catalogue. Ce niveau est facultatif : tous les TCG ne l’utilisent pas.');
     }
 }
