@@ -82,6 +82,14 @@ Les administrateurs vérifiés gèrent les jeux dans **Filament → Jeux**
 (`/admin/games`) : nom, slug unique et image optionnelle. Le slug est proposé
 à la création et reste modifiable ; renommer un jeu ne change pas son slug.
 
+L’année de création, l’année de fin, le nom de l’éditeur et une description
+en texte simple sont également éditables. Ces quatre champs sont facultatifs.
+Les années se saisissent seules, sur quatre chiffres ; lorsque les deux sont
+renseignées, la fin ne peut pas précéder la création. Laisser la fin vide pour
+un TCG encore actif ou dont l’année de fin est inconnue. L’éditeur est limité
+à 255 caractères. Appliquer `make migrate` pour ajouter ces champs à une base
+existante.
+
 Les images JPEG, PNG et WebP sont acceptées jusqu’à **5 Mio** et **4096 × 4096
 pixels**. Le serveur les convertit en WebP (qualité 85), conserve la transparence
 et corrige l’orientation EXIF des JPEG. Le fichier porte le nom normalisé du jeu,
@@ -116,7 +124,9 @@ make migrate
 Côté code, utiliser `App\Actions\Games\SaveGame::handle($game, $data)` pour
 créer/modifier un jeu et son image. `image` accepte un `UploadedFile`, le chemin
 actuel pour le conserver, ou `null` pour le retirer ; omettre la clé conserve
-l’image. Les champs `name` et `slug` sont validés par ce service. Pour supprimer,
+l’image. Le service valide `name`, `slug`, `start_year`, `end_year`, `publisher`
+et `description`. Omettre un champ d’information facultatif conserve sa valeur ;
+transmettre `null` ou une chaîne vide l’efface. Pour supprimer,
 utiliser `$game->delete()` ou `Game::destroy($ids)` : les mises à jour/suppressions
 SQL de masse et les méthodes `*Quietly()` contournent les événements Eloquent
 responsables du nettoyage.

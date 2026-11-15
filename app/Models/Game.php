@@ -16,15 +16,28 @@ use Illuminate\Support\Str;
  * @property string $name
  * @property string $slug
  * @property string|null $image
+ * @property int|null $start_year
+ * @property int|null $end_year
+ * @property string|null $publisher
+ * @property string|null $description
  * @property CarbonInterface|null $created_at
  * @property CarbonInterface|null $updated_at
  */
-#[Fillable(['name', 'slug'])]
+#[Fillable(['name', 'slug', 'start_year', 'end_year', 'publisher', 'description'])]
 #[ObservedBy([GameObserver::class])]
 class Game extends Model
 {
     /** @use HasFactory<GameFactory> */
     use HasFactory;
+
+    /** @return array<string, string> */
+    protected function casts(): array
+    {
+        return [
+            'start_year' => 'integer',
+            'end_year' => 'integer',
+        ];
+    }
 
     public function delete(): ?bool
     {

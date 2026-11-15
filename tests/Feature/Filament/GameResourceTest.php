@@ -38,7 +38,101 @@ class GameResourceTest extends TestCase
             ->call('create')
             ->assertHasNoFormErrors();
 
-        $this->assertDatabaseHas('games', ['name' => 'Pokémon', 'slug' => 'pokemon', 'image' => null]);
+        $this->assertDatabaseHas('games', [
+            'name' => 'Pokémon', 'slug' => 'pokemon', 'image' => null,
+            'start_year' => null, 'end_year' => null, 'publisher' => null, 'description' => null,
+        ]);
+    }
+
+    public function test_an_admin_can_create_edit_and_clear_optional_game_details(): void
+    {
+        Livewire::test(CreateGame::class)
+            ->fillForm([
+                'name' => 'Un TCG', 'slug' => 'un-tcg',
+                'start_year' => 2024, 'end_year' => 2026,
+                'publisher' => 'Un éditeur', 'description' => "Un TCG.\nSa description.",
+            ])
+            ->call('create')
+            ->assertHasNoFormErrors();
+
+        $game = Game::query()->sole();
+        $this->assertSame(2024, $game->start_year);
+        $this->assertSame(2026, $game->end_year);
+        $this->assertSame('Un éditeur', $game->publisher);
+        $this->assertSame("Un TCG.\nSa description.", $game->description);
+
+        $page = Livewire::test(EditGame::class, ['record' => $game->id])
+            ->assertFormSet([
+                'start_year' => 2024, 'end_year' => 2026,
+                'publisher' => 'Un éditeur', 'description' => "Un TCG.\nSa description.",
+            ])
+            ->fillForm([
+                'start_year' => 2023, 'end_year' => 2025,
+                'publisher' => 'Autre éditeur', 'description' => 'Description révisée.',
+            ])
+            ->call('save')
+            ->assertHasNoFormErrors();
+
+        $this->assertDatabaseHas('games', [
+            'id' => $game->id, 'start_year' => 2023, 'end_year' => 2025,
+            'publisher' => 'Autre éditeur', 'description' => 'Description révisée.',
+        ]);
+
+        $page->fillForm(['start_year' => '', 'end_year' => '', 'publisher' => '', 'description' => ''])
+            ->call('save')
+            ->assertHasNoFormErrors();
+
+        $this->assertDatabaseHas('games', [
+            'id' => $game->id, 'start_year' => null, 'end_year' => null,
+            'publisher' => null, 'description' => null,
+        ]);
+    }
+
+    public function test_each_year_is_optional_in_filament(): void
+    {
+        Livewire::test(CreateGame::class)
+            ->fillForm(['name' => 'Un TCG', 'slug' => 'un-tcg', 'end_year' => 2026])
+            ->call('create')
+            ->assertHasNoFormErrors();
+
+        $game = Game::query()->sole();
+        $this->assertNull($game->start_year);
+        $this->assertSame(2026, $game->end_year);
+
+        Livewire::test(EditGame::class, ['record' => $game->id])
+            ->fillForm(['start_year' => 1993, 'end_year' => null])
+            ->call('save')
+            ->assertHasNoFormErrors();
+
+        $this->assertSame(1993, $game->fresh()->start_year);
+        $this->assertNull($game->fresh()->end_year);
+    }
+
+    public function test_filament_rejects_invalid_years_and_a_long_publisher(): void
+    {
+        Livewire::test(CreateGame::class)
+            ->fillForm([
+                'name' => 'Un TCG', 'slug' => 'un-tcg',
+                'start_year' => 2024.5, 'end_year' => 10000,
+                'publisher' => str_repeat('a', 256),
+            ])
+            ->call('create')
+            ->assertHasFormErrors(['start_year', 'end_year', 'publisher']);
+
+        $this->assertDatabaseCount('games', 0);
+    }
+
+    public function test_filament_reports_an_end_year_before_creation_without_saving_changes(): void
+    {
+        $game = Game::factory()->create(['start_year' => 2024, 'end_year' => 2026]);
+
+        Livewire::test(EditGame::class, ['record' => $game->id])
+            ->fillForm(['start_year' => 2027])
+            ->call('save')
+            ->assertHasFormErrors(['end_year']);
+
+        $this->assertSame(2024, $game->fresh()->start_year);
+        $this->assertSame(2026, $game->fresh()->end_year);
     }
 
     public function test_the_name_suggests_a_slug_without_overwriting_a_custom_slug(): void

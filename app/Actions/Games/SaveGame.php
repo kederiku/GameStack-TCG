@@ -35,11 +35,25 @@ class SaveGame
                     $slug = Str::slug($name);
                 }
 
+                $details = [];
+                foreach (['start_year', 'end_year', 'publisher', 'description'] as $field) {
+                    $value = array_key_exists($field, $data) ? $data[$field] : $record->getAttribute($field);
+                    $value = is_string($value) ? trim($value) : $value;
+                    $details[$field] = $value === '' ? null : $value;
+                }
+
                 $image = array_key_exists('image', $data) ? $data['image'] : $record->image;
-                $attributes = Validator::make(['name' => $name, 'slug' => $slug], [
+                $attributes = Validator::make(['name' => $name, 'slug' => $slug, ...$details], [
                     'name' => ['required', 'string', 'max:255'],
                     'slug' => ['required', 'string', 'max:255', 'regex:/\A[a-z0-9]+(?:-[a-z0-9]+)*\z/', Rule::notIn(GameSlug::reserved()), Rule::unique(Game::class, 'slug')->ignore($record)],
-                ], ['slug.not_in' => 'Ce slug est réservé à une page de l’application. Choisissez un autre identifiant.'])->validate();
+                    'start_year' => ['nullable', 'integer', 'between:1000,9999'],
+                    'end_year' => ['nullable', 'integer', 'between:1000,9999', Rule::when($details['start_year'] !== null, ['gte:start_year'])],
+                    'publisher' => ['nullable', 'string', 'max:255'],
+                    'description' => ['nullable', 'string'],
+                ], [
+                    'slug.not_in' => 'Ce slug est réservé à une page de l’application. Choisissez un autre identifiant.',
+                    'end_year.gte' => 'L’année de fin doit être supérieure ou égale à l’année de création.',
+                ])->validate();
 
                 if ($image instanceof UploadedFile) {
                     Validator::make(['image' => $image], [
