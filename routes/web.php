@@ -13,6 +13,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
 require __DIR__.'/settings.php';
 
+Route::get('/{game:slug}/{catalogKey}/{expansionKey}', [PublicGameController::class, 'expansion'])
+    ->where('game', GameSlug::routePattern())
+    ->where(['catalogKey' => '[a-z0-9]+(?:-[a-z0-9]+)*', 'expansionKey' => '[a-z0-9]+(?:-[a-z0-9]+)*'])
+    ->name('games.expansions.show');
+
 Route::get('/{game:slug}', [PublicGameController::class, 'show'])
     ->where('game', GameSlug::routePattern())
     ->name('games.show');

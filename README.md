@@ -328,13 +328,27 @@ un autre slug dans Filament le rend accessible.
 
 Les pages publiques partagent un layout React avec les composants shadcn/ui
 existants. Le logo utilise Big Shoulders Display avec « TCG » vertical, chargée
-par le pipeline de polices Vite. La palette publique suit le choix
-clair/sombre/système de l’application. Une image absente ou impossible à charger
+par le pipeline de polices Vite. Le site React utilise uniquement le mode sombre,
+y compris au premier chargement. Une image absente ou impossible à charger
 laisse place aux initiales du jeu.
 
-La page d’un jeu affiche actuellement un état « Le catalogue se prépare ».
-Le catalogue se gère déjà dans Filament ; son affichage public, les cartes,
-les collections et les prix restent à venir.
+La page d’un jeu affiche les extensions publiées dans Filament, regroupées par
+série. Catalogue, langue d’édition, type, recherche et tri sont conservés dans
+l’URL ; la pagination affiche 36 extensions à la fois. Les visibilités héritées
+du jeu, du catalogue et de la série s’appliquent aussi aux accès directs.
+Un catalogue vide affiche « Le catalogue se prépare ».
+
+Chaque fiche `/{jeu}/{catalogue}/{extension}` présente les éditions visibles et
+leurs sorties par marché et canal. `edition=fr` sélectionne une édition ; un
+choix indisponible déclenche un repli annoncé. Les logos restent propres aux
+éditions. Les cartes, collections et prix restent à venir.
+
+La topbar existante propose FR/EN pour le parcours public, indépendamment de
+la langue des éditions. `lang=fr` ou `lang=en` se partage et mémorise une
+préférence en cookie. Les noms administrés utilisent leurs localisations,
+puis la langue du catalogue, puis leur nom de base. Les noms de catalogues et
+de marchés restent ceux saisis dans l’administration. Aucun exemple masqué
+n’est publié automatiquement. Les maquettes temporaires ont été retirées.
 
 Voir [les vérifications de la navigation publique](docs/superpowers/public-navigation-verification.md).
 
@@ -381,15 +395,16 @@ et raccourcis vers les réglages. Aucun chiffre de collection ou prix fictif
 n’est affiché. Le dashboard fonctionne aussi sans jeu enregistré.
 
 La navigation du compte et les réglages partagent la palette GameStackr de
-l’accueil et de l’authentification, avec les modes clair, sombre et système.
+l’accueil et de l’authentification, dans un thème sombre commun.
 La sidebar se replie sur ordinateur et devient un tiroir sur mobile.
 
-Les pages **Mon profil**, **Sécurité** et **Apparence** prolongent cette identité
+Les pages **Mon profil** et **Sécurité** prolongent cette identité
 avec des panneaux partagés et une navigation compacte. Les formulaires, fenêtres
 de confirmation, clés d’accès et étapes de double authentification sont en
 français ; les messages fournis par le serveur ou le navigateur conservent leur
-langue. L’apparence propose des aperçus Clair/Sombre/Système et partage son état
-avec le sélecteur de la topbar.
+langue. Les anciens liens d’apparence restent accessibles, sans proposer de
+changement de thème. La traduction FR/EN concerne le parcours public ; les
+écrans de compte et d’authentification restent en français.
 
 Pour les nouveaux écrans React, réutiliser :
 
@@ -397,6 +412,8 @@ Pour les nouveaux écrans React, réutiliser :
 - `components/games/` pour les images, le sélecteur et la grille de jeux ;
 - `components/empty-state.tsx` pour les états vides ;
 - `components/settings-section.tsx` pour les panneaux des réglages du compte ;
+- `components/catalog/`, `filter-select.tsx` et `segmented-picker.tsx` pour les
+  catalogues, les éditions et leurs filtres ;
 - les primitives `components/ui/` et les tokens de `resources/css/app.css`.
 
 La grille de jeux est commune à l’accueil et au dashboard. Les états vides

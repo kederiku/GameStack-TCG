@@ -4,7 +4,6 @@ import {
     Compass,
     House,
     LayoutGrid,
-    Palette,
     ShieldCheck,
     UserRound,
 } from 'lucide-react';
@@ -22,7 +21,6 @@ import {
     useSidebar,
 } from '@/components/ui/sidebar';
 import { dashboard, home } from '@/routes';
-import { edit as appearance } from '@/routes/appearance';
 import { edit as profile } from '@/routes/profile';
 import { edit as security } from '@/routes/security';
 import type { NavItem } from '@/types';
@@ -34,7 +32,6 @@ const mainNavItems: NavItem[] = [
 const accountNavItems: NavItem[] = [
     { title: 'Mon profil', href: profile(), icon: UserRound },
     { title: 'Sécurité', href: security(), icon: ShieldCheck },
-    { title: 'Apparence', href: appearance(), icon: Palette },
 ];
 
 export function AppSidebar() {
