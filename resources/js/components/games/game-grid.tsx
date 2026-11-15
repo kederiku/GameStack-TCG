@@ -3,6 +3,7 @@ import { EmptyState } from '@/components/empty-state';
 import { GameCard } from '@/components/games/game-card';
 import { cn } from '@/lib/utils';
 import type { PublicGame } from '@/types/game';
+import { useLocale } from '@/hooks/use-locale';
 
 export function GameGrid({
     games,
@@ -11,12 +12,19 @@ export function GameGrid({
     games: PublicGame[];
     className?: string;
 }) {
+    const { t } = useLocale();
     if (games.length === 0) {
         return (
             <EmptyState
                 icon={Layers2}
-                title="Les premiers TCG arrivent bientôt"
-                description="Les jeux à collectionner rejoindront bientôt cet espace. Votre prochaine collection commence ici."
+                title={t(
+                    'Les premiers TCG arrivent bientôt',
+                    'The first TCGs are coming soon',
+                )}
+                description={t(
+                    'Les jeux à collectionner rejoindront bientôt cet espace. Votre prochaine collection commence ici.',
+                    'Collectible card games will soon join this space. Your next collection starts here.',
+                )}
             />
         );
     }

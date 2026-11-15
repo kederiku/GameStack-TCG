@@ -38,5 +38,5 @@ void createInertiaApp({
     },
 });
 
-// This will set light / dark mode on load...
+// Keep the first render and client navigation in the same dark theme.
 initializeTheme();

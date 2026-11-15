@@ -2,6 +2,8 @@ import { Link, usePage } from '@inertiajs/react';
 import { ArrowUpRight, UserRound } from 'lucide-react';
 import { BrandLogo } from '@/components/brand-logo';
 import { GameSelector } from '@/components/games/game-selector';
+import { LanguageSwitcher } from '@/components/language-switcher';
+import { useLocale } from '@/hooks/use-locale';
 import { Button } from '@/components/ui/button';
 import {
     DropdownMenu,
@@ -13,6 +15,7 @@ import { dashboard, home, login, register } from '@/routes';
 import type { PublicGamePageProps } from '@/types/game';
 
 export function PublicHeader() {
+    const { t, locale, localizedUrl } = useLocale();
     const { games, currentGame, canRegister, auth } =
         usePage<PublicGamePageProps>().props;
 
@@ -20,8 +23,11 @@ export function PublicHeader() {
         <header className="border-b border-border/80">
             <div className="mx-auto flex max-w-7xl flex-wrap items-center gap-x-5 gap-y-4 px-4 py-5 sm:px-6 lg:gap-x-7 lg:px-8">
                 <Link
-                    href={home()}
-                    aria-label="GameStackr TCG — accueil"
+                    href={localizedUrl(home.url())}
+                    aria-label={t(
+                        'GameStackr TCG — accueil',
+                        'GameStackr TCG — home',
+                    )}
                     className="shrink-0 rounded-sm focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ring"
                 >
                     <BrandLogo />
@@ -30,18 +36,19 @@ export function PublicHeader() {
                     <GameSelector games={games} currentGame={currentGame} />
                 </div>
                 <nav
-                    aria-label="Compte"
+                    aria-label={t('Compte', 'Account')}
                     className="ml-auto flex shrink-0 items-center gap-2"
                 >
+                    <LanguageSwitcher />
                     {auth.user ? (
                         <Button variant="secondary" asChild>
                             <Link href={dashboard()}>
                                 <UserRound className="size-4" />
                                 <span className="hidden md:inline">
-                                    Mon espace
+                                    {t('Mon espace', 'My space')}
                                 </span>
                                 <span className="sr-only md:hidden">
-                                    Mon espace
+                                    {t('Mon espace', 'My space')}
                                 </span>
                             </Link>
                         </Button>
@@ -49,12 +56,17 @@ export function PublicHeader() {
                         <>
                             <div className="hidden items-center gap-2 md:flex">
                                 <Button variant="ghost" asChild>
-                                    <Link href={login()}>Connexion</Link>
+                                    <Link href={login()}>
+                                        {t('Connexion', 'Log in')}
+                                    </Link>
                                 </Button>
                                 {canRegister && (
                                     <Button asChild>
                                         <Link href={register()}>
-                                            Créer un compte
+                                            {t(
+                                                'Créer un compte',
+                                                'Create account',
+                                            )}
                                             <ArrowUpRight className="size-4" />
                                         </Link>
                                     </Button>
@@ -67,25 +79,31 @@ export function PublicHeader() {
                                             variant="outline"
                                             size="icon"
                                             className="size-11 bg-card"
-                                            aria-label="Accéder à mon compte"
+                                            aria-label={t(
+                                                'Accéder à mon compte',
+                                                'Open account menu',
+                                            )}
                                         >
                                             <UserRound className="size-4" />
                                         </Button>
                                     </DropdownMenuTrigger>
                                     <DropdownMenuContent
-                                        lang="fr"
+                                        lang={locale}
                                         align="end"
                                         className="w-48"
                                     >
                                         <DropdownMenuItem asChild>
                                             <Link href={login()}>
-                                                Connexion
+                                                {t('Connexion', 'Log in')}
                                             </Link>
                                         </DropdownMenuItem>
                                         {canRegister && (
                                             <DropdownMenuItem asChild>
                                                 <Link href={register()}>
-                                                    Créer un compte
+                                                    {t(
+                                                        'Créer un compte',
+                                                        'Create account',
+                                                    )}
                                                 </Link>
                                             </DropdownMenuItem>
                                         )}

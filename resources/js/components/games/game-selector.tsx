@@ -12,6 +12,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { home } from '@/routes';
 import type { PublicGame } from '@/types/game';
+import { useLocale } from '@/hooks/use-locale';
 
 export function GameSelector({
     games,
@@ -20,6 +21,7 @@ export function GameSelector({
     games: PublicGame[];
     currentGame: PublicGame | null;
 }) {
+    const { t, locale, localizedUrl } = useLocale();
     return (
         <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -28,10 +30,13 @@ export function GameSelector({
                     disabled={games.length === 0}
                     aria-label={
                         games.length === 0
-                            ? 'Aucun jeu disponible'
+                            ? t('Aucun jeu disponible', 'No games available')
                             : currentGame
-                              ? `Changer de jeu : ${currentGame.name}`
-                              : 'Choisir un jeu'
+                              ? t(
+                                    `Changer de jeu : ${currentGame.name}`,
+                                    `Switch game: ${currentGame.name}`,
+                                )
+                              : t('Choisir un jeu', 'Choose a game')
                     }
                     className="h-11 w-full min-w-0 justify-between bg-card px-3 font-normal"
                 >
@@ -47,26 +52,30 @@ export function GameSelector({
                         )}
                         <span className="truncate">
                             {games.length === 0
-                                ? 'Aucun jeu disponible'
-                                : (currentGame?.name ?? 'Choisir un jeu')}
+                                ? t(
+                                      'Aucun jeu disponible',
+                                      'No games available',
+                                  )
+                                : (currentGame?.name ??
+                                  t('Choisir un jeu', 'Choose a game'))}
                         </span>
                     </span>
                     <ChevronDown className="size-4 shrink-0 text-muted-foreground" />
                 </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent
-                lang="fr"
+                lang={locale}
                 align="start"
                 sideOffset={8}
                 className="max-h-[min(26rem,var(--radix-dropdown-menu-content-available-height))] w-72 max-w-[calc(100vw-2rem)] overflow-y-auto rounded-xl p-1.5"
             >
                 <DropdownMenuLabel className="px-2.5 py-2 text-xs font-medium tracking-widest text-muted-foreground uppercase">
-                    Vos univers
+                    {t('Vos univers', 'Your games')}
                 </DropdownMenuLabel>
                 {games.map((game) => (
                     <DropdownMenuItem key={game.id} asChild>
                         <Link
-                            href={game.url}
+                            href={localizedUrl(game.url)}
                             aria-current={
                                 currentGame?.id === game.id ? 'page' : undefined
                             }
@@ -84,9 +93,12 @@ export function GameSelector({
                 ))}
                 <DropdownMenuSeparator />
                 <DropdownMenuItem asChild>
-                    <Link href={home()} className="gap-3 px-2.5 py-3">
+                    <Link
+                        href={localizedUrl(home.url())}
+                        className="gap-3 px-2.5 py-3"
+                    >
                         <House className="size-4" />
-                        Tous les jeux
+                        {t('Tous les jeux', 'All games')}
                     </Link>
                 </DropdownMenuItem>
             </DropdownMenuContent>

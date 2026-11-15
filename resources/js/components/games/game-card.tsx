@@ -2,11 +2,13 @@ import { Link } from '@inertiajs/react';
 import { ArrowUpRight } from 'lucide-react';
 import { GameImage } from '@/components/games/game-image';
 import type { PublicGame } from '@/types/game';
+import { useLocale } from '@/hooks/use-locale';
 
 export function GameCard({ game }: { game: PublicGame }) {
+    const { t, localizedUrl } = useLocale();
     return (
         <Link
-            href={game.url}
+            href={localizedUrl(game.url)}
             className="group flex h-full min-w-0 items-center gap-4 rounded-2xl border border-border bg-card p-5 transition-colors hover:border-primary/60 hover:bg-accent/40 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ring"
         >
             <GameImage game={game} className="size-16 rounded-xl p-2.5" />
@@ -15,7 +17,7 @@ export function GameCard({ game }: { game: PublicGame }) {
                     {game.name}
                 </span>
                 <span className="mt-1.5 block text-xs text-muted-foreground">
-                    Découvrir ce TCG
+                    {t('Découvrir ce TCG', 'Explore this TCG')}
                 </span>
             </span>
             <ArrowUpRight

@@ -1,9 +1,8 @@
 import { Link } from '@inertiajs/react';
-import { Palette, ShieldCheck, UserRound } from 'lucide-react';
+import { ShieldCheck, UserRound } from 'lucide-react';
 import type { PropsWithChildren } from 'react';
 import { useCurrentUrl } from '@/hooks/use-current-url';
 import { cn, toUrl } from '@/lib/utils';
-import { edit as editAppearance } from '@/routes/appearance';
 import { edit } from '@/routes/profile';
 import { edit as editSecurity } from '@/routes/security';
 
@@ -21,13 +20,6 @@ const settingsPages = [
         description: 'Gardez le contrôle sur les accès à votre compte.',
         href: editSecurity(),
         icon: ShieldCheck,
-    },
-    {
-        label: 'Apparence',
-        title: 'Apparence',
-        description: 'Votre collection, dans l’ambiance qui vous ressemble.',
-        href: editAppearance(),
-        icon: Palette,
     },
 ];
 

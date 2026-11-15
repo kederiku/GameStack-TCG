@@ -6,7 +6,6 @@ import {
     Compass,
     Heart,
     Layers2,
-    Palette,
     ShieldCheck,
     Sparkles,
     UserRound,
@@ -18,7 +17,6 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { dashboard } from '@/routes';
-import { edit as appearance } from '@/routes/appearance';
 import { edit as profile } from '@/routes/profile';
 import { edit as security } from '@/routes/security';
 import type { PublicGame } from '@/types/game';
@@ -52,12 +50,6 @@ const accountLinks = [
         title: 'Sécurité',
         description: 'Protéger votre compte',
         href: security(),
-    },
-    {
-        icon: Palette,
-        title: 'Apparence',
-        description: 'Un espace à votre image',
-        href: appearance(),
     },
 ];
 

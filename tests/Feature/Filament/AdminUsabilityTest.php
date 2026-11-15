@@ -59,6 +59,7 @@ class AdminUsabilityTest extends TestCase
 
     public function test_french_admin_labels_do_not_change_the_public_locale(): void
     {
+        $this->withCookie('site_locale', 'en');
         app()->setLocale('en');
         $this->get('/admin/games')->assertOk()->assertSee('lang="fr"', false)->assertSee('Rechercher');
         $this->assertSame('en', app()->getLocale());
