@@ -42,10 +42,19 @@ ces documents sans changement applicatif. Le deuxième `make check` sur
 PHPStan (144 fichiers), formatage frontend (127 fichiers), lint (69 fichiers)
 et TypeScript. `make test-storage` a de nouveau réussi : **3 tests, 27 assertions**.
 
-Après le correctif d’intégration `b057846`, le dernier `make check` réussit :
+Après le correctif d’intégration `b057846`, `make check` réussit :
 **250 tests, 1 772 assertions**, Pint, PHPStan, formatage, lint et TypeScript.
 Le contrôle ciblé Filament compte **16 tests, 257 assertions**. La revue
 indépendante du correctif n’a relevé aucune nouvelle régression.
+
+La revue globale sur `6ef551b` a relevé une redirection de connexion Inertia
+vers Filament incompatible avec une navigation normale, ainsi qu’un nom de
+connexion absent du nettoyage d’image après rollback. Le correctif `230ab38`
+résout ces deux points. Les régressions ont été reproduites avant correction
+(trois échecs), puis les contrôles ciblés ont réussi : **32 tests, 184 assertions**.
+Le dernier `make check` sur cette version a réussi : **254 tests, 1 803 assertions**,
+Pint, PHPStan, formatage, lint et TypeScript. `make test-storage` a également
+réussi sur cette version : **3 tests, 27 assertions** sur Garage réel.
 
 ## Échantillon du seeder
 
@@ -86,6 +95,13 @@ sortie : l’édition est publiée en base mais son sélecteur affichait encore
 champ à partir de la base. Le second parcours navigateur confirme le passage
 immédiat à « Publiée », la conservation du nom et du code saisis avant l’ajout
 de la sortie, puis une sauvegarde réussie du formulaire parent.
+
+Le dernier parcours confirme aussi la connexion depuis une URL d’édition
+Filament : après saisie des identifiants, le navigateur ouvre directement
+la fiche demandée, sans fenêtre d’erreur Inertia. La connexion avec deuxième
+facteur et la conservation des destinations Inertia ordinaires sont couvertes
+par les tests automatisés. Le serveur temporaire a ensuite été arrêté, et
+son compte et ses images supprimés de la base de tests.
 
 Deux corrections ont concerné uniquement le banc d’essai : `artisan serve`
 filtrait les variables de configuration du sous-processus (première connexion
@@ -134,3 +150,10 @@ PostgreSQL et le stockage, comme pour les images de jeux existantes.
 - Le parcours manuel prévu utilise une instance temporaire sur la base de
   tests et un compte jetable, afin de vérifier les mutations sans toucher
   aux fiches et comptes de l’application.
+- Le seeder refuse un conflit qui imposerait de promouvoir une édition
+  existante : cela préserve le statut choisi par l’utilisateur, au prix
+  d’une correction manuelle de cette fiche avant de relancer le seeder.
+- Le défaut préexistant de connexion Inertia vers Filament est corrigé dans
+  ce lot pour que l’accès direct aux nouvelles pages fonctionne après
+  connexion ; cette extension limitée du périmètre est couverte par des
+  tests de connexion classique, Inertia et avec deuxième facteur.
