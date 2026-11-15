@@ -14,6 +14,15 @@ L’utilisateur a choisi des catalogues éditoriaux distincts, avec des relation
 explicites entre extensions apparentées. Il demande également un seeder avec
 des exemples réels de plusieurs TCG et des différents cas de figure.
 
+Il précise ensuite vouloir rattacher, dans une étape future, les produits scellés
+(boosters, displays, coffrets, etc.), différents selon les langues, ainsi que les
+cartes et leurs variantes. La V1 doit préserver ces possibilités sans implémenter
+prématurément ces deux domaines. Leur compatibilité est détaillée plus bas.
+Il confirme vouloir suivre toutes les catégories évoquées : finitions holo/reverse,
+illustrations, tampons promotionnels et premières éditions. Chaque carte et chaque
+variante doit avoir son image, et chaque édition traduite de la carte sa propre
+image également. Ces besoins futurs sont explicitement demandés par l’utilisateur.
+
 Les détails ci-dessous, notamment les cinq jeux exemples, les champs, les règles
 de suppression et le fonctionnement du seeder, sont des propositions de l’agent.
 Ils ne constituent pas encore une validation du document par l’utilisateur.
@@ -94,9 +103,11 @@ plusieurs langues et une édition peut avoir plusieurs marchés.
   classement ; ils ne traduisent pas automatiquement les catégories d’un éditeur.
 - `ExpansionEdition` : extension, langue, nom officiel dans son écriture d’origine,
   code officiel facultatif, logo/image facultatif, visibilité. Une seule édition
-  par couple extension/langue dans cette V1 ; les différences de tirage sont hors
-  périmètre. Des publications distinctes d’une même langue restent représentables
-  par des extensions/catalogues distincts.
+  linguistique par couple extension/langue dans cette V1. Ce terme ne désigne
+  ni un produit commercial, ni une première édition physique, ni un tirage :
+  plusieurs produits, impressions et variantes pourront dépendre de cette même
+  édition linguistique. Des ensembles éditoriaux réellement distincts d’une même
+  langue restent représentables par des extensions/catalogues distincts.
 - `ExpansionRelease` : édition, marché, canal (`general`, `specialist`,
   `prerelease`), date nullable, URL source facultative. Unicité édition/marché/canal.
   La date est un jour civil local, pas un instant UTC. Une date inconnue reste
@@ -165,6 +176,127 @@ L’admin peut détacher explicitement une série d’une extension avant suppre
 La visibilité d’un enfant ne rend pas visible un parent masqué. L’héritage effectif
 sera testé ; aucune exposition publique nouvelle n’est incluse dans cette livraison.
 La visibilité actuelle des jeux et leurs URL publiques restent compatibles.
+
+## Compatibilité avec les futurs produits, cartes et variantes
+
+Cette section fixe les points d’attache et les erreurs à éviter. Les noms de
+modèles futurs sont indicatifs ; leurs tables, écrans et seeders ne font pas partie
+de la V1. Le choix de leurs attributs détaillés nécessitera leur propre conception.
+
+### Produits scellés
+
+Le lien précis sera vers `ExpansionEdition`, dont on peut retrouver l’extension,
+le catalogue et le jeu. Un produit peut concerner plusieurs éditions d’extension,
+et une édition d’extension peut être présente dans de nombreux produits.
+Ne pas prévoir une contrainte globale « un produit = une extension ».
+
+Envisager `SealedProduct` pour la famille commerciale et `SealedProductEdition`
+pour la version effectivement vendue : présentation, langue(s) de contenu,
+conditionnement, visuels et références commerciales. La famille est un regroupement
+facultatif ; ne pas inventer d’équivalent japonais à chaque produit français.
+La seule paire produit/langue ne suffit pas à identifier une version commerciale :
+plusieurs coffrets, marchés ou conditionnements peuvent utiliser la même langue.
+Un SKU interne, une référence fabricant et un EAN/UPC sont des notions distinctes.
+Les identifiants commerciaux peuvent être absents ; l’ID interne reste nécessaire.
+
+Prévoir une composition explicite : un display contient des boosters, un carton
+des displays, un coffret des boosters, des cartes directement incluses et des
+accessoires. Chaque ligne doit préciser sa quantité et sa nature. Interdire les
+cycles de contenance. Les liens aux extensions découlent des contenus connus ;
+une association marketing à une extension est distincte d’une preuve de contenu.
+Si une liste d’associations aux extensions est stockée, elle doit avoir une règle
+de synchronisation avec la composition et non devenir une deuxième vérité divergente.
+
+Les relations devront distinguer le contenu garanti (une promo précise), les
+possibilités aléatoires (cartes d’un booster ou une promo parmi plusieurs) et les
+contenus inconnus/non documentés. Une appartenance à une extension ne garantit
+pas qu’une variante soit obtenable dans tous ses produits. Ne pas inventer de
+probabilités ni de composition précise lorsque le fabricant ne les publie pas.
+
+La langue des cartes, la langue du packaging et le marché sont séparés. Ne pas
+interdire au niveau structurel un coffret multilingue ; vérifier la cohérence des
+langues par ses composants. Les sorties commerciales appartiendront aux produits
+et ne modifieront pas la date de lancement de l’édition d’extension : réutiliser
+les référentiels de marché/canal, pas les enregistrements `ExpansionRelease`.
+
+### Cartes et variantes
+
+Envisager trois niveaux distincts :
+
+1. Une identité de carte de jeu (`Card`) pour rapprocher des publications lorsque
+   leur identité est établie. Ce n’est pas l’espèce/personnage (« Pikachu »), et
+   un nom identique ne prouve pas des caractéristiques ou règles identiques.
+   Ce rapprochement peut rester absent lors de l’import d’une impression locale.
+2. Une entrée de carte dans une édition linguistique (`CardPrinting`), liée à
+   `ExpansionEdition`, avec son numéro/code de collection et ses données locales.
+3. Une version collectionnable (`CardVariant`) de cette entrée, permettant de
+   distinguer les illustrations, finitions, tampons et éditions de tirage. Ces axes
+   doivent être combinables : une version peut avoir une illustration alternative,
+   une finition holographique, un tampon promotionnel et une mention de première
+   édition. L’utilisateur souhaite suivre toutes ces catégories, pas en choisir
+   une seule. La définition de leurs valeurs par jeu est laissée à la conception
+   future ; ne pas réduire la variante à un enum exclusif « holo OU alternative ».
+
+Ne créer que les combinaisons de variantes réellement documentées, pas le produit
+cartésien de toutes les valeurs possibles. La rareté n’est pas synonyme de finition
+et pourra être propre à une impression/variante selon le jeu.
+
+Ne pas supposer que les variantes partagent toutes le même numéro, ni qu’un numéro
+identifie globalement une carte. Un numéro différent dans l’extension peut être
+une entrée distincte reliée à la même identité de carte ; plusieurs illustrations
+sous le même numéro restent possibles. Le numéro imprimé est du texte et reste
+distinct d’un identifiant technique. Une variante n’est pas automatiquement
+transposable dans les autres langues ou catalogues.
+
+### Images des cartes et variantes
+
+- Chaque `CardPrinting`, donc chaque carte publiée dans une édition linguistique,
+  possède une image propre. L’identité abstraite `Card` ne porte pas l’unique image
+  partagée de toutes ses langues, extensions et impressions.
+- Chaque `CardVariant` possède également son image propre. Son identité visuelle
+  tient compte de sa langue via son `CardPrinting` parent, de son illustration,
+  de sa finition et de ses autres caractéristiques documentées.
+- Une carte française et une carte japonaise ne partagent pas implicitement une
+  image. Un nom traduit pour l’affichage ne crée ni une carte imprimée dans cette
+  langue, ni un visuel supposé correspondant.
+- Les associations d’images de la carte de base et de chaque variante restent
+  indépendantes. Ne pas présenter silencieusement l’image de base comme un scan
+  de la variante, ou un visuel étranger comme celui de la langue demandée.
+- Si une image manque pendant la saisie, le futur écran doit signaler ce manque
+  explicitement ; la fiche sera considérée incomplète pour ce besoin. Un placeholder
+  n’est pas une image de carte vérifiée. Aucun scan de carte ne sera inventé par IA.
+- La gestion précise des fichiers et de leurs éventuels rectos/versos sera définie
+  avec le domaine cartes. Préserver dès maintenant les règles existantes de gestion
+  de fichiers, sans imposer de table média globale à la V1 du catalogue.
+
+### Distribution et collection
+
+La carte promo conserve son appartenance éditoriale (par exemple un ensemble
+promotionnel de type `promo`), même si le coffret où elle est distribuée porte le
+nom d’une autre extension. Une carte distribuée dans plusieurs produits ne change
+pas de propriétaire éditorial à chaque distribution : c’est une relation distincte.
+Les futurs rattachements à des cartes/produits empêcheront une suppression qui
+laisserait des références invalides, selon la même règle que les dépendances V1.
+
+L’état d’un exemplaire possédé, sa certification, son prix d’achat et la quantité
+en collection seront séparés de la définition de la variante au catalogue.
+
+### Cas réels de contrôle de cette compatibilité
+
+- La page officielle de Pokémon 151 japonais décrit un booster de sept cartes,
+  ainsi que des coffrets avec cinq boosters, trois promos garanties et un classeur
+  (P6). Elle décrit également des traitements miroir. Ces faits motivent la
+  séparation entre contenance, cartes distribuées et caractéristiques de variante.
+- ROMANCE DAWN possède des illustrations parallèles ; la liste officielle expose
+  plusieurs visuels de Roronoa Zoro sous le même code OP01-001 (O2, O3). Le code seul
+  ne peut donc pas être l’identité d’une version collectionnable.
+- Le coffret Charizard Ultra-Premium comporte trois promos et seize boosters de
+  la série Sword & Shield (P11). La page ne détaille pas l’assortiment de ces
+  boosters : conserver cette inconnue au lieu de fabriquer une composition fixe.
+
+Ces cas sont des critères de conception documentés. Le seeder V1 charge les
+extensions déjà définies ci-dessous ; les produits et cartes correspondants seront
+ajoutés à un seeder ultérieur une fois leurs modèles conçus et autorisés.
 
 ## Administration Filament
 
@@ -299,10 +431,12 @@ applicatifs ne constituent pas une validation déjà exécutée.
 - P8 — [Pokémon traditionnel, 151](https://asia.pokemon-card.com/tw/archive/special/card/sv2a/index.html)
 - P9 — [Pokémon traditionnel, SET B](https://asia.pokemon-card.com/tw/archive/card/sun_moon_series/booster_pack_b.html)
 - P10 — [Pokémon simplifié, 收集啦151 惊 et 聚](https://www.pokemon.cn/tcg/product/15486.html)
+- P11 — [Pokémon, coffret Charizard Ultra-Premium](https://www.pokemon.com/us/pokemon-tcg/product-gallery/sword-shield-ultra-premium-collection-charizard)
 - M1 — [Wizards, bloc Khans of Tarkir](https://magic.wizards.com/en/news/making-magic/whims-fate-reforged-part-2-2015-01-05)
 - M2 — [Wizards, Foundations](https://magic.wizards.com/en/news/announcements/announcing-magic-the-gathering-foundations)
 - O1 — [Bandai, ROMANCE DAWN japonais](https://www.onepiece-cardgame.com/products/boosters/op01.php)
 - O2 — [Bandai, ROMANCE DAWN international](https://en.onepiece-cardgame.com/products/boosters/op01.php)
+- O3 — [Bandai, liste officielle des cartes ROMANCE DAWN](https://en.onepiece-cardgame.com/cardlist/?series=569101)
 - Y1 — [Konami, DARKWING BLAST OCG](https://www.yugioh-card.com/japan/products/dabl/)
 - Y2 — [Konami, Explosion de l’Aile des Ténèbres FR](https://www.yugioh-card.com/eu/fr/product/explosion-de-laile-des-tenebres/)
 - Y3 — [Konami, Darkwing Blast États-Unis](https://www.yugioh-card.com/en/products/dabl/)
@@ -317,11 +451,15 @@ Ses trois questions ont été résolues dans cette proposition : rattachements f
 en V1, recréation des exemples entièrement supprimés à la relance explicite, et
 rapprochements autorisés également au sein d’un même catalogue. Ce n’est pas une
 revue de code ni une validation utilisateur.
+La section ajoutée sur les futurs produits scellés, cartes et variantes a également
+été relue par cet agent : aucun obstacle identifié dans le socle V1 proposé.
 
 L’utilisateur doit valider ce document avant l’écriture du code. Les principaux
 choix proposés sont les cinq jeux de l’échantillon, le seeder explicite et non
 destructif, les images officielles limitées à quelques exemples, les sorties par
 canal et l’absence de nouvelles pages publiques dans cette livraison.
+Les produits scellés, cartes et variantes restent un objectif ultérieur annoncé
+par l’utilisateur ; leur section de compatibilité ne les ajoute pas à la V1.
 
 Après validation, préparer le plan d’implémentation avec le skill
 `superpowers:writing-plans`. Ce document ne constitue ni un plan exécuté ni une
