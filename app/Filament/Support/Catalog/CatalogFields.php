@@ -15,6 +15,7 @@ use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Components\Component;
 use Filament\Schemas\Components\Group;
 use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Text;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
@@ -29,10 +30,10 @@ class CatalogFields
     public static function key(): TextInput
     {
         return TextInput::make('key')
-            ->label('Clé')
+            ->label('Identifiant interne')
             ->disabledOn('edit')
             ->maxLength(255)
-            ->helperText('Identifiant stable de la fiche, par exemple ecarlate-violet. Laissez vide pour le générer. Minuscules, chiffres et tirets uniquement ; non modifiable après création.');
+            ->helperText('Généré si laissé vide. Minuscules, chiffres et tirets ; définitif après création.');
     }
 
     public static function description(): Textarea
@@ -51,13 +52,13 @@ class CatalogFields
     {
         return TextInput::make('sort_order')->label('Ordre d’affichage')->integer()
             ->minValue(0)->maxValue(2147483647)->required()->default(0)
-            ->helperText('Classement souhaité : les petits nombres passent avant les grands. Laissez 0 si aucun ordre n’est prévu. Le tri des listes d’administration reste indépendant.');
+            ->helperText('Les petits nombres passent en premier. 0 par défaut ; sans effet sur le tri de l’admin.');
     }
 
     public static function visibility(): Toggle
     {
         return Toggle::make('is_visible')->label('Afficher sur le site')->default(true)
-            ->helperText('Masquer conserve la fiche dans l’administration. Les niveaux au-dessus d’elle doivent aussi être visibles pour permettre son affichage public.');
+            ->helperText('Une fiche masquée reste modifiable ici. Ses parents doivent aussi être visibles pour l’affichage public.');
     }
 
     /** @param array<string, string> $options */
@@ -69,14 +70,14 @@ class CatalogFields
     public static function game(): Select
     {
         return Select::make('game_id')->label('Jeu')->required()->searchable()->disabledOn('edit')
-            ->helperText('Le TCG auquel appartient ce catalogue, par exemple Pokémon. Ce rattachement est définitif après création.')
+            ->helperText('Rattachement définitif après création.')
             ->options(fn (): array => Game::query()->orderBy('name')->pluck('name', 'id')->all());
     }
 
     public static function catalogue(): Select
     {
         return Select::make('catalog_id')->label('Catalogue')->required()->searchable()->disabledOn('edit')
-            ->helperText('Choisissez la version du catalogue du jeu, par exemple Pokémon — International ou Japonais. Ce rattachement est définitif après création.')
+            ->helperText('Version du jeu, par exemple Pokémon — International. Rattachement définitif après création.')
             ->options(fn (): array => Catalog::query()->with(['game', 'defaultLanguage'])->orderBy('name')->get()
                 ->mapWithKeys(fn (Catalog $catalog): array => [$catalog->id => self::catalogueLabel($catalog)])->all());
     }
@@ -89,7 +90,7 @@ class CatalogFields
     public static function series(): Select
     {
         return Select::make('series_id')->label('Série')->searchable()
-            ->helperText('Facultatif : choisissez une série ou un bloc du même catalogue. Laissez vide si cet ensemble n’en fait pas partie.')
+            ->helperText('Facultatif. Une série ou un bloc du même catalogue.')
             ->disabled(fn (Get $get): bool => self::positiveId($get('catalog_id')) === null)
             ->options(function (Get $get): array {
                 $catalogId = self::positiveId($get('catalog_id'));
@@ -134,15 +135,24 @@ class CatalogFields
     /**
      * @param  list<Component>  $presentation
      * @param  list<Component>  $publication
+     * @param  list<Component>  $advanced
      */
-    public static function layout(Schema $schema, array $presentation, array $publication = [], ?FileUpload $image = null, ?string $description = null): Schema
+    public static function layout(Schema $schema, array $presentation, array $publication = [], ?FileUpload $image = null, ?string $description = null, array $advanced = []): Schema
     {
         $main = Section::make('Présentation')->icon(Heroicon::OutlinedIdentification)
-            ->description($description)
             ->columns(['default' => 1, 'md' => 2])->schema($presentation)->columnSpanFull();
+        $content = [$main];
+        if ($advanced !== []) {
+            $content[] = Section::make('Options avancées')->icon(Heroicon::OutlinedAdjustmentsHorizontal)
+                ->description('Identifiant et classement : les valeurs proposées conviennent dans la plupart des cas.')
+                ->collapsed()->columns(['default' => 1, 'md' => 2])->schema($advanced);
+        }
+        if ($description !== null) {
+            $content[] = self::help($description);
+        }
 
         if ($publication === [] && $image === null) {
-            return $schema->components([$main]);
+            return $schema->columns(1)->components($content);
         }
 
         $sidebar = [];
@@ -151,13 +161,19 @@ class CatalogFields
         }
         if ($publication !== []) {
             $sidebar[] = Section::make('Publication')->icon(Heroicon::OutlinedGlobeAlt)
-                ->description('L’affichage public du catalogue est en préparation. Ces réglages sont déjà conservés.')
+                ->description('Affichage public en préparation. Réglages conservés.')
                 ->schema($publication);
         }
 
         return $schema->columns(['default' => 1, 'lg' => 1, 'xl' => 3])->components([
-            Group::make([$main])->columnSpan(['xl' => 2]),
+            Group::make($content)->columnSpan(['xl' => 2]),
             Group::make($sidebar)->columnSpan(['xl' => 1]),
         ]);
+    }
+
+    public static function help(string $text): Section
+    {
+        return Section::make('Comprendre cette fiche')->icon(Heroicon::OutlinedQuestionMarkCircle)
+            ->collapsed()->schema([Text::make($text)])->columnSpanFull();
     }
 }

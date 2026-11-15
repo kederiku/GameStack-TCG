@@ -31,14 +31,15 @@ class RelationsRelationManager extends CatalogRelationManager
                 ->helperText('Point de départ du lien : lisez « source → type de lien → cible ».')
                 ->getOptionLabelUsing(fn (mixed $value): ?string => $this->expansionLabel($value)),
             Select::make('target_expansion_id')->label('Extension cible')->required()->searchable()->disabledOn('edit')
-                ->helperText('Recherchez un autre ensemble du même jeu, éventuellement dans un autre catalogue. Pour « Adaptée de » et « Inclut du contenu de », l’extension ouverte est la source du lien.')
+                ->helperText('Un ensemble du même jeu, y compris dans un autre catalogue. Choix définitif après création.')
                 ->getSearchResultsUsing(fn (string $search): array => $this->candidateExpansions($search))
                 ->getOptionLabelUsing(fn (mixed $value): ?string => $this->expansionLabel($value)),
             CatalogFields::enum('type', 'Type', CatalogLabels::RELATION_TYPES)->disabledOn('edit')
-                ->helperText('« Liée à » est réciproque. « Adaptée de » et « Inclut du contenu de » se lisent de la source vers la cible. Le type et les deux ensembles sont définitifs après création.'),
+                ->helperText('Type et ensembles définitifs après création. Consultez l’aide pour le sens du lien.'),
             Textarea::make('notes')->label('Justification')->required()->rows(4)->columnSpanFull()
-                ->helperText('Expliquez le lien et ses limites. Des noms proches ne suffisent pas à établir que deux ensembles contiennent les mêmes cartes.'),
+                ->helperText('Expliquez le lien et ses limites à partir d’une source vérifiable.'),
             CatalogFields::sourceUrl()->required(),
+            CatalogFields::help('Lisez le lien : source → type de lien → cible. « Liée à » est réciproque. « Adaptée de » et « Inclut du contenu de » se lisent de la source vers la cible ; à la création, l’extension ouverte est la source. Des noms proches ne suffisent pas à établir que deux ensembles contiennent les mêmes cartes.'),
         ]);
     }
 

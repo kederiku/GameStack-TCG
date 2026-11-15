@@ -6,9 +6,12 @@ use App\Models\CatalogRecord;
 use Filament\Actions\Action;
 use Filament\Resources\Pages\EditRecord;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Validation\ValidationException;
 
 abstract class EditCatalogRecord extends EditRecord
 {
+    public static bool $formActionsAreSticky = true;
+
     /** @return list<Action> */
     protected function getHeaderActions(): array
     {
@@ -20,7 +23,14 @@ abstract class EditCatalogRecord extends EditRecord
     {
         assert($record instanceof CatalogRecord);
 
-        return CatalogActions::save($record, $data, 'data');
+        try {
+            return CatalogActions::save($record, $data, 'data');
+        } catch (ValidationException $exception) {
+            // Domain validation runs after the schema, so reveal its errors too.
+            $this->dispatch('form-validation-error', livewireId: $this->getId());
+
+            throw $exception;
+        }
     }
 
     public function getTitle(): string

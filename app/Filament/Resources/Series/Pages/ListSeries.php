@@ -22,6 +22,6 @@ class ListSeries extends ListCatalogRecords
 
     public function getSubheading(): string
     {
-        return 'Les séries et blocs regroupent plusieurs extensions d’un même catalogue. Ce niveau est facultatif. Ouvrez une série pour ajouter ses noms et images dans différentes langues.';
+        return 'Regroupez les extensions en séries ou blocs lorsque le jeu en utilise.';
     }
 }

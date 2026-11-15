@@ -15,9 +15,9 @@ class CatalogsTable
         return CatalogTables::standard($table)->columns([
             CatalogTables::name('Catalogue'),
             CatalogTables::key(),
-            TextColumn::make('game.name')->label('Jeu')->searchable()
+            TextColumn::make('game.name')->label('Jeu')->searchable()->wrap()
                 ->url(fn (Catalog $record): string => GameResource::getUrl('edit', ['record' => $record->game_id])),
-            TextColumn::make('defaultLanguage.code')->label('Langue par défaut')->badge()->searchable(),
+            TextColumn::make('defaultLanguage.code')->label('Langue de repli')->badge()->searchable()->toggleable(isToggledHiddenByDefault: true),
             CatalogTables::visibility(),
         ])->filters([CatalogTables::gameFilter(), CatalogTables::visibilityFilter()]);
     }

@@ -28,7 +28,7 @@ class EditCatalog extends EditCatalogRecord
             Action::make('expansions')->label('Voir les extensions')->icon(Heroicon::OutlinedRectangleStack)
                 ->visible(fn (): bool => ExpansionResource::canAccess())
                 ->url(ExpansionResource::getUrl(parameters: ['filters' => ['catalog' => ['value' => $catalogue->id]]])),
-            Action::make('game')->label('Retour au jeu')->icon(Heroicon::OutlinedArrowUturnLeft)
+            Action::make('game')->label('Retour au jeu')->color('gray')->icon(Heroicon::OutlinedArrowUturnLeft)
                 ->visible(fn (): bool => GameResource::canEdit($catalogue->game))
                 ->url(GameResource::getUrl('edit', ['record' => $catalogue->game_id])),
             ...parent::getHeaderActions(),

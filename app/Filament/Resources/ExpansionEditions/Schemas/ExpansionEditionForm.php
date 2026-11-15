@@ -13,13 +13,13 @@ class ExpansionEditionForm
     {
         return CatalogFields::layout($schema, [
             CatalogFields::language()->disabledOn('edit')
-                ->helperText('Langue réellement imprimée sur les cartes. Une seule édition par langue et par ensemble ; la langue ne peut plus être modifiée après création.'),
+                ->helperText('Langue imprimée, définitive après création. Une seule édition par langue.'),
             CatalogFields::name('Nom de l’édition')->helperText('Nom commercial de l’ensemble dans cette langue, tel qu’il est présenté par l’éditeur.'),
             TextInput::make('official_code')->label('Code officiel')->maxLength(255)
-                ->helperText('Code attribué par l’éditeur à cette édition, s’il est connu. Laissez vide plutôt que d’en déduire un depuis une autre langue.'),
+                ->helperText('Code de l’éditeur pour cette langue. Laissez vide s’il est inconnu.'),
         ], [
             CatalogFields::enum('status', 'État', CatalogLabels::STATUSES)->default('announced')
-                ->helperText('Annoncée : à venir ; Publiée : déjà sortie ; Annulée : abandonnée. Une sortie publiée rend aussi l’édition publiée. Cet état est distinct de sa visibilité.'),
+                ->helperText('Annoncée : à venir ; publiée : sortie ; annulée : abandonnée. Une sortie publiée publie aussi l’édition.'),
             CatalogFields::visibility(),
         ], CatalogFields::image('Image de l’édition', 'Utilisez le visuel propre à cette langue. Sans image, aucun visuel d’une autre édition n’est repris.'), description: 'Une édition correspond à une version réellement imprimée ou annoncée dans une langue. Ses lieux, canaux et dates de commercialisation se renseignent ensuite dans « Sorties ».');
     }

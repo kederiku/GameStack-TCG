@@ -27,7 +27,8 @@ class GamesTable
                     ->visibleFrom('md'),
                 TextColumn::make('name')
                     ->label('Jeu')
-                    ->description(fn (Game $record): string => $record->slug)
+                    ->description(fn (Game $record): ?string => $record->publisher)
+                    ->wrap()
                     ->weight(FontWeight::SemiBold)
                     ->searchable()
                     ->sortable(),
@@ -40,7 +41,7 @@ class GamesTable
                     ->label('Éditeur')
                     ->placeholder('Non renseigné')
                     ->wrap()
-                    ->visibleFrom('md'),
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('is_visible')
                     ->label('Visibilité')
                     ->badge()

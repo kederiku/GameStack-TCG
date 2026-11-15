@@ -4,6 +4,7 @@ namespace App\Filament\Resources\Series\Tables;
 
 use App\Filament\Support\Catalog\CatalogLabels;
 use App\Filament\Support\Catalog\CatalogTables;
+use App\Models\Series;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
@@ -15,8 +16,9 @@ class SeriesTable
         return CatalogTables::standard($table)->columns([
             CatalogTables::name('Série'),
             CatalogTables::key(),
-            TextColumn::make('catalog.name')->label('Catalogue')->searchable(),
-            TextColumn::make('catalog.game.name')->label('Jeu')->searchable(),
+            TextColumn::make('catalog.name')->label('Catalogue / jeu')->searchable()->wrap()
+                ->description(fn (Series $record): string => $record->catalog->game->name),
+            TextColumn::make('catalog.game.name')->label('Jeu')->searchable()->toggleable(isToggledHiddenByDefault: true),
             CatalogTables::enum('type', 'Type', CatalogLabels::SERIES_TYPES),
             CatalogTables::visibility(),
         ])->filters([

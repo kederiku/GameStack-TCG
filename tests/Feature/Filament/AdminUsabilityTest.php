@@ -4,6 +4,7 @@ namespace Tests\Feature\Filament;
 
 use App\Filament\Resources\Catalogs\Pages\EditCatalog;
 use App\Filament\Resources\Expansions\Pages\CreateExpansion;
+use App\Filament\Resources\Expansions\Pages\EditExpansion;
 use App\Filament\Resources\Expansions\Pages\ListExpansions;
 use App\Filament\Resources\Series\Pages\CreateSeries;
 use App\Filament\Resources\Series\Pages\EditSeries;
@@ -35,7 +36,7 @@ class AdminUsabilityTest extends TestCase
 
         $catalog = $this->catalog();
         $this->edition($this->expansion($catalog));
-        $this->expansion($catalog, key: 'second');
+        $this->expansion($catalog, key: 'second')->update(['is_visible' => false]);
 
         Livewire::test(CatalogOverview::class)
             ->assertViewHas('totals', ['games' => 1, 'catalogs' => 1, 'expansions' => 2, 'editions' => 1])
@@ -131,5 +132,23 @@ class AdminUsabilityTest extends TestCase
             ->assertFormSet(['catalog_id' => null, 'series_id' => null]);
         Livewire::withQueryParams(['catalog' => 999999])->test(CreateSeries::class)
             ->assertFormSet(['catalog_id' => null]);
+    }
+
+    public function test_domain_validation_reveals_errors_when_creating_or_editing_catalogue_records(): void
+    {
+        $catalog = $this->catalog();
+        $page = Livewire::test(CreateExpansion::class)
+            ->fillForm(['catalog_id' => $catalog->id, 'name' => 'Invalid key', 'type' => 'main', 'key' => 'INVALID!'])
+            ->call('create')->assertHasFormErrors(['key']);
+        $page->assertDispatched('form-validation-error', livewireId: $page->instance()->getId());
+        $this->assertDatabaseMissing('expansions', ['name' => 'Invalid key']);
+
+        $expansion = $this->expansion($catalog);
+        $foreignSeries = $this->series($this->catalog());
+        $page = Livewire::test(EditExpansion::class, ['record' => $expansion->id])
+            ->fillForm(['series_id' => $foreignSeries->id])
+            ->call('save')->assertHasFormErrors(['series_id']);
+        $page->assertDispatched('form-validation-error', livewireId: $page->instance()->getId());
+        $this->assertNull($expansion->fresh()->series_id);
     }
 }

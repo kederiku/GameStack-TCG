@@ -40,15 +40,6 @@ class GameForm
                                         $set('slug', Str::slug($state ?? ''));
                                     }
                                 }),
-                            TextInput::make('slug')
-                                ->label('Slug')
-                                ->required()
-                                ->maxLength(255)
-                                ->regex('/\A[a-z0-9]+(?:-[a-z0-9]+)*\z/')
-                                ->unique(ignoreRecord: true)
-                                ->rules(fn (): array => [Rule::notIn(GameSlug::reserved())])
-                                ->validationMessages(['not_in' => 'Ce slug est réservé à une page de l’application. Choisissez un autre identifiant.'])
-                                ->helperText('Identifiant de l’URL : minuscules, chiffres et tirets. Conservé si le jeu est renommé.'),
                             TextInput::make('publisher')
                                 ->label('Éditeur')
                                 ->maxLength(255)
@@ -60,7 +51,21 @@ class GameForm
                                 ->rows(5)
                                 ->columnSpanFull(),
                         ]),
-                    Section::make('Historique')
+                    Section::make('Options avancées')
+                        ->icon(Heroicon::OutlinedAdjustmentsHorizontal)
+                        ->collapsed()
+                        ->schema([
+                            TextInput::make('slug')
+                                ->label('Identifiant dans l’URL')
+                                ->required()
+                                ->maxLength(255)
+                                ->regex('/\A[a-z0-9]+(?:-[a-z0-9]+)*\z/')
+                                ->unique(ignoreRecord: true)
+                                ->rules(fn (): array => [Rule::notIn(GameSlug::reserved())])
+                                ->validationMessages(['not_in' => 'Ce slug est réservé à une page de l’application. Choisissez un autre identifiant.'])
+                                ->helperText('Identifiant de l’URL : minuscules, chiffres et tirets. Conservé si le jeu est renommé.'),
+                        ]),
+                    Section::make('Historique')->collapsed()
                         ->description('Renseignez uniquement les années connues. Ces champs sont facultatifs.')
                         ->icon(Heroicon::OutlinedCalendarDays)
                         ->columns(['default' => 1, 'md' => 2])

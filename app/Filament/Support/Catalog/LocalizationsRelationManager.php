@@ -24,7 +24,7 @@ abstract class LocalizationsRelationManager extends CatalogRelationManager
                 ->helperText('Langue dans laquelle présenter la fiche. Une traduction par langue ; ce choix est définitif après création.'),
             CatalogFields::name('Nom localisé')->helperText('Nom à afficher dans cette langue. Traduire la présentation ne crée pas d’édition imprimée.'),
             CatalogFields::description(),
-        ], image: $this->imageField());
+        ], image: $this->imageField(), description: 'Une localisation traduit la présentation : nom, description et, pour une série, image. Elle ne prouve pas que des cartes existent dans cette langue. Le nom de référence reste disponible sans traduction.');
     }
 
     protected function imageField(): ?FileUpload
@@ -46,7 +46,7 @@ abstract class LocalizationsRelationManager extends CatalogRelationManager
         }
 
         return $table->columns($columns)->recordTitleAttribute('name')->searchPlaceholder('Rechercher')
-            ->description('Une localisation est une traduction de la présentation : nom, description et, pour une série, image. Elle ne prouve pas que des cartes existent dans cette langue.')
+            ->description('Traductions d’affichage. Pour des cartes réellement imprimées dans une langue, créez une édition.')
             ->emptyStateHeading('Aucune localisation')
             ->emptyStateDescription('Ajoutez les langues utiles à la présentation de cette fiche. Le nom de référence reste disponible sans traduction.')
             ->headerActions([$this->createCatalogAction('Créer une localisation', static::$parentField)])

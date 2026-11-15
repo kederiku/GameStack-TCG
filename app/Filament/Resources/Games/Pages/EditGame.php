@@ -14,6 +14,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class EditGame extends EditRecord
 {
+    public static bool $formActionsAreSticky = true;
+
     use SavesGame;
 
     protected static string $resource = GameResource::class;

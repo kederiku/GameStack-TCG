@@ -14,7 +14,7 @@ class ListExpansions extends ListCatalogRecords
     /** @return list<CreateAction> */
     protected function getHeaderActions(): array
     {
-        return [CreateAction::make()->label('Ajouter une expansion')
+        return [CreateAction::make()->label('Ajouter une extension')
             ->url(fn (): string => ExpansionResource::getUrl('create', array_filter([
                 'catalog' => CatalogFields::positiveId($this->tableFilters['catalog']['value'] ?? null),
                 'series' => CatalogFields::positiveId($this->tableFilters['series']['value'] ?? null),
@@ -23,6 +23,6 @@ class ListExpansions extends ListCatalogRecords
 
     public function getSubheading(): string
     {
-        return 'Une extension est un ensemble de cartes rattaché à un catalogue, avec ou sans série. Ouvrez sa fiche pour ajouter les traductions d’affichage et les éditions réellement imprimées par langue.';
+        return 'Ouvrez une extension pour gérer ses traductions, ses éditions imprimées et leurs sorties.';
     }
 }

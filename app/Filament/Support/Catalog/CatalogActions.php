@@ -49,6 +49,8 @@ class CatalogActions
     {
         return DeleteAction::make()
             ->label('Supprimer')
+            ->color('gray')
+            ->outlined()
             ->modalHeading('Supprimer cette fiche ?')
             ->modalSubmitActionLabel('Supprimer')
             ->modalCancelActionLabel('Annuler')

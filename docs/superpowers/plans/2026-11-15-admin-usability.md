@@ -44,8 +44,17 @@
 
 **Interfaces:** étendre `CatalogFields::layout` avec `array $advanced = []` ; conserver les paramètres existants. Les sections d’aide et options avancées utilisent les composants natifs. Les colonnes clés deviennent configurables, les noms/contexte restent recherchables.
 
-- [ ] Réorganiser les champs et déplacer les explications longues vers l’aide repliable ; raccourcir les aides immédiates sans perdre les distinctions métier.
-- [ ] Simplifier les tableaux, alléger les actions de suppression et améliorer le contraste, les espacements et la présentation du widget en clair/sombre.
-- [ ] Exécuter `make check` et `make assets` ; résultat attendu : succès. Pas de tests miroir des textes/CSS.
-- [ ] Vérifier dans le navigateur sur la base de tests : accueil vide/rempli, liens et création, recherche après Livewire en français, ouverture clavier des aides, erreurs dans les options, clair/sombre, écran étroit. Corriger les défauts observés.
-- [ ] Enregistrer le lot et les preuves ; revue indépendante de toute la branche puis publication/CI/fusion selon AGENTS.md.
+- [x] Réorganiser les champs et déplacer les explications longues vers l’aide repliable ; raccourcir les aides immédiates sans perdre les distinctions métier.
+- [x] Simplifier les tableaux, alléger les actions de suppression et améliorer le contraste, les espacements et la présentation du widget en clair/sombre.
+- [x] Exécuter `make check` et `make assets` ; résultat attendu : succès. Pas de tests miroir des textes/CSS.
+- [x] Vérifier dans le navigateur sur la base de tests : accueil vide/rempli, liens et création, recherche après Livewire en français, ouverture clavier des aides, erreurs dans les options, clair/sombre, écran étroit. Corriger les défauts observés.
+- [x] Enregistrer le lot et les preuves. La revue indépendante, la publication et la fusion suivent ensuite AGENTS.md ; leurs résultats sont tracés dans la PR.
+
+## Résultats de validation
+
+- `make check` réussi : Pint, PHPStan, **262 tests / 1868 assertions**, lint frontend et TypeScript.
+- `make assets` réussi. Aucun changement de stockage ou de traitement des images ; suite Garage locale non requise, exécutée par la CI de la PR.
+- Navigateur sur `gamestackr_testing` : accueil vide puis rempli, clair/sombre, série → extensions filtrées → création préremplie et enregistrée, recherche par jeu après Livewire, aides ouvertes au clavier, formulaires et accueil à 390 px, tableau à défilement horizontal contenu, noms longs.
+- Une erreur métier dans une section repliée a été reproduite, couverte par un test en échec, corrigée et revérifiée dans le navigateur : ouverture automatique et message visible.
+- Traductions françaises ajoutées pour les libellés d’accessibilité manquants de Filament.
+- Choix d’exécution : checkout existant sur branche dédiée, pour conserver le montage Docker de l’application.

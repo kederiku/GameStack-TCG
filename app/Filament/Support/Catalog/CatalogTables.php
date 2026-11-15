@@ -19,6 +19,7 @@ class CatalogTables
         return $table->defaultSort('name')
             ->searchPlaceholder('Rechercher')
             ->emptyStateHeading('Aucune fiche')
+            ->emptyStateDescription('Ajoutez une fiche ou ajustez les filtres pour afficher d’autres résultats.')
             ->recordActions([
                 EditAction::make()->label('Modifier'),
                 CatalogActions::delete(),
@@ -30,12 +31,13 @@ class CatalogTables
 
     public static function name(string $label = 'Nom'): TextColumn
     {
-        return TextColumn::make('name')->label($label)->weight(FontWeight::SemiBold)->searchable()->sortable();
+        return TextColumn::make('name')->label($label)->weight(FontWeight::SemiBold)->wrap()->searchable()->sortable();
     }
 
     public static function key(string $field = 'key', string $label = 'Clé'): TextColumn
     {
-        return TextColumn::make($field)->label($label)->searchable()->sortable();
+        return TextColumn::make($field)->label($label)->searchable()->sortable()
+            ->toggleable(isToggledHiddenByDefault: $field === 'key');
     }
 
     public static function visibility(): TextColumn
