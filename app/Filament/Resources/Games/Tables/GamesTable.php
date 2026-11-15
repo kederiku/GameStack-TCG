@@ -2,11 +2,10 @@
 
 namespace App\Filament\Resources\Games\Tables;
 
+use App\Filament\Support\Catalog\CatalogActions;
 use App\Models\Game;
 use App\Services\GameImages;
 use Filament\Actions\BulkActionGroup;
-use Filament\Actions\DeleteAction;
-use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Support\Enums\FontWeight;
 use Filament\Support\Icons\Heroicon;
@@ -57,11 +56,11 @@ class GamesTable
             ->defaultSort('name')
             ->recordActions([
                 EditAction::make()->label('Modifier'),
-                DeleteAction::make()->label('Supprimer'),
+                CatalogActions::delete(),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
-                    DeleteBulkAction::make()->label('Supprimer la sélection'),
+                    CatalogActions::deleteBulk(),
                 ]),
             ])
             ->emptyStateHeading('Aucun jeu')

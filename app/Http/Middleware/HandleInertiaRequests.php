@@ -2,8 +2,13 @@
 
 namespace App\Http\Middleware;
 
+use Closure;
 use Illuminate\Http\Request;
+use Inertia\Inertia;
 use Inertia\Middleware;
+use Inertia\Support\Header;
+use Symfony\Component\HttpFoundation\RedirectResponse;
+use Symfony\Component\HttpFoundation\Response;
 
 class HandleInertiaRequests extends Middleware
 {
@@ -15,6 +20,29 @@ class HandleInertiaRequests extends Middleware
      * @var string
      */
     protected $rootView = 'app';
+
+    public function handle(Request $request, Closure $next): Response
+    {
+        if (! $request->header(Header::INERTIA) || ! $request->routeIs('login.store', 'two-factor.login.store')) {
+            return parent::handle($request, $next);
+        }
+
+        return parent::handle($request, function (Request $request) use ($next): Response {
+            $response = $next($request);
+
+            if (! $response instanceof RedirectResponse || $request->user() === null) {
+                return $response;
+            }
+
+            // Fortify resolves the destination; only local Filament pages need a full browser visit.
+            $panelUrl = rtrim(route('filament.admin.pages.dashboard'), '/');
+            $destination = str($response->getTargetUrl())->before('?')->before('#')->toString();
+
+            return $destination === $panelUrl || str_starts_with($destination, $panelUrl.'/')
+                ? Inertia::location($response)
+                : $response;
+        });
+    }
 
     /**
      * Determines the current asset version.

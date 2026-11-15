@@ -50,6 +50,16 @@ class AuthenticationTest extends TestCase
         $response->assertRedirect(route('dashboard', absolute: false));
     }
 
+    public function test_inertia_login_keeps_ordinary_redirects_to_the_dashboard(): void
+    {
+        $user = User::factory()->create();
+
+        $this->get('/dashboard')->assertRedirect('/login');
+        $this->post('/login', ['email' => $user->email, 'password' => 'password'], ['X-Inertia' => 'true'])
+            ->assertRedirect('/dashboard')
+            ->assertHeaderMissing('X-Inertia-Location');
+    }
+
     public function test_users_with_two_factor_enabled_are_redirected_to_two_factor_challenge()
     {
         $this->skipUnlessFortifyHas(Features::twoFactorAuthentication());

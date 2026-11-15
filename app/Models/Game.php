@@ -3,12 +3,15 @@
 namespace App\Models;
 
 use App\Observers\GameObserver;
+use App\Support\Catalog\CatalogRules;
 use Carbon\CarbonInterface;
 use Database\Factories\GameFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\QueryException;
 use Illuminate\Support\Str;
 
 /**
@@ -44,24 +47,34 @@ class Game extends Model
         ];
     }
 
+    /** @return HasMany<Catalog, $this> */
+    public function catalogs(): HasMany
+    {
+        return $this->hasMany(Catalog::class);
+    }
+
     public function delete(): ?bool
     {
         if (! $this->exists) {
             return parent::delete();
         }
 
-        return $this->getConnection()->transaction(function (): ?bool {
-            $current = $this->newQuery()->lockForUpdate()->find($this->id);
+        try {
+            return $this->getConnection()->transaction(function (): ?bool {
+                $current = $this->newQuery()->lockForUpdate()->find($this->id);
 
-            if ($current === null) {
-                return null;
-            }
+                if ($current === null) {
+                    return null;
+                }
 
-            // A concurrent save may have replaced the image since this instance loaded.
-            $this->setRawAttributes($current->getAttributes(), sync: true);
+                // A concurrent save may have replaced the image since this instance loaded.
+                $this->setRawAttributes($current->getAttributes(), sync: true);
 
-            return parent::delete();
-        });
+                return parent::delete();
+            });
+        } catch (QueryException $exception) {
+            CatalogRules::rejectRestrictedDelete($exception, $this);
+        }
     }
 
     protected static function booted(): void

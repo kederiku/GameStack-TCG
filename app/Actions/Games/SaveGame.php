@@ -58,9 +58,7 @@ class SaveGame
                 ])->validate();
 
                 if ($image instanceof UploadedFile) {
-                    Validator::make(['image' => $image], [
-                        'image' => ['required', 'image:allow_svg', 'mimetypes:image/jpeg,image/png,image/webp,image/avif,image/svg+xml', 'max:5120', 'dimensions:max_width=4096,max_height=4096'],
-                    ])->validate();
+                    GameImages::validateUpload($image);
                     $image = $this->images->store($image, $attributes['name'], $record->getConnection());
                 } elseif ($image !== null && (! is_string($image) || $image !== $record->image)) {
                     throw ValidationException::withMessages(['image' => 'Cette image ne correspond plus à celle du jeu. Rechargez le formulaire.']);
