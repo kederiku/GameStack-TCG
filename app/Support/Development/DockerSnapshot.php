@@ -16,8 +16,8 @@ class DockerSnapshot
         $report = json_decode((string) @file_get_contents($path), true);
 
         if (! is_array($report) || ! is_int($report['generated_at'] ?? null)
-            || now()->timestamp - $report['generated_at'] > 30
-            || $report['generated_at'] > now()->timestamp
+            || now()->getTimestamp() - $report['generated_at'] > 30
+            || $report['generated_at'] > now()->getTimestamp()
             || ! is_array($report['services'] ?? null)) {
             return [];
         }

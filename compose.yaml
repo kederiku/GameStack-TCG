@@ -16,6 +16,8 @@ x-app: &app
 
 services:
     service-status:
+        # Make enables the local profile; other APP_ENV values leave this stopped.
+        profiles: ['${APP_ENV:-disabled}']
         image: gamestackr-tcg-app:dev
         command: ['php', '/collector/collect.php']
         user: '0:0'

@@ -4,7 +4,7 @@ ifeq ($(shell uname -s),Linux)
 export DOCKER_UID ?= $(shell id -u)
 export DOCKER_GID ?= $(shell id -g)
 endif
-DC := docker compose
+DC := docker compose --profile local
 RUN := $(DC) run --rm --no-deps app
 EXEC := $(DC) exec app
 ARGS ?=
@@ -19,7 +19,7 @@ env: ## Créer .env s’il n’existe pas
 
 init: env ## Installer le projet puis démarrer tous les services
 	$(DC) build app
-	$(DC) stop app vite queue
+	$(DC) stop app vite queue service-status
 	$(DC) up -d --wait postgres mailpit
 	$(RUN) composer install --no-interaction --prefer-dist
 	$(RUN) php artisan config:clear
@@ -32,6 +32,7 @@ init: env ## Installer le projet puis démarrer tous les services
 	$(DC) up -d --wait
 
 up: env storage-init ## Démarrer les services (après make init)
+	$(DC) stop service-status
 	$(DC) up -d --wait
 
 storage-init: env ## Initialiser Garage sans effacer les objets ni renouveler les accès

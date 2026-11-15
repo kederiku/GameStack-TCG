@@ -79,6 +79,37 @@ Les comptes issus de l’inscription publique n’ont jamais accès à Filament,
 y compris en environnement local. Filament lui-même utilise Livewire ;
 l’application et les écrans d’authentification utilisent Inertia/React.
 
+## Services de développement
+
+En environnement `APP_ENV=local`, les administrateurs vérifiés disposent du groupe
+**Développement** dans Filament. **État des services**
+(`/admin/development-services`) vérifie PostgreSQL, Mailpit et Garage et présente
+séparément leur disponibilité, la durée du contrôle et l’état du conteneur Docker.
+Les conteneurs de l’application, du worker, de Vite et de Garage Web UI sont aussi
+affichés. La page s’actualise toutes les 15 secondes pendant sa consultation ;
+**Actualiser** permet un contrôle immédiat.
+
+Les liens **Mailpit** et **Garage Web UI** du menu ouvrent leurs interfaces dans
+un nouvel onglet, en respectant `MAILPIT_PORT` et `GARAGE_UI_PORT`. PostgreSQL n’a
+pas d’interface web installée. Hors `local`, la section disparaît et les accès
+directs ou Livewire sont refusés, même avec `APP_DEBUG=true`.
+
+Après mise à jour, lancer `make up` : le conteneur `service-status` collecte toutes
+les 5 secondes les états des seuls services du projet Compose courant. Il n’a
+ni réseau ni port publié. Lui seul monte le socket Docker ; l’application lit
+son rapport minimal dans un volume en lecture seule. Make active le profil Compose
+`local` ; le collecteur reste arrêté si `APP_ENV` a une autre valeur. Sa garde
+d’environnement interdit aussi la collecte lors d’un lancement explicite hors local.
+Aucune commande d’arrêt, de redémarrage
+ou de modification de conteneur n’est proposée dans l’admin.
+
+Un rapport absent, invalide ou vieux de plus de 30 secondes affiche un état Docker
+**Indisponible**, sans empêcher les contrôles de réponse. Les sondes n’écrivent
+ni dans la base, ni dans les e-mails, ni dans les objets Garage. Le contrôle Garage
+vérifie la santé du cluster local, pas les permissions du bucket S3 configuré.
+Une panne PostgreSQL peut empêcher l’ouverture de l’admin, dont les comptes et
+sessions dépendent déjà de cette base : la page ne remplace pas un moniteur externe.
+
 ## Jeux
 
 Les administrateurs vérifiés gèrent les jeux dans **Filament → Jeux**

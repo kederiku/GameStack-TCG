@@ -2,15 +2,19 @@
 
 namespace App\Providers\Filament;
 
+use App\Filament\Pages\DevelopmentServices;
 use App\Http\Controllers\AdminLoginController;
+use App\Support\Development\ServiceCatalog;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
+use Filament\Navigation\NavigationItem;
 use Filament\Pages\Dashboard;
 use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
+use Filament\Support\Icons\Heroicon;
 use Filament\Widgets\AccountWidget;
 use Filament\Widgets\FilamentInfoWidget;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
@@ -37,6 +41,16 @@ class AdminPanelProvider extends PanelProvider
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\Filament\Pages')
             ->pages([
                 Dashboard::class,
+            ])
+            ->navigationItems([
+                NavigationItem::make('Mailpit')->group('Développement')->sort(20)
+                    ->icon(Heroicon::OutlinedEnvelope)
+                    ->url(fn (): string => app(ServiceCatalog::class)->links()['mailpit']['url'], shouldOpenInNewTab: true)
+                    ->visible(fn (): bool => DevelopmentServices::canAccess()),
+                NavigationItem::make('Garage Web UI')->group('Développement')->sort(30)
+                    ->icon(Heroicon::OutlinedArchiveBox)
+                    ->url(fn (): string => app(ServiceCatalog::class)->links()['garage-webui']['url'], shouldOpenInNewTab: true)
+                    ->visible(fn (): bool => DevelopmentServices::canAccess()),
             ])
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\Filament\Widgets')
             ->widgets([
