@@ -6,6 +6,7 @@ use App\Support\GameSlug;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
@@ -36,6 +37,11 @@ class GameForm
                 ->rules(fn (): array => [Rule::notIn(GameSlug::reserved())])
                 ->validationMessages(['not_in' => 'Ce slug est réservé à une page de l’application. Choisissez un autre identifiant.'])
                 ->helperText('Identifiant unique : lettres minuscules, chiffres et tirets. Il reste inchangé lorsque le jeu est renommé.'),
+            Toggle::make('is_visible')
+                ->label('Afficher sur le site')
+                ->default(true)
+                ->helperText('Désactivez pour masquer le jeu et sa page sur le site. Il reste modifiable ici.')
+                ->columnSpanFull(),
             TextInput::make('start_year')
                 ->label('Année de création')
                 ->integer()

@@ -13,6 +13,7 @@ class PublicGames
     public static function all(): Collection
     {
         return Game::query()
+            ->where('is_visible', true)
             ->whereNotIn('slug', GameSlug::reserved())
             ->orderBy('name')->orderBy('id')
             ->get(['id', 'name', 'slug', 'image'])

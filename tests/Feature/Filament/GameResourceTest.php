@@ -39,9 +39,49 @@ class GameResourceTest extends TestCase
             ->assertHasNoFormErrors();
 
         $this->assertDatabaseHas('games', [
-            'name' => 'Pokémon', 'slug' => 'pokemon', 'image' => null,
+            'name' => 'Pokémon', 'slug' => 'pokemon', 'image' => null, 'is_visible' => true,
             'start_year' => null, 'end_year' => null, 'publisher' => null, 'description' => null,
         ]);
+    }
+
+    public function test_an_admin_can_create_a_hidden_game_and_show_it_later(): void
+    {
+        Livewire::test(CreateGame::class)
+            ->assertFormSet(['is_visible' => true])
+            ->fillForm(['name' => 'Un jeu', 'slug' => 'un-jeu', 'is_visible' => false])
+            ->call('create')->assertHasNoFormErrors();
+
+        $game = Game::query()->sole();
+        $this->assertFalse($game->is_visible);
+        $this->get('/un-jeu')->assertNotFound();
+
+        Livewire::test(ListGames::class)
+            ->assertCanSeeTableRecords([$game])
+            ->assertTableColumnStateSet('is_visible', false, $game);
+
+        Livewire::test(EditGame::class, ['record' => $game->id])
+            ->assertFormSet(['is_visible' => false])
+            ->fillForm(['is_visible' => true])
+            ->call('save')->assertHasNoFormErrors();
+
+        $this->assertTrue($game->fresh()->is_visible);
+        $this->get('/un-jeu')->assertOk();
+    }
+
+    public function test_an_admin_can_hide_a_game_and_edit_it_without_republishing_it(): void
+    {
+        $game = Game::factory()->create(['slug' => 'un-jeu']);
+        Livewire::test(EditGame::class, ['record' => $game->id])
+            ->fillForm(['is_visible' => false])
+            ->call('save')->assertHasNoFormErrors();
+
+        Livewire::test(EditGame::class, ['record' => $game->id])
+            ->fillForm(['description' => 'Une description.'])
+            ->call('save')->assertHasNoFormErrors();
+
+        $this->assertFalse($game->fresh()->is_visible);
+        $this->assertSame('Une description.', $game->fresh()->description);
+        $this->get('/un-jeu')->assertNotFound();
     }
 
     public function test_an_admin_can_create_edit_and_clear_optional_game_details(): void

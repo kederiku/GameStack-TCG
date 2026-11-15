@@ -90,6 +90,14 @@ un TCG encore actif ou dont l’année de fin est inconnue. L’éditeur est lim
 à 255 caractères. Appliquer `make migrate` pour ajouter ces champs à une base
 existante.
 
+L’interrupteur **Afficher sur le site**, activé par défaut, permet de masquer
+un jeu tout en le gardant dans Filament. Un jeu masqué disparaît des listes de
+l’accueil, des menus, du dashboard et des écrans d’authentification ; son URL
+publique renvoie 404. Le réactiver le rend de nouveau accessible. La liste
+Filament indique sa visibilité. Cette option est indépendante de l’année de fin
+et conserve les informations et l’image du jeu. La migration laisse les jeux
+existants visibles.
+
 Les images JPEG, PNG et WebP sont acceptées jusqu’à **5 Mio** et **4096 × 4096
 pixels**. Le serveur les convertit en WebP (qualité 85), conserve la transparence
 et corrige l’orientation EXIF des JPEG. Le fichier porte le nom normalisé du jeu,
@@ -126,7 +134,9 @@ créer/modifier un jeu et son image. `image` accepte un `UploadedFile`, le chemi
 actuel pour le conserver, ou `null` pour le retirer ; omettre la clé conserve
 l’image. Le service valide `name`, `slug`, `start_year`, `end_year`, `publisher`
 et `description`. Omettre un champ d’information facultatif conserve sa valeur ;
-transmettre `null` ou une chaîne vide l’efface. Pour supprimer,
+transmettre `null` ou une chaîne vide l’efface. `is_visible` accepte un booléen ;
+omettre la clé conserve la visibilité actuelle (activée à la création).
+Pour supprimer,
 utiliser `$game->delete()` ou `Game::destroy($ids)` : les mises à jour/suppressions
 SQL de masse et les méthodes `*Quietly()` contournent les événements Eloquent
 responsables du nettoyage.

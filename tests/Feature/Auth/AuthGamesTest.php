@@ -17,6 +17,7 @@ class AuthGamesTest extends TestCase
         Game::factory()->create(['name' => 'Yu-Gi-Oh!', 'slug' => 'yugioh']);
         Game::factory()->create(['name' => 'Pokémon', 'slug' => 'pokemon', 'image' => 'games/pokemon.svg']);
         Game::factory()->create(['name' => 'Reserved', 'slug' => 'login']);
+        Game::factory()->create(['name' => 'Hidden', 'slug' => 'hidden', 'is_visible' => false]);
 
         foreach (['/login', '/register', '/forgot-password', '/reset-password/test-token?email=test@example.test'] as $url) {
             $this->get($url)->assertOk()->assertInertia(fn (Assert $page) => $page
@@ -34,6 +35,7 @@ class AuthGamesTest extends TestCase
     public function test_protected_auth_pages_receive_games_too(): void
     {
         Game::factory()->create(['slug' => 'pokemon']);
+        Game::factory()->create(['slug' => 'hidden', 'is_visible' => false]);
         $user = User::factory()->unverified()->create();
 
         foreach (['verification.notice', 'password.confirm'] as $route) {
@@ -45,6 +47,7 @@ class AuthGamesTest extends TestCase
     public function test_two_factor_challenge_receives_games(): void
     {
         Game::factory()->create(['slug' => 'pokemon']);
+        Game::factory()->create(['slug' => 'hidden', 'is_visible' => false]);
         $user = User::factory()->withTwoFactor()->create();
 
         $this->post(route('login.store'), ['email' => $user->email, 'password' => 'password'])

@@ -39,6 +39,7 @@ class DashboardTest extends TestCase
         Game::factory()->create(['name' => 'Pokémon', 'slug' => 'pokemon', 'image' => null]);
         Game::factory()->create(['name' => 'Magic', 'slug' => 'magic', 'image' => 'games/magic.svg']);
         Game::factory()->create(['name' => 'Admin', 'slug' => 'admin']);
+        Game::factory()->create(['name' => 'Hidden', 'slug' => 'hidden', 'is_visible' => false]);
 
         $this->actingAs($user)->get(route('dashboard'))->assertOk()
             ->assertInertia(fn (Assert $page) => $page

@@ -18,7 +18,7 @@ class PublicGameController extends Controller
 
     public function show(Game $game): Response
     {
-        abort_if(in_array($game->slug, GameSlug::reserved(), true), 404);
+        abort_if(! $game->is_visible || in_array($game->slug, GameSlug::reserved(), true), 404);
 
         return Inertia::render('games/show', $this->pageProps($game));
     }

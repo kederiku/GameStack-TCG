@@ -6,6 +6,7 @@ use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
@@ -19,6 +20,7 @@ class GamesTable
                 ImageColumn::make('image')->label('Image')->disk('public')->visibility('public')->imageHeight(48),
                 TextColumn::make('name')->label('Nom')->searchable()->sortable(),
                 TextColumn::make('slug')->label('Slug')->searchable()->sortable(),
+                IconColumn::make('is_visible')->label('Visible sur le site')->boolean(),
                 TextColumn::make('updated_at')->label('Modifié le')->dateTime('d/m/Y H:i')->sortable(),
             ])
             ->defaultSort('name')

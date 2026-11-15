@@ -20,15 +20,19 @@ use Illuminate\Support\Str;
  * @property int|null $end_year
  * @property string|null $publisher
  * @property string|null $description
+ * @property bool $is_visible
  * @property CarbonInterface|null $created_at
  * @property CarbonInterface|null $updated_at
  */
-#[Fillable(['name', 'slug', 'start_year', 'end_year', 'publisher', 'description'])]
+#[Fillable(['name', 'slug', 'start_year', 'end_year', 'publisher', 'description', 'is_visible'])]
 #[ObservedBy([GameObserver::class])]
 class Game extends Model
 {
     /** @use HasFactory<GameFactory> */
     use HasFactory;
+
+    /** @var array<string, mixed> */
+    protected $attributes = ['is_visible' => true];
 
     /** @return array<string, string> */
     protected function casts(): array
@@ -36,6 +40,7 @@ class Game extends Model
         return [
             'start_year' => 'integer',
             'end_year' => 'integer',
+            'is_visible' => 'boolean',
         ];
     }
 
