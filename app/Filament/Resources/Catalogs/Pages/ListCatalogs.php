@@ -12,13 +12,13 @@ class ListCatalogs extends ListCatalogRecords
 
     public function getSubheading(): string
     {
-        return 'Un catalogue rassemble les extensions d’une même version du jeu, par exemple Pokémon International ou Japonais. Parcours : jeu → catalogue → série facultative → extension → édition par langue → sortie par marché.';
+        return 'Une version éditoriale du jeu, par exemple Pokémon International ou Japonais. Ouvrez un catalogue pour retrouver ses séries et extensions.';
     }
 
     /** @return list<CreateAction> */
     protected function getHeaderActions(): array
     {
-        return [CreateAction::make()->label('Créer')
+        return [CreateAction::make()->label('Ajouter un catalogue')
             ->url(fn (): string => CatalogResource::getUrl('create', array_filter([
                 'game' => $this->tableFilters['game']['value'] ?? null,
             ])))];

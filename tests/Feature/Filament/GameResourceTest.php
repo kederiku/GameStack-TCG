@@ -170,7 +170,8 @@ class GameResourceTest extends TestCase
         Livewire::test(EditGame::class, ['record' => $game->id])
             ->fillForm(['start_year' => 2027])
             ->call('save')
-            ->assertHasFormErrors(['end_year']);
+            ->assertHasFormErrors(['end_year'])
+            ->assertDispatched('form-validation-error');
 
         $this->assertSame(2024, $game->fresh()->start_year);
         $this->assertSame(2026, $game->fresh()->end_year);

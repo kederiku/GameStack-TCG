@@ -5,9 +5,12 @@ namespace App\Filament\Support\Catalog;
 use App\Models\CatalogRecord;
 use Filament\Actions\Action;
 use Filament\Resources\Pages\CreateRecord;
+use Illuminate\Validation\ValidationException;
 
 abstract class CreateCatalogRecord extends CreateRecord
 {
+    public static bool $formActionsAreSticky = true;
+
     /** @param array<string, mixed> $data */
     protected function handleRecordCreation(array $data): CatalogRecord
     {
@@ -15,7 +18,14 @@ abstract class CreateCatalogRecord extends CreateRecord
         $record = new $model;
         assert($record instanceof CatalogRecord);
 
-        return CatalogActions::save($record, $data, 'data');
+        try {
+            return CatalogActions::save($record, $data, 'data');
+        } catch (ValidationException $exception) {
+            // Domain validation runs after the schema, so reveal its errors too.
+            $this->dispatch('form-validation-error', livewireId: $this->getId());
+
+            throw $exception;
+        }
     }
 
     public function getTitle(): string

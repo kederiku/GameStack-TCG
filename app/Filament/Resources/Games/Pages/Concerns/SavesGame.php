@@ -19,6 +19,8 @@ trait SavesGame
                 $messages['data.'.$field] = $errors;
             }
 
+            $this->dispatch('form-validation-error', livewireId: $this->getId());
+
             throw ValidationException::withMessages($messages);
         }
     }

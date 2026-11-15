@@ -9,6 +9,8 @@ use Filament\Resources\Pages\CreateRecord;
 
 class CreateGame extends CreateRecord
 {
+    public static bool $formActionsAreSticky = true;
+
     use SavesGame;
 
     protected static string $resource = GameResource::class;

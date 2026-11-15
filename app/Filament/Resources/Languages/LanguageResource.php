@@ -14,6 +14,7 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
+use UnitEnum;
 
 /** @extends resource<Language> */
 class LanguageResource extends Resource
@@ -27,6 +28,10 @@ class LanguageResource extends Resource
     protected static ?string $pluralModelLabel = 'langues';
 
     protected static ?string $navigationLabel = 'Langues';
+
+    protected static string|UnitEnum|null $navigationGroup = 'Référentiels';
+
+    protected static ?int $navigationSort = 10;
 
     protected static ?string $recordTitleAttribute = 'name';
 
