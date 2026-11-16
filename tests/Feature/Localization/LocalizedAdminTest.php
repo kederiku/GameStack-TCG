@@ -12,11 +12,12 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Routing\RouteCollection;
 use Illuminate\Support\Facades\Route;
 use Livewire\Mechanisms\HandleRequests\HandleRequests;
+use Tests\Concerns\BuildsCatalog;
 use Tests\TestCase;
 
 class LocalizedAdminTest extends TestCase
 {
-    use RefreshDatabase;
+    use BuildsCatalog, RefreshDatabase;
 
     public function test_panel_locale_is_explicit(): void
     {
@@ -82,6 +83,53 @@ class LocalizedAdminTest extends TestCase
         foreach (['/en/admin/games/'.$game->id.'/edit?signature=invalid', '/en/admin/fake', '/fr/admin/jeux/'.$game->id.'/modifier', '/en/admin/games', '//evil.test/en/admin/games/'.$game->id.'/edit'] as $invalid) {
             $this->postJson('/fr/preferences/langue', ['locale' => 'en', 'route' => 'admin.games.edit', 'target' => $invalid])->assertUnprocessable();
         }
+    }
+
+    public function test_switch_and_legacy_alias_preserve_the_actual_filament_table_query(): void
+    {
+        $this->actingAs(User::factory()->create(['is_admin' => true]));
+        $first = $this->catalog();
+        $first->update(['name' => 'Pick Alpha']);
+        $last = $this->catalog($first->game, key: 'last');
+        $last->update(['name' => 'Pick Zulu']);
+        $otherGame = $this->catalog();
+        $otherGame->update(['name' => 'Pick Excluded']);
+        $otherSearch = $this->catalog($first->game, key: 'other');
+        $otherSearch->update(['name' => 'Unrelated']);
+        $query = http_build_query([
+            'filters' => ['game' => ['value' => (string) $first->game_id]],
+            'search' => 'Pick', 'sort' => 'name:desc', 'page' => '1',
+        ]);
+        $source = $this->get('/fr/admin/catalogues?'.$query)->assertOk();
+        $source->assertSeeInOrder(['Pick Zulu', 'Pick Alpha'])
+            ->assertDontSee('.table.records.'.$otherGame->id.'"', false)
+            ->assertDontSee('.table.records.'.$otherSearch->id.'"', false);
+        // A real table interaction updates the list component while the topbar stays mounted.
+        preg_match_all('/wire:snapshot="([^"]+)"/', $this->get('/fr/admin/catalogues')->getContent(), $matches);
+        $snapshot = collect($matches[1])->map(fn (string $value) => html_entity_decode($value, ENT_QUOTES))
+            ->first(fn (string $value) => array_key_exists('tableSearch', json_decode($value, true)['data']));
+        $this->assertNotNull($snapshot);
+        $interaction = $this->postJson(app(HandleRequests::class)->getUpdateUri(), ['components' => [[
+            'snapshot' => $snapshot,
+            'updates' => ['tableSearch' => 'Pick', 'tableFilters.game.value' => (string) $first->game_id],
+            'calls' => [['method' => 'sortTable', 'params' => ['name', 'desc'], 'path' => '']],
+        ]]], ['X-Livewire' => 'true'])->assertOk();
+        $html = $interaction->json('components.0.effects.html');
+        $this->assertStringContainsString('Pick Zulu', $html);
+        $this->assertStringContainsString('Pick Alpha', $html);
+        $this->assertStringNotContainsString('.table.records.'.$otherGame->id.'"', $html);
+        $this->assertStringNotContainsString('.table.records.'.$otherSearch->id.'"', $html);
+
+        $expected = '/en/admin/catalogs?'.$query;
+        $source->assertSee($expected);
+        $this->post('/fr/preferences/langue', [
+            'locale' => 'en', 'route' => 'admin.catalogs.index',
+            'target' => $expected.'&redirect=https://evil.test#table',
+        ])->assertRedirect($expected.'#table');
+        $this->get('/admin/catalogs?lang=en&'.$query)->assertRedirect($expected);
+        $this->get($expected)->assertOk()->assertSeeInOrder(['Pick Zulu', 'Pick Alpha'])
+            ->assertDontSee('.table.records.'.$otherGame->id.'"', false)
+            ->assertDontSee('.table.records.'.$otherSearch->id.'"', false);
     }
 
     public function test_legacy_gets_redirect_privately_preserving_admin_state(): void

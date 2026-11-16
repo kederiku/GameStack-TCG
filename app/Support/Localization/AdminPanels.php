@@ -100,9 +100,9 @@ final class AdminPanels
     public static function query(Request $request): array
     {
         $query = [];
-        foreach (['tableFilters', 'tableSearch', 'tableSort', 'tableGrouping', 'tableGroupingDirection', 'page', 'recordsPerPage', 'activeTab', 'relation'] as $key) {
+        foreach (['filters', 'search', 'sort', 'grouping', 'tab', 'tableFilters', 'tableSearch', 'tableSort', 'tableGrouping', 'tableGroupingDirection', 'page', 'recordsPerPage', 'activeTab', 'relation'] as $key) {
             $value = $request->query($key);
-            if ($key === 'tableFilters' && is_array($value) && strlen(json_encode($value, JSON_THROW_ON_ERROR)) <= 4096) {
+            if (in_array($key, ['filters', 'tableFilters'], true) && is_array($value) && strlen(json_encode($value, JSON_THROW_ON_ERROR)) <= 4096) {
                 $query[$key] = $value;
             } elseif (is_string($value) && strlen($value) <= 255) {
                 $query[$key] = $value;
