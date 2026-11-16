@@ -1,13 +1,14 @@
+import { useLocalizedRoutes } from '@/hooks/use-localized-routes';
 import { Link } from '@inertiajs/react';
 import type { PropsWithChildren } from 'react';
 import { useLocale } from '@/hooks/use-locale';
 import { localeDefinitions } from '@/i18n/generated/types';
 import { BrandLogo } from '@/components/brand-logo';
 import { PublicHeader } from '@/components/public/public-header';
-import { home } from '@/routes';
 
 export default function PublicLayout({ children }: PropsWithChildren) {
-    const { locale, t, localizedUrl } = useLocale();
+    const routes = useLocalizedRoutes();
+    const { locale, t } = useLocale();
     return (
         <div
             lang={localeDefinitions[locale].htmlLang}
@@ -29,7 +30,7 @@ export default function PublicLayout({ children }: PropsWithChildren) {
             <footer className="border-t border-border/70">
                 <div className="mx-auto flex max-w-7xl flex-col items-start justify-between gap-5 px-4 py-7 sm:flex-row sm:items-center sm:px-6 lg:px-8">
                     <Link
-                        href={localizedUrl(home.url())}
+                        href={routes.home.url()}
                         aria-label={t(
                             'GameStackr TCG — accueil',
                             'GameStackr TCG — home',

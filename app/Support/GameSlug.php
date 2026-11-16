@@ -2,6 +2,8 @@
 
 namespace App\Support;
 
+use App\Support\Localization\Locales;
+use App\Support\Localization\TranslationFiles;
 use Illuminate\Support\Facades\Route;
 
 class GameSlug
@@ -16,7 +18,16 @@ class GameSlug
     /** @return list<string> */
     public static function reserved(): array
     {
-        $reserved = self::RESERVED;
+        $reserved = [...self::RESERVED, ...array_keys(Locales::all())];
+        foreach (array_keys(Locales::all()) as $locale) {
+            foreach (app(TranslationFiles::class)->routes($locale) as $path) {
+                foreach (explode('/', $path) as $segment) {
+                    if ($segment !== '' && ! str_contains($segment, '{')) {
+                        $reserved[] = $segment;
+                    }
+                }
+            }
+        }
 
         // Include configured package prefixes, such as Livewire's hashed path.
         foreach (Route::getRoutes()->getRoutes() as $route) {

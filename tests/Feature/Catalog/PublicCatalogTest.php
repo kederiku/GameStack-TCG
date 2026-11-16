@@ -33,7 +33,7 @@ class PublicCatalogTest extends TestCase
         $privateEdition = $this->edition($public, $this->language('fr', 'Français'));
         $privateEdition->update(['name' => 'Secret edition', 'is_visible' => false]);
 
-        $this->get('/pokemon')->assertOk()->assertInertia(fn (Assert $page) => $page
+        $this->get('/fr/pokemon')->assertOk()->assertInertia(fn (Assert $page) => $page
             ->where('catalogData.total', 1)
             ->has('catalogData.catalogs', 1)
             ->where('catalogData.catalogs.0.count', 1)
@@ -41,7 +41,7 @@ class PublicCatalogTest extends TestCase
             ->has('catalogData.expansions.data', 1)
             ->where('catalogData.expansions.data.0.id', $public->id)
             ->has('catalogData.expansions.data.0.languages', 1));
-        $this->get('/pokemon?q=Secret')->assertInertia(fn (Assert $page) => $page
+        $this->get('/fr/pokemon?q=Secret')->assertInertia(fn (Assert $page) => $page
             ->where('catalogData.expansions.total', 0));
     }
 
@@ -51,7 +51,7 @@ class PublicCatalogTest extends TestCase
         $catalog = $this->catalog($game);
         $series = $this->series($catalog);
         $expansion = $this->expansion($catalog, $series);
-        $path = '/pokemon/international/base-set';
+        $path = '/fr/pokemon/international/base-set';
         $this->get($path)->assertOk();
         foreach ([$expansion, $series, $catalog, $game] as $record) {
             $record->update(['is_visible' => false]);
@@ -59,8 +59,8 @@ class PublicCatalogTest extends TestCase
             $record->update(['is_visible' => true]);
         }
         Game::factory()->create(['slug' => 'other']);
-        $this->get('/other/international/base-set')->assertNotFound();
-        $this->get('/pokemon/missing/base-set')->assertNotFound();
+        $this->get('/fr/other/international/base-set')->assertNotFound();
+        $this->get('/fr/pokemon/missing/base-set')->assertNotFound();
     }
 
     public function test_identical_expansion_keys_in_different_catalogs_are_distinct(): void
@@ -68,9 +68,9 @@ class PublicCatalogTest extends TestCase
         $game = Game::factory()->create(['slug' => 'pokemon']);
         $a = $this->expansion($this->catalog($game));
         $b = $this->expansion($this->catalog($game, key: 'japan'));
-        $this->get('/pokemon/international/base-set')->assertInertia(fn (Assert $page) => $page
+        $this->get('/fr/pokemon/international/base-set')->assertInertia(fn (Assert $page) => $page
             ->component('games/expansion', false)->where('expansion.id', $a->id));
-        $this->get('/pokemon/japan/base-set')->assertInertia(fn (Assert $page) => $page
+        $this->get('/fr/pokemon/japan/base-set')->assertInertia(fn (Assert $page) => $page
             ->where('expansion.id', $b->id));
     }
 
@@ -84,13 +84,13 @@ class PublicCatalogTest extends TestCase
         $french = $this->edition($expansion, $fr);
         DB::table('expansion_editions')->where('id', $english->id)->update(['image' => 'catalog/english.avif']);
         foreach (['fr', 'en'] as $locale) {
-            $this->get('/pokemon/international/base-set?lang='.$locale.'&edition=fr')->assertInertia(fn (Assert $page) => $page
+            $this->get('/'.$locale.'/pokemon/international/base-set?edition=fr')->assertInertia(fn (Assert $page) => $page
                 ->where('expansion.selectedEdition.id', $french->id)
                 ->where('expansion.selectedEdition.imageUrl', null)
                 ->where('expansion.editionFallback', false)
                 ->has('expansion.editions', 2));
         }
-        $this->get('/pokemon/international/base-set?lang=fr&edition=fr')->assertInertia(fn (Assert $page) => $page
+        $this->get('/fr/pokemon/international/base-set?edition=fr')->assertInertia(fn (Assert $page) => $page
             ->where('expansion.name', 'Ensemble de base')
             ->where('expansion.nameLanguage', 'fr')
             ->where('expansion.description', 'Description française'));
@@ -104,7 +104,7 @@ class PublicCatalogTest extends TestCase
         $this->edition($expansion);
         $hidden = $this->edition($expansion, $this->language('fr', 'Français'));
         $hidden->update(['is_visible' => false]);
-        $this->get('/pokemon/international/base-set?lang=fr&edition=fr')->assertInertia(fn (Assert $page) => $page
+        $this->get('/fr/pokemon/international/base-set?edition=fr')->assertInertia(fn (Assert $page) => $page
             ->where('expansion.name', 'English title')
             ->where('expansion.nameLanguage', 'en')
             ->where('expansion.nameFallback', true)
@@ -117,13 +117,13 @@ class PublicCatalogTest extends TestCase
     {
         $catalog = $this->catalog(Game::factory()->create(['slug' => 'pokemon']));
         $expansion = $this->expansion($catalog);
-        $this->get('/pokemon/international/base-set')->assertInertia(fn (Assert $page) => $page
+        $this->get('/fr/pokemon/international/base-set')->assertInertia(fn (Assert $page) => $page
             ->where('expansion.series', null)
             ->where('expansion.selectedEdition', null)
             ->has('expansion.editions', 0));
-        $this->get('/pokemon?language=fr')->assertInertia(fn (Assert $page) => $page
+        $this->get('/fr/pokemon?language=fr')->assertInertia(fn (Assert $page) => $page
             ->where('catalogData.expansions.total', 0));
-        $this->get('/pokemon')->assertInertia(fn (Assert $page) => $page
+        $this->get('/fr/pokemon')->assertInertia(fn (Assert $page) => $page
             ->where('catalogData.expansions.data.0.id', $expansion->id));
     }
 
@@ -135,7 +135,7 @@ class PublicCatalogTest extends TestCase
         $release->update(['released_on' => '2023-03-31', 'status' => 'released']);
         $cancelled = $this->release($edition, $this->market('us', 'États-Unis'), 'event');
         $cancelled->update(['announced_period' => '2027', 'status' => 'cancelled']);
-        $this->get('/pokemon/international/base-set')->assertInertia(fn (Assert $page) => $page
+        $this->get('/fr/pokemon/international/base-set')->assertInertia(fn (Assert $page) => $page
             ->has('expansion.selectedEdition.releases', 2)
             ->where('expansion.selectedEdition.releases.0.releasedOn', '2023-03-31')
             ->where('expansion.selectedEdition.releases.0.market.name', 'France')
@@ -154,13 +154,13 @@ class PublicCatalogTest extends TestCase
         $edition->update(['name' => 'Écarlate et Violet', 'official_code' => 'SV01']);
         $this->edition($this->expansion($catalog, key: 'other'));
         foreach (['ecarlate', 'SV01'] as $query) {
-            $this->get('/pokemon?catalog=international&language=fr&type=main&series=scarlet-and-violet&q='.$query)->assertInertia(fn (Assert $page) => $page
+            $this->get('/fr/pokemon?catalog=international&language=fr&type=main&series=scarlet-and-violet&q='.$query)->assertInertia(fn (Assert $page) => $page
                 ->where('catalogData.expansions.total', 1)
                 ->where('catalogData.expansions.data.0.id', $expansion->id)
                 ->where('catalogData.expansions.data.0.edition.language.code', 'fr'));
         }
-        $this->get('/pokemon?q=%25')->assertInertia(fn (Assert $page) => $page->where('catalogData.expansions.total', 0));
-        $this->get('/pokemon?type=special')->assertInertia(fn (Assert $page) => $page->where('catalogData.expansions.total', 0));
+        $this->get('/fr/pokemon?q=%25')->assertInertia(fn (Assert $page) => $page->where('catalogData.expansions.total', 0));
+        $this->get('/fr/pokemon?type=special')->assertInertia(fn (Assert $page) => $page->where('catalogData.expansions.total', 0));
     }
 
     public function test_pagination_is_bounded_and_deterministic_with_missing_dates(): void
@@ -169,11 +169,11 @@ class PublicCatalogTest extends TestCase
         for ($index = 1; $index <= 38; $index++) {
             $this->expansion($catalog, key: 'set-'.$index);
         }
-        $this->get('/pokemon?sort=recent')->assertInertia(fn (Assert $page) => $page
+        $this->get('/fr/pokemon?sort=recent')->assertInertia(fn (Assert $page) => $page
             ->has('catalogData.expansions.data', 36)
             ->where('catalogData.expansions.total', 38)
             ->where('catalogData.expansions.last_page', 2));
-        $this->get('/pokemon?sort=recent&page=2')->assertInertia(fn (Assert $page) => $page
+        $this->get('/fr/pokemon?sort=recent&page=2')->assertInertia(fn (Assert $page) => $page
             ->has('catalogData.expansions.data', 2)
             ->where('catalogData.expansions.data.0.key', 'set-37'));
     }
@@ -184,16 +184,16 @@ class PublicCatalogTest extends TestCase
         $expansion = $this->expansion($catalog);
         $target = $this->expansion($this->catalog($catalog->game, key: 'japan'));
         ExpansionRelation::create(['source_expansion_id' => $expansion->id, 'target_expansion_id' => $target->id, 'type' => 'adapted_from', 'notes' => 'Related content', 'source_url' => 'https://example.com/source']);
-        $this->get('/pokemon/international/base-set')->assertInertia(fn (Assert $page) => $page->has('expansion.related', 1));
+        $this->get('/fr/pokemon/international/base-set')->assertInertia(fn (Assert $page) => $page->has('expansion.related', 1));
         $target->catalog->update(['is_visible' => false]);
-        $this->get('/pokemon/international/base-set')->assertInertia(fn (Assert $page) => $page->has('expansion.related', 0));
+        $this->get('/fr/pokemon/international/base-set')->assertInertia(fn (Assert $page) => $page->has('expansion.related', 0));
     }
 
     public function test_out_of_range_pages_are_clamped_to_a_real_page(): void
     {
         $catalog = $this->catalog(Game::factory()->create(['slug' => 'pokemon']));
         $this->expansion($catalog);
-        $this->get('/pokemon?page=99999999999999999999999')->assertOk()->assertInertia(fn (Assert $page) => $page
+        $this->get('/fr/pokemon?page=99999999999999999999999')->assertOk()->assertInertia(fn (Assert $page) => $page
             ->where('catalogData.expansions.current_page', 1)
             ->has('catalogData.expansions.data', 1));
     }
@@ -213,12 +213,12 @@ class PublicCatalogTest extends TestCase
         $unknown = $this->expansion($catalog, key: 'unknown');
         $unknown->update(['name' => 'Middle']);
 
-        $this->get('/pokemon?sort=recent')->assertInertia(fn (Assert $page) => $page
+        $this->get('/fr/pokemon?sort=recent')->assertInertia(fn (Assert $page) => $page
             ->where('catalogData.expansions.data.0.id', $new->id)
             ->where('catalogData.expansions.data.1.id', $old->id)
             ->where('catalogData.expansions.data.2.id', $unknown->id));
-        $this->get('/pokemon?sort=oldest')->assertInertia(fn (Assert $page) => $page->where('catalogData.expansions.data.0.id', $old->id));
-        $this->get('/pokemon?sort=name&lang=fr')->assertInertia(fn (Assert $page) => $page
+        $this->get('/fr/pokemon?sort=oldest')->assertInertia(fn (Assert $page) => $page->where('catalogData.expansions.data.0.id', $old->id));
+        $this->get('/fr/pokemon?sort=name')->assertInertia(fn (Assert $page) => $page
             ->where('catalogData.expansions.data.0.id', $new->id)
             ->where('catalogData.expansions.data.1.id', $unknown->id)
             ->where('catalogData.expansions.data.2.id', $old->id));
@@ -227,7 +227,7 @@ class PublicCatalogTest extends TestCase
     public function test_empty_games_optional_metadata_and_malformed_filters_are_supported(): void
     {
         Game::factory()->create(['slug' => 'ended-game', 'publisher' => 'Publisher', 'start_year' => 1996, 'end_year' => 2020]);
-        $this->get('/ended-game?catalog[]=x&q[]=x&language[]=x&sort[]=x&type[]=x&page[]=2')->assertOk()->assertInertia(fn (Assert $page) => $page
+        $this->get('/fr/ended-game?catalog[]=x&q[]=x&language[]=x&sort[]=x&type[]=x&page[]=2')->assertOk()->assertInertia(fn (Assert $page) => $page
             ->where('gameDetails.publisher', 'Publisher')
             ->where('gameDetails.startYear', 1996)
             ->where('gameDetails.endYear', 2020)
@@ -244,7 +244,7 @@ class PublicCatalogTest extends TestCase
             $this->edition($this->expansion($catalog, key: 'language-'.$index), $this->language($code, $code));
         }
         foreach (['zh-Hant-TW', 'es-419', 'en-US-x-tcg'] as $code) {
-            $this->get('/pokemon?language='.$code)->assertInertia(fn (Assert $page) => $page
+            $this->get('/fr/pokemon?language='.$code)->assertInertia(fn (Assert $page) => $page
                 ->where('catalogData.filters.language', $code)
                 ->where('catalogData.expansions.total', 1)
                 ->where('catalogData.expansions.data.0.edition.language.code', $code));
@@ -257,7 +257,7 @@ class PublicCatalogTest extends TestCase
         $this->expansion($this->catalog($game));
         $catalog = $this->catalog($game, key: 'all');
         $edition = $this->edition($this->expansion($catalog), $this->language('all', 'Allar'));
-        $this->get('/pokemon?catalog=all&language=all')->assertInertia(fn (Assert $page) => $page
+        $this->get('/fr/pokemon?catalog=all&language=all')->assertInertia(fn (Assert $page) => $page
             ->where('catalogData.expansions.total', 1)
             ->where('catalogData.expansions.data.0.edition.id', $edition->id));
     }
@@ -266,7 +266,7 @@ class PublicCatalogTest extends TestCase
     {
         Game::factory()->create(['slug' => 'pokemon']);
         foreach (['', '%20%20'] as $value) {
-            $this->get('/pokemon?language='.$value)->assertInertia(fn (Assert $page) => $page
+            $this->get('/fr/pokemon?language='.$value)->assertInertia(fn (Assert $page) => $page
                 ->where('catalogData.filters.language', '*'));
         }
     }

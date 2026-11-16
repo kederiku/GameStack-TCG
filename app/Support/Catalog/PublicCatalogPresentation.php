@@ -8,6 +8,7 @@ use App\Models\ExpansionEdition;
 use App\Models\ExpansionRelease;
 use App\Models\Series;
 use App\Services\CatalogImages;
+use App\Support\Localization\LocalizedRoutes;
 
 class PublicCatalogPresentation
 {
@@ -29,7 +30,7 @@ class PublicCatalogPresentation
             'key' => $expansion->key,
             ...$this->name($expansion, $catalog),
             'type' => $expansion->type,
-            'url' => route('games.expansions.show', ['game' => $catalog->game->slug, 'catalogKey' => $catalog->key, 'expansionKey' => $expansion->key], absolute: false),
+            'url' => LocalizedRoutes::url('games.expansions.show', ['game' => $catalog->game->slug, 'catalogKey' => $catalog->key, 'expansionKey' => $expansion->key], absolute: false),
             'catalog' => ['id' => $catalog->id, 'key' => $catalog->key, 'name' => $catalog->name],
             'series' => $expansion->series ? $this->series($expansion->series, $catalog) : null,
             'languages' => $expansion->editions->map(fn (ExpansionEdition $item) => [
@@ -81,7 +82,7 @@ class PublicCatalogPresentation
         return [
             'id' => $series->id, 'key' => $series->key,
             ...$this->name($series, $catalog),
-            'url' => route('games.show', ['game' => $catalog->game->slug, 'catalog' => $catalog->key, 'series' => $series->key], absolute: false),
+            'url' => LocalizedRoutes::url('games.show', ['game' => $catalog->game->slug, 'catalog' => $catalog->key, 'series' => $series->key], absolute: false),
         ];
     }
 

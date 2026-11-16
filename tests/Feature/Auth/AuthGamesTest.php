@@ -24,7 +24,7 @@ class AuthGamesTest extends TestCase
                 ->has('games', 2)
                 ->where('games.0.name', 'Pokémon')
                 ->where('games.0.imageUrl', url('/storage/games/pokemon.svg'))
-                ->where('games.0.url', '/pokemon')
+                ->where('games.0.url', '/fr/pokemon')
                 ->where('games.1.name', 'Yu-Gi-Oh!')
                 ->where('games.1.imageUrl', null)
                 ->missing('games.0.image')
@@ -64,7 +64,7 @@ class AuthGamesTest extends TestCase
 
     public function test_account_pages_do_not_receive_the_auth_catalogue(): void
     {
-        $this->actingAs(User::factory()->create())->get(route('profile.edit'))
+        $this->actingAs(User::factory()->create())->get(route('site.fr.profile.edit'))
             ->assertOk()->assertInertia(fn (Assert $page) => $page->missing('games'));
     }
 }

@@ -3,27 +3,27 @@ import { ShieldCheck, UserRound } from 'lucide-react';
 import type { PropsWithChildren } from 'react';
 import { useCurrentUrl } from '@/hooks/use-current-url';
 import { cn, toUrl } from '@/lib/utils';
-import { edit } from '@/routes/profile';
-import { edit as editSecurity } from '@/routes/security';
-
-const settingsPages = [
-    {
-        label: 'Profil',
-        title: 'Mon profil',
-        description: 'Les informations qui font de cet espace le vôtre.',
-        href: edit(),
-        icon: UserRound,
-    },
-    {
-        label: 'Sécurité',
-        title: 'Sécurité',
-        description: 'Gardez le contrôle sur les accès à votre compte.',
-        href: editSecurity(),
-        icon: ShieldCheck,
-    },
-];
+import { useLocalizedRoutes } from '@/hooks/use-localized-routes';
 
 export default function SettingsLayout({ children }: PropsWithChildren) {
+    const routes = useLocalizedRoutes();
+    const settingsPages = [
+        {
+            label: 'Profil',
+            title: 'Mon profil',
+            description: 'Les informations qui font de cet espace le vôtre.',
+            href: routes['profile.edit'](),
+            icon: UserRound,
+        },
+        {
+            label: 'Sécurité',
+            title: 'Sécurité',
+            description: 'Gardez le contrôle sur les accès à votre compte.',
+            href: routes['security.edit'](),
+            icon: ShieldCheck,
+        },
+    ];
+
     const { isCurrentOrParentUrl } = useCurrentUrl();
     const currentPage =
         settingsPages.find((page) => isCurrentOrParentUrl(page.href)) ??

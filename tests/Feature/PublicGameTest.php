@@ -18,13 +18,13 @@ class PublicGameTest extends TestCase
         Game::factory()->create(['name' => 'Pokémon', 'slug' => 'pokemon', 'image' => 'games/pokemon.svg']);
         Game::factory()->create(['name' => 'Magic', 'slug' => 'magic', 'image' => 'games/magic.webp']);
 
-        $this->get('/')->assertOk()->assertInertia(fn (Assert $page) => $page
+        $this->get('/fr')->assertOk()->assertInertia(fn (Assert $page) => $page
             ->component('welcome')
             ->where('currentGame', null)
             ->where('canRegister', true)
             ->has('games', 3)
             ->where('games.0.name', 'Magic')
-            ->where('games.0.url', '/magic')
+            ->where('games.0.url', '/fr/magic')
             ->where('games.0.imageUrl', url('/storage/games/magic.webp'))
             ->where('games.1.slug', 'pokemon')
             ->where('games.1.imageUrl', url('/storage/games/pokemon.svg'))
@@ -35,7 +35,7 @@ class PublicGameTest extends TestCase
 
     public function test_the_landing_works_without_any_game(): void
     {
-        $this->get('/')->assertOk()->assertInertia(fn (Assert $page) => $page
+        $this->get('/fr')->assertOk()->assertInertia(fn (Assert $page) => $page
             ->has('games', 0)->where('currentGame', null));
     }
 
@@ -43,13 +43,13 @@ class PublicGameTest extends TestCase
     {
         $game = Game::factory()->create(['name' => 'Pokémon', 'slug' => 'pokemon-custom']);
 
-        $this->get('/pokemon-custom')->assertOk()->assertInertia(fn (Assert $page) => $page
+        $this->get('/fr/pokemon-custom')->assertOk()->assertInertia(fn (Assert $page) => $page
             ->component('games/show', false)
             ->where('currentGame.id', $game->id)
             ->where('currentGame.slug', 'pokemon-custom')
-            ->where('currentGame.url', '/pokemon-custom')
+            ->where('currentGame.url', '/fr/pokemon-custom')
             ->has('games', 1));
-        $this->get('/'.$game->id)->assertNotFound();
+        $this->get('/fr/'.$game->id)->assertNotFound();
     }
 
     public function test_navigation_resolves_the_current_game_from_each_url(): void
@@ -58,7 +58,7 @@ class PublicGameTest extends TestCase
         Game::factory()->create(['slug' => 'yugioh']);
 
         foreach (['pokemon', 'yugioh', 'pokemon'] as $slug) {
-            $this->get('/'.$slug)->assertOk()->assertInertia(fn (Assert $page) => $page
+            $this->get('/fr/'.$slug)->assertOk()->assertInertia(fn (Assert $page) => $page
                 ->where('currentGame.slug', $slug)->has('games', 2));
         }
     }
@@ -67,16 +67,16 @@ class PublicGameTest extends TestCase
     {
         $game = Game::factory()->create(['slug' => 'original']);
         $game->update(['slug' => 'renamed']);
-        $this->get('/original')->assertNotFound();
-        $this->get('/renamed')->assertOk();
+        $this->get('/fr/original')->assertNotFound();
+        $this->get('/fr/renamed')->assertOk();
         $game->delete();
-        $this->get('/renamed')->assertNotFound();
+        $this->get('/fr/renamed')->assertNotFound();
     }
 
     public function test_unknown_and_malformed_game_paths_are_not_found(): void
     {
         foreach (['absent', 'not/a/game', 'UPPERCASE', 'bad_slug'] as $path) {
-            $this->get('/'.$path)->assertNotFound();
+            $this->get('/fr/'.$path)->assertNotFound();
         }
     }
 
@@ -87,11 +87,11 @@ class PublicGameTest extends TestCase
         }
         Game::factory()->create(['slug' => 'pokemon']);
 
-        $this->get('/')->assertInertia(fn (Assert $page) => $page
+        $this->get('/fr')->assertInertia(fn (Assert $page) => $page
             ->has('games', 1)->where('games.0.slug', 'pokemon'));
         $this->get('/login')->assertInertia(fn (Assert $page) => $page->component('auth/login'));
         $this->get('/register')->assertInertia(fn (Assert $page) => $page->component('auth/register'));
-        $this->get('/dashboard')->assertRedirect('/login');
+        $this->get('/fr/mon-espace')->assertRedirect('/login');
         $this->get('/admin')->assertRedirect();
         $this->get('/up')->assertOk();
         $this->get('/storage')->assertNotFound();
@@ -102,21 +102,21 @@ class PublicGameTest extends TestCase
     {
         $user = User::factory()->create();
         Game::factory()->create(['slug' => 'pokemon']);
-        $this->actingAs($user)->get('/pokemon')->assertOk()->assertInertia(fn (Assert $page) => $page
+        $this->actingAs($user)->get('/fr/pokemon')->assertOk()->assertInertia(fn (Assert $page) => $page
             ->where('auth.user.id', $user->id)->missing('auth.user.password'));
     }
 
     public function test_registration_visibility_tracks_the_enabled_feature(): void
     {
         config(['fortify.features' => []]);
-        $this->get('/')->assertInertia(fn (Assert $page) => $page->where('canRegister', false));
+        $this->get('/fr')->assertInertia(fn (Assert $page) => $page->where('canRegister', false));
     }
 
     public function test_long_names_and_absent_images_reach_the_public_page_unchanged(): void
     {
         $name = str_repeat('Jeu ', 63).'TCG';
         Game::factory()->create(['name' => $name, 'slug' => 'long-name']);
-        $this->get('/long-name')->assertOk()->assertInertia(fn (Assert $page) => $page
+        $this->get('/fr/long-name')->assertOk()->assertInertia(fn (Assert $page) => $page
             ->where('currentGame.name', $name)->where('currentGame.imageUrl', null));
     }
 }

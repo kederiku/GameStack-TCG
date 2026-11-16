@@ -82,7 +82,7 @@ class PublicCatalog
         $lastPage = max(1, (int) ceil($total / 36));
         $page = min($lastPage, max(1, (int) self::input($request, 'page', '1')));
         $expansions = $query->orderBy('sort_order')->orderBy('expansions.id')->with($this->relations())->paginate(36, page: $page, total: $total)
-            ->appends([...$filters, 'lang' => app()->getLocale()])
+            ->appends($filters)
             ->through(fn (Expansion $expansion) => $this->presentation->card($expansion, $filters['language']));
 
         return [

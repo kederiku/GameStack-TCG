@@ -54,9 +54,9 @@ class AuthenticationTest extends TestCase
     {
         $user = User::factory()->create();
 
-        $this->get('/dashboard')->assertRedirect('/login');
+        $this->get('/fr/mon-espace')->assertRedirect('/login');
         $this->post('/login', ['email' => $user->email, 'password' => 'password'], ['X-Inertia' => 'true'])
-            ->assertRedirect('/dashboard')
+            ->assertRedirect('/fr/mon-espace')
             ->assertHeaderMissing('X-Inertia-Location');
     }
 

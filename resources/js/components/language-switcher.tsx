@@ -7,22 +7,34 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
+import { switchLocale } from '@/lib/localized-navigation';
 import { useLocale } from '@/hooks/use-locale';
 
 export function LanguageSwitcher() {
-    const { url } = usePage();
+    const { localizedUrls, availableLocales } = usePage().props;
     const { locale, t } = useLocale();
+
+    if (Object.keys(localizedUrls).length === 0) return null;
 
     return (
         <Select
             value={locale}
             onValueChange={(language) => {
-                const next = new URL(url, window.location.origin);
-                next.searchParams.set('lang', language);
-                router.get(
-                    `${next.pathname}${next.search}${next.hash}`,
-                    {},
-                    { preserveScroll: true, preserveState: true },
+                switchLocale(
+                    localizedUrls,
+                    language,
+                    window.location.hash,
+                    (url) => {
+                        router.get(
+                            url,
+                            {},
+                            {
+                                preserveScroll: true,
+                                preserveState: true,
+                                headers: { 'X-Locale-Switch': 'true' },
+                            },
+                        );
+                    },
                 );
             }}
         >
@@ -37,12 +49,20 @@ export function LanguageSwitcher() {
                 <SelectValue>{locale.toUpperCase()}</SelectValue>
             </SelectTrigger>
             <SelectContent align="end" lang={locale}>
-                <SelectItem value="fr" textValue="FR">
-                    Français
-                </SelectItem>
-                <SelectItem value="en" textValue="EN">
-                    English
-                </SelectItem>
+                {availableLocales
+                    .filter(
+                        ({ code }) =>
+                            localizedUrls[code as keyof typeof localizedUrls],
+                    )
+                    .map(({ code, label }) => (
+                        <SelectItem
+                            key={code}
+                            value={code}
+                            textValue={code.toUpperCase()}
+                        >
+                            {label}
+                        </SelectItem>
+                    ))}
             </SelectContent>
         </Select>
     );

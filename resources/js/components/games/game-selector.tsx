@@ -1,3 +1,4 @@
+import { useLocalizedRoutes } from '@/hooks/use-localized-routes';
 import { Link } from '@inertiajs/react';
 import { Check, ChevronDown, House, Layers2 } from 'lucide-react';
 import { GameImage } from '@/components/games/game-image';
@@ -10,7 +11,6 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { home } from '@/routes';
 import type { PublicGame } from '@/types/game';
 import { useLocale } from '@/hooks/use-locale';
 
@@ -21,7 +21,8 @@ export function GameSelector({
     games: PublicGame[];
     currentGame: PublicGame | null;
 }) {
-    const { t, locale, localizedUrl } = useLocale();
+    const routes = useLocalizedRoutes();
+    const { t, locale } = useLocale();
     return (
         <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -75,7 +76,7 @@ export function GameSelector({
                 {games.map((game) => (
                     <DropdownMenuItem key={game.id} asChild>
                         <Link
-                            href={localizedUrl(game.url)}
+                            href={game.url}
                             aria-current={
                                 currentGame?.id === game.id ? 'page' : undefined
                             }
@@ -94,7 +95,7 @@ export function GameSelector({
                 <DropdownMenuSeparator />
                 <DropdownMenuItem asChild>
                     <Link
-                        href={localizedUrl(home.url())}
+                        href={routes.home.url()}
                         className="gap-3 px-2.5 py-3"
                     >
                         <House className="size-4" />

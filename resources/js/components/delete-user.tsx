@@ -1,7 +1,7 @@
 import { Form } from '@inertiajs/react';
 import { Trash2 } from 'lucide-react';
 import { useRef } from 'react';
-import ProfileController from '@/actions/App/Http/Controllers/Settings/ProfileController';
+import { useLocalizedRoutes } from '@/hooks/use-localized-routes';
 import SettingsSection from '@/components/settings-section';
 import InputError from '@/components/input-error';
 import PasswordInput from '@/components/password-input';
@@ -18,6 +18,7 @@ import {
 import { Label } from '@/components/ui/label';
 
 export default function DeleteUser() {
+    const routes = useLocalizedRoutes();
     const passwordInput = useRef<HTMLInputElement>(null);
 
     return (
@@ -59,7 +60,7 @@ export default function DeleteUser() {
                         </DialogDescription>
 
                         <Form
-                            {...ProfileController.destroy.form()}
+                            {...routes['profile.destroy'].form()}
                             options={{
                                 preserveScroll: true,
                             }}

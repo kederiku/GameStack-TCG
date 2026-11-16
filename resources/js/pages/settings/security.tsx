@@ -1,7 +1,7 @@
 import { Form, Head } from '@inertiajs/react';
 import { LockKeyhole, Save } from 'lucide-react';
 import { useRef } from 'react';
-import SecurityController from '@/actions/App/Http/Controllers/Settings/SecurityController';
+import { useLocalizedRoutes } from '@/hooks/use-localized-routes';
 import SettingsSection from '@/components/settings-section';
 import { Spinner } from '@/components/ui/spinner';
 import InputError from '@/components/input-error';
@@ -21,6 +21,7 @@ type Props = {
     ManageTwoFactorProps;
 
 export default function Security(props: Props) {
+    const routes = useLocalizedRoutes();
     const passwordInput = useRef<HTMLInputElement>(null);
     const currentPasswordInput = useRef<HTMLInputElement>(null);
 
@@ -35,7 +36,7 @@ export default function Security(props: Props) {
                 icon={LockKeyhole}
             >
                 <Form
-                    {...SecurityController.update.form()}
+                    {...routes['user-password.update'].form()}
                     options={{
                         preserveScroll: true,
                     }}

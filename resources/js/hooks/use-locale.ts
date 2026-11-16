@@ -19,11 +19,6 @@ export function useLocale() {
             : translate(key as TranslationKey, replacements);
     }
 
-    const localizedUrl = (path: string) => {
-        const url = new URL(path, 'http://local');
-        url.searchParams.set('lang', locale);
-        return `${url.pathname}${url.search}${url.hash}`;
-    };
     const date = (value: string | null) =>
         value
             ? new Intl.DateTimeFormat(htmlLang, {
@@ -47,5 +42,5 @@ export function useLocale() {
         }
     };
 
-    return { locale, t, tChoice, localizedUrl, date, languageName };
+    return { locale, t, tChoice, date, languageName };
 }

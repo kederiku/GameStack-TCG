@@ -4,6 +4,7 @@ namespace App\Support;
 
 use App\Models\Game;
 use App\Services\GameImages;
+use App\Support\Localization\LocalizedRoutes;
 use Illuminate\Support\Collection;
 
 /** @phpstan-type PublicGame array{id: int, name: string, slug: string, imageUrl: string|null, url: string} */
@@ -28,7 +29,7 @@ class PublicGames
             'name' => $game->name,
             'slug' => $game->slug,
             'imageUrl' => $game->image ? GameImages::disk()->url($game->image) : null,
-            'url' => route('games.show', ['game' => $game->slug], absolute: false),
+            'url' => LocalizedRoutes::url('games.show', ['game' => $game->slug], absolute: false),
         ];
     }
 }

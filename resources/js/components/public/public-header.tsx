@@ -1,3 +1,4 @@
+import { useLocalizedRoutes } from '@/hooks/use-localized-routes';
 import { Link, usePage } from '@inertiajs/react';
 import { ArrowUpRight, UserRound } from 'lucide-react';
 import { BrandLogo } from '@/components/brand-logo';
@@ -11,11 +12,12 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { dashboard, home, login, register } from '@/routes';
+import { login, register } from '@/routes';
 import type { PublicGamePageProps } from '@/types/game';
 
 export function PublicHeader() {
-    const { t, locale, localizedUrl } = useLocale();
+    const routes = useLocalizedRoutes();
+    const { t, locale } = useLocale();
     const { games, currentGame, canRegister, auth } =
         usePage<PublicGamePageProps>().props;
 
@@ -23,7 +25,7 @@ export function PublicHeader() {
         <header className="border-b border-border/80">
             <div className="mx-auto flex max-w-7xl flex-wrap items-center gap-x-5 gap-y-4 px-4 py-5 sm:px-6 lg:gap-x-7 lg:px-8">
                 <Link
-                    href={localizedUrl(home.url())}
+                    href={routes.home.url()}
                     aria-label={t(
                         'GameStackr TCG — accueil',
                         'GameStackr TCG — home',
@@ -42,7 +44,7 @@ export function PublicHeader() {
                     <LanguageSwitcher />
                     {auth.user ? (
                         <Button variant="secondary" asChild>
-                            <Link href={dashboard()}>
+                            <Link href={routes.dashboard()}>
                                 <UserRound className="size-4" />
                                 <span className="hidden md:inline">
                                     {t('Mon espace', 'My space')}

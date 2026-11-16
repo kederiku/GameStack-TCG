@@ -6,6 +6,7 @@ import { SegmentedPicker } from '@/components/segmented-picker';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { registerPendingNavigation } from '@/lib/localized-navigation';
 import { createFilterNavigation } from '@/lib/filter-navigation';
 import { useLocale } from '@/hooks/use-locale';
 import type { CatalogData, CatalogFilters as Filters } from '@/types/catalog';
@@ -18,35 +19,33 @@ export function CatalogFilters({
     data: CatalogData;
     url: string;
 }) {
-    const { t, locale, languageName } = useLocale();
+    const { t, languageName } = useLocale();
     const { types } = useCatalogLabels();
     const [query, setQuery] = useState(data.filters.q);
     const navigation = useMemo(
         () =>
             createFilterNavigation(data.filters, (filters, replace) => {
                 let cancel = () => {};
-                router.get(
-                    url,
-                    { ...filters, lang: locale },
-                    {
-                        preserveState: true,
-                        preserveScroll: true,
-                        replace,
-                        onCancelToken: (token) => {
-                            cancel = () => token.cancel();
-                        },
+                router.get(url, filters, {
+                    preserveState: true,
+                    preserveScroll: true,
+                    replace,
+                    onCancelToken: (token) => {
+                        cancel = () => token.cancel();
                     },
-                );
+                });
                 return () => cancel();
             }),
-        [data.filters, url, locale],
+        [data.filters, url],
     );
     useEffect(() => {
         setQuery(data.filters.q);
+        const unregister = registerPendingNavigation(navigation.cancel);
         const unsubscribe = router.on('before', navigation.cancel);
         window.addEventListener('popstate', navigation.cancel);
         return () => {
             unsubscribe();
+            unregister();
             window.removeEventListener('popstate', navigation.cancel);
             navigation.cancel();
         };

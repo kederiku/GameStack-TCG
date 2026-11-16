@@ -61,7 +61,7 @@ class ReservedGameSlugTest extends TestCase
     public function test_a_slug_that_only_starts_with_a_reserved_word_remains_available(): void
     {
         $game = app(SaveGame::class)->handle(new Game, ['name' => 'Un jeu', 'slug' => 'admin-tcg']);
-        $this->get('/admin-tcg')->assertOk();
+        $this->get('/fr/admin-tcg')->assertOk();
         $this->assertSame('admin-tcg', $game->slug);
     }
 }

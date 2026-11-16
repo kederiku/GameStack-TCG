@@ -1,3 +1,4 @@
+import { useLocalizedRoutes } from '@/hooks/use-localized-routes';
 import { Head, Link, router } from '@inertiajs/react';
 import { ArrowLeft, Layers2 } from 'lucide-react';
 import { Breadcrumbs } from '@/components/breadcrumbs';
@@ -20,12 +21,11 @@ export default function ExpansionShow({
     currentGame: PublicGame;
     expansion: ExpansionDetail;
 }) {
-    const { t, locale, localizedUrl, languageName } = useLocale();
+    const routes = useLocalizedRoutes();
+    const { t, languageName } = useLocale();
     const { types, statuses } = useCatalogLabels();
     const edition = expansion.selectedEdition;
-    const catalogUrl = localizedUrl(
-        `${currentGame.url}?catalog=${encodeURIComponent(expansion.catalog.key)}`,
-    );
+    const catalogUrl = `${currentGame.url}?catalog=${encodeURIComponent(expansion.catalog.key)}`;
     return (
         <>
             <Head title={`${expansion.name} — ${currentGame.name}`}>
@@ -42,10 +42,10 @@ export default function ExpansionShow({
             </Head>
             <Breadcrumbs
                 breadcrumbs={[
-                    { title: t('Jeux', 'Games'), href: localizedUrl('/') },
+                    { title: t('Jeux', 'Games'), href: routes.home.url() },
                     {
                         title: currentGame.name,
-                        href: localizedUrl(currentGame.url),
+                        href: currentGame.url,
                     },
                     { title: expansion.catalog.name, href: catalogUrl },
                     { title: expansion.name, href: '' },
@@ -129,7 +129,6 @@ export default function ExpansionShow({
                                             router.get(
                                                 expansion.url,
                                                 {
-                                                    lang: locale,
                                                     edition: language,
                                                 },
                                                 {
@@ -183,7 +182,7 @@ export default function ExpansionShow({
                         <dd className="mt-2 text-sm font-medium [overflow-wrap:anywhere]">
                             {expansion.series ? (
                                 <Link
-                                    href={localizedUrl(expansion.series.url)}
+                                    href={expansion.series.url}
                                     className="text-brand-highlight hover:underline"
                                 >
                                     {expansion.series.name}

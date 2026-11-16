@@ -19,6 +19,8 @@ return [
     'account' => [
         'settings' => 'parametres',
         'profile' => 'parametres/profil',
+        'password' => 'parametres/mot-de-passe',
+        'appearance' => 'parametres/apparence',
         'security' => 'parametres/securite',
     ],
     'admin' => [

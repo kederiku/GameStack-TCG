@@ -63,7 +63,8 @@ class AdminUsabilityTest extends TestCase
         app()->setLocale('en');
         $this->get('/admin/games')->assertOk()->assertSee('lang="fr"', false)->assertSee('Rechercher');
         $this->assertSame('en', app()->getLocale());
-        $this->get('/')->assertOk()->assertSee('lang="en"', false);
+        $this->get('/')->assertRedirect('/en');
+        $this->get('/en')->assertOk()->assertSee('lang="en"', false);
     }
 
     public function test_catalogue_shortcuts_show_only_its_series_and_expansions(): void

@@ -2,6 +2,8 @@
 
 namespace App\Http\Middleware;
 
+use App\Support\Localization\Locales;
+use App\Support\Localization\LocalizedRoutes;
 use Closure;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -23,6 +25,12 @@ class HandleInertiaRequests extends Middleware
 
     public function handle(Request $request, Closure $next): Response
     {
+        if ($request->header(Header::INERTIA) && $request->header('X-Locale-Switch') === 'true'
+            && LocalizedRoutes::key($request) !== null) {
+            // Laravel normalizes query order; Inertia otherwise drops the visit's fragment.
+            Inertia::preserveFragment();
+        }
+
         if (! $request->header(Header::INERTIA) || ! $request->routeIs('login.store', 'two-factor.login.store')) {
             return parent::handle($request, $next);
         }
@@ -66,7 +74,11 @@ class HandleInertiaRequests extends Middleware
         return [
             ...parent::share($request),
             'name' => config('app.name'),
-            'locale' => app()->getLocale(),
+            'locale' => LocalizedRoutes::locale($request),
+            'availableLocales' => array_values(Locales::all()),
+            'direction' => Locales::definition(LocalizedRoutes::locale($request))['direction'],
+            'routeKey' => LocalizedRoutes::key($request),
+            'localizedUrls' => LocalizedRoutes::alternates($request),
             'auth' => [
                 'user' => $request->user(),
             ],

@@ -1,6 +1,6 @@
 import { Form, Head, Link, usePage } from '@inertiajs/react';
 import { BadgeCheck, Mail, Save, UserRound } from 'lucide-react';
-import ProfileController from '@/actions/App/Http/Controllers/Settings/ProfileController';
+import { useLocalizedRoutes } from '@/hooks/use-localized-routes';
 import DeleteUser from '@/components/delete-user';
 import InputError from '@/components/input-error';
 import SettingsSection from '@/components/settings-section';
@@ -22,6 +22,7 @@ export default function Profile({
     mustVerifyEmail: boolean;
     status?: string;
 }) {
+    const routes = useLocalizedRoutes();
     const { auth } = usePage<{ auth: Auth }>().props;
     const getInitials = useInitials();
     return (
@@ -58,7 +59,7 @@ export default function Profile({
                 icon={UserRound}
             >
                 <Form
-                    {...ProfileController.update.form()}
+                    {...routes['profile.update'].form()}
                     options={{ preserveScroll: true }}
                     className="space-y-6"
                 >

@@ -29,7 +29,7 @@ class GameVisibilityTest extends TestCase
 
         $this->assertTrue($game->is_visible);
         $this->assertTrue($game->fresh()->is_visible);
-        $this->get('/un-jeu')->assertOk();
+        $this->get('/fr/un-jeu')->assertOk();
     }
 
     public function test_hidden_games_keep_their_visibility_when_it_is_omitted(): void
@@ -56,19 +56,19 @@ class GameVisibilityTest extends TestCase
     {
         $game = Game::factory()->create(['name' => 'Un jeu', 'slug' => 'un-jeu']);
         $other = Game::factory()->create(['name' => 'Autre jeu', 'slug' => 'autre-jeu']);
-        $this->get('/un-jeu')->assertOk();
+        $this->get('/fr/un-jeu')->assertOk();
 
         app(SaveGame::class)->handle($game, ['name' => $game->name, 'is_visible' => false]);
 
-        foreach (['/', '/autre-jeu', '/login'] as $url) {
+        foreach (['/fr', '/fr/autre-jeu', '/login'] as $url) {
             $this->get($url)->assertOk()->assertInertia(fn (Assert $page) => $page
                 ->has('games', 1)->where('games.0.id', $other->id));
         }
-        $this->get('/un-jeu')->assertNotFound();
+        $this->get('/fr/un-jeu')->assertNotFound();
 
         app(SaveGame::class)->handle($game, ['name' => $game->name, 'is_visible' => true]);
 
-        $this->get('/un-jeu')->assertOk()->assertInertia(fn (Assert $page) => $page
+        $this->get('/fr/un-jeu')->assertOk()->assertInertia(fn (Assert $page) => $page
             ->where('currentGame.id', $game->id)->has('games', 2));
     }
 
@@ -86,21 +86,21 @@ class GameVisibilityTest extends TestCase
     {
         Game::factory()->create(['slug' => 'hidden', 'is_visible' => false]);
         $user = User::factory()->create();
-        $this->actingAs($user)->get('/hidden')->assertNotFound();
+        $this->actingAs($user)->get('/fr/hidden')->assertNotFound();
 
         $user->forceFill(['is_admin' => true])->save();
-        $this->get('/hidden')->assertNotFound();
+        $this->get('/fr/hidden')->assertNotFound();
     }
 
     public function test_the_site_allows_a_catalogue_containing_only_hidden_games(): void
     {
         Game::factory()->create(['is_visible' => false]);
 
-        foreach (['/', '/login'] as $url) {
+        foreach (['/fr', '/login'] as $url) {
             $this->get($url)->assertOk()->assertInertia(fn (Assert $page) => $page->has('games', 0));
         }
 
-        $this->actingAs(User::factory()->create())->get('/dashboard')->assertOk()
+        $this->actingAs(User::factory()->create())->get('/fr/mon-espace')->assertOk()
             ->assertInertia(fn (Assert $page) => $page->has('games', 0));
     }
 

@@ -19,6 +19,8 @@ return [
     'account' => [
         'settings' => 'settings',
         'profile' => 'settings/profile',
+        'password' => 'settings/password',
+        'appearance' => 'settings/appearance',
         'security' => 'settings/security',
     ],
     'admin' => [

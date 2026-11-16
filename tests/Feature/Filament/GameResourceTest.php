@@ -54,7 +54,7 @@ class GameResourceTest extends TestCase
 
         $game = Game::query()->sole();
         $this->assertFalse($game->is_visible);
-        $this->get('/un-jeu')->assertNotFound();
+        $this->get('/fr/un-jeu')->assertNotFound();
 
         Livewire::test(ListGames::class)
             ->assertCanSeeTableRecords([$game])
@@ -66,7 +66,7 @@ class GameResourceTest extends TestCase
             ->call('save')->assertHasNoFormErrors();
 
         $this->assertTrue($game->fresh()->is_visible);
-        $this->get('/un-jeu')->assertOk();
+        $this->get('/fr/un-jeu')->assertOk();
     }
 
     public function test_an_admin_can_hide_a_game_and_edit_it_without_republishing_it(): void
@@ -82,7 +82,7 @@ class GameResourceTest extends TestCase
 
         $this->assertFalse($game->fresh()->is_visible);
         $this->assertSame('Une description.', $game->fresh()->description);
-        $this->get('/un-jeu')->assertNotFound();
+        $this->get('/fr/un-jeu')->assertNotFound();
     }
 
     public function test_an_admin_can_create_edit_and_clear_optional_game_details(): void

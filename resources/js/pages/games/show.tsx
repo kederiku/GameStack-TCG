@@ -1,3 +1,4 @@
+import { useLocalizedRoutes } from '@/hooks/use-localized-routes';
 import { Head, Link } from '@inertiajs/react';
 import { ChevronDown, Layers2, Search, X } from 'lucide-react';
 import { Breadcrumbs } from '@/components/breadcrumbs';
@@ -28,7 +29,8 @@ export default function GameShow({
     gameDetails: GameDetails;
     catalogData: CatalogData;
 }) {
-    const { t, localizedUrl, languageName } = useLocale();
+    const routes = useLocalizedRoutes();
+    const { t, languageName } = useLocale();
     const groups = new Map<string, PublicExpansion[]>();
     for (const expansion of catalogData.expansions.data) {
         const key = `${expansion.catalog.id}-${expansion.series?.id ?? 'none'}`;
@@ -53,10 +55,10 @@ export default function GameShow({
             </Head>
             <Breadcrumbs
                 breadcrumbs={[
-                    { title: t('Jeux', 'Games'), href: localizedUrl('/') },
+                    { title: t('Jeux', 'Games'), href: routes.home.url() },
                     {
                         title: currentGame.name,
-                        href: localizedUrl(currentGame.url),
+                        href: currentGame.url,
                     },
                     { title: t('Catalogue', 'Catalog'), href: '' },
                 ]}
@@ -97,9 +99,7 @@ export default function GameShow({
                 <div className="mb-5">
                     <Button asChild variant="secondary" size="sm">
                         <Link
-                            href={localizedUrl(
-                                `${currentGame.url}?catalog=${encodeURIComponent(catalogData.filters.catalog)}`,
-                            )}
+                            href={`${currentGame.url}?catalog=${encodeURIComponent(catalogData.filters.catalog)}`}
                         >
                             <X className="size-3" />
                             {t('Toutes les séries', 'All series')}
@@ -131,7 +131,7 @@ export default function GameShow({
                                         {series ? (
                                             <Link
                                                 className="rounded-sm hover:text-brand-highlight focus-visible:outline-2 focus-visible:outline-ring"
-                                                href={localizedUrl(series.url)}
+                                                href={series.url}
                                             >
                                                 {name}
                                             </Link>
@@ -205,7 +205,7 @@ export default function GameShow({
                     >
                         {filtered && (
                             <Button asChild variant="secondary">
-                                <Link href={localizedUrl(currentGame.url)}>
+                                <Link href={currentGame.url}>
                                     {t(
                                         'Réinitialiser les filtres',
                                         'Reset filters',
