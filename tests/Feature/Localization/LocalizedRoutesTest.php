@@ -7,15 +7,15 @@ use App\Http\Middleware\HandleInertiaRequests;
 use App\Models\Game;
 use App\Models\User;
 use App\Support\GameSlug;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Route;
 use Inertia\Testing\AssertableInertia as Assert;
+use Tests\Concerns\ForwardOnlyRefreshDatabase;
 use Tests\TestCase;
 
 class LocalizedRoutesTest extends TestCase
 {
-    use RefreshDatabase;
+    use ForwardOnlyRefreshDatabase;
 
     public function test_url_locale_wins_and_is_restored_after_response(): void
     {

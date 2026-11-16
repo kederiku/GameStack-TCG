@@ -4,14 +4,14 @@ namespace Tests\Feature\Localization;
 
 use App\Models\Language;
 use App\Support\Localization\Locales;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
+use Tests\Concerns\ForwardOnlyRefreshDatabase;
 use Tests\TestCase;
 
 class LocaleRegistryTest extends TestCase
 {
-    use RefreshDatabase;
+    use ForwardOnlyRefreshDatabase;
 
     public function test_active_locales_are_independent_from_content_languages(): void
     {

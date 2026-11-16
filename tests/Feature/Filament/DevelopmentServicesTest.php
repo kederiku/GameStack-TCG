@@ -6,15 +6,15 @@ use App\Filament\Pages\DevelopmentServices;
 use App\Models\User;
 use App\Support\Localization\AdminPanels;
 use Filament\Facades\Filament;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Client\Factory;
 use Illuminate\Support\Facades\Http;
 use Livewire\Livewire;
+use Tests\Concerns\ForwardOnlyRefreshDatabase;
 use Tests\TestCase;
 
 class DevelopmentServicesTest extends TestCase
 {
-    use RefreshDatabase;
+    use ForwardOnlyRefreshDatabase;
 
     protected function setUp(): void
     {

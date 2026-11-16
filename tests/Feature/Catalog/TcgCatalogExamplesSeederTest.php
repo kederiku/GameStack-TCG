@@ -10,19 +10,19 @@ use App\Models\ExpansionEdition;
 use App\Models\ExpansionRelease;
 use App\Models\Game;
 use Database\Seeders\TcgCatalogExamplesSeeder;
-use Illuminate\Foundation\Testing\DatabaseMigrations;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
 use RuntimeException;
 use Tests\Concerns\BuildsCatalog;
+use Tests\Concerns\ForwardOnlyDatabaseMigrations;
 use Tests\TestCase;
 
 class TcgCatalogExamplesSeederTest extends TestCase
 {
     use BuildsCatalog;
-    use DatabaseMigrations;
+    use ForwardOnlyDatabaseMigrations;
 
     protected function setUp(): void
     {

@@ -11,6 +11,7 @@ use App\Models\ExpansionRelease;
 use App\Models\Language;
 use App\Models\Market;
 use App\Models\Series;
+use App\Models\SeriesImage;
 use App\Models\SeriesLocalization;
 use App\Policies\CatalogPolicy;
 use App\Support\Localization\VendorTranslationLoader;
@@ -21,6 +22,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
+use Spatie\Translatable\Translatable;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -38,10 +40,11 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->configureDefaults();
+        app(Translatable::class)->allowNullForTranslation()->allowEmptyStringForTranslation();
 
         foreach ([
             Catalog::class, Series::class, Expansion::class, Language::class, Market::class,
-            SeriesLocalization::class, ExpansionLocalization::class, ExpansionEdition::class,
+            SeriesImage::class, SeriesLocalization::class, ExpansionLocalization::class, ExpansionEdition::class,
             ExpansionRelease::class, ExpansionRelation::class,
         ] as $model) {
             Gate::policy($model, CatalogPolicy::class);

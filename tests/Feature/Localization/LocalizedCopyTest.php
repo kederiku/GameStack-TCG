@@ -5,16 +5,16 @@ namespace Tests\Feature\Localization;
 use App\Filament\Support\Catalog\CatalogLabels;
 use App\Models\User;
 use App\Notifications\LocalizedResetPassword;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Request;
 use Illuminate\Mail\Markdown;
 use Inertia\Testing\AssertableInertia as Assert;
 use Laravel\Passkeys\Exceptions\InvalidPasskeyException;
+use Tests\Concerns\ForwardOnlyRefreshDatabase;
 use Tests\TestCase;
 
 class LocalizedCopyTest extends TestCase
 {
-    use RefreshDatabase;
+    use ForwardOnlyRefreshDatabase;
 
     public function test_english_login_title_and_links_follow_the_url(): void
     {

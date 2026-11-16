@@ -5,16 +5,16 @@ namespace Tests\Feature\Localization;
 use App\Http\Middleware\HandleInertiaRequests;
 use App\Models\User;
 use App\Support\Localization\LocalizedRoutes;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\URL;
 use Inertia\Testing\AssertableInertia as Assert;
+use Tests\Concerns\ForwardOnlyRefreshDatabase;
 use Tests\TestCase;
 
 class LocalizedPreferencesTest extends TestCase
 {
-    use RefreshDatabase;
+    use ForwardOnlyRefreshDatabase;
 
     public function test_url_does_not_overwrite_saved_preference(): void
     {

@@ -2,12 +2,12 @@
 
 namespace Tests\Feature\Catalog;
 
+use App\Actions\Catalog\SaveTranslations;
 use App\Models\ExpansionEdition;
 use App\Models\Series;
-use App\Models\SeriesLocalization;
+use App\Models\SeriesImage;
 use App\Services\CatalogImages;
 use Closure;
-use Illuminate\Foundation\Testing\DatabaseMigrations;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -15,16 +15,18 @@ use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use RuntimeException;
 use Tests\Concerns\BuildsCatalog;
+use Tests\Concerns\UsesLocalizedSchema;
 use Tests\TestCase;
 
 class CatalogImagesTest extends TestCase
 {
     use BuildsCatalog;
-    use DatabaseMigrations;
+    use UsesLocalizedSchema;
 
     protected function setUp(): void
     {
         parent::setUp();
+        $this->createLocalizedSchema();
 
         config(['game-images.disk' => 's3']);
         Storage::fake('s3');
@@ -104,6 +106,8 @@ class CatalogImagesTest extends TestCase
         $edition = $this->edition($this->expansion($this->catalog()));
         config(['database.connections.catalog_image_test' => config('database.connections.pgsql')]);
         $connection = DB::connection('catalog_image_test');
+        $this->assertSame('gamestackr_testing', $connection->getDatabaseName());
+        $connection->statement('SET search_path TO '.$this->localizedSchema);
 
         $connection->beginTransaction();
         try {
@@ -141,9 +145,8 @@ class CatalogImagesTest extends TestCase
         $this->assertInvalidImage(fn () => $edition->update(['image' => $owner->image]));
         $this->assertInvalidImage(fn () => $this->saveCatalog($edition, ['image' => $unownedPath]));
         $this->assertInvalidImage(fn () => $edition->update(['image' => UploadedFile::fake()->image('direct-upload.png')]));
-        $this->assertInvalidImage(fn () => $series->localizations()->create([
+        $this->assertInvalidImage(fn () => $series->images()->create([
             'language_id' => $this->language('fr', 'Français')->id,
-            'name' => 'Français',
             'image' => $unownedPath,
         ]));
         $this->assertInvalidImage(fn () => $this->saveCatalog($series, ['image' => $owner->image]));
@@ -205,7 +208,7 @@ class CatalogImagesTest extends TestCase
         }
 
         $series = Series::findOrFail($series->id);
-        $this->assertSame(2, $series->localizations()->count());
+        $this->assertSame(2, $series->images()->count());
         $disk->assertExists($paths);
 
         $series->delete();
@@ -228,12 +231,25 @@ class CatalogImagesTest extends TestCase
         Storage::disk('s3')->assertMissing($path);
     }
 
-    private function localization(Series $series, string $code, string $name): SeriesLocalization
+    public function test_text_changes_preserve_images_and_image_lookup_never_falls_back(): void
     {
-        return $this->saveCatalog(new SeriesLocalization, [
+        $series = $this->series($this->catalog());
+        $english = $this->localization($series, 'en', 'English');
+        $path = $english->image;
+        app(SaveTranslations::class)->handle($series->fresh(), 'en', ['display_name' => 'New English']);
+        $this->assertSame($path, $english->fresh()->image);
+        $this->assertSame([$path], Storage::disk('s3')->allFiles());
+        $this->assertNull($series->imageForLocale('fr'));
+        $this->assertSame($english->id, $series->imageForLocale('EN')->id);
+    }
+
+    private function localization(Series $series, string $code, string $name): SeriesImage
+    {
+        app(SaveTranslations::class)->handle($series->fresh(), $code, ['display_name' => $name]);
+
+        return $this->saveCatalog(new SeriesImage, [
             'series_id' => $series->id,
             'language_id' => $this->language($code, $name)->id,
-            'name' => $name,
             'image' => UploadedFile::fake()->image('series.png', 30, 15),
         ]);
     }

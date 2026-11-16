@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Support\Localization\HasContentTranslations;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -19,9 +20,14 @@ use Illuminate\Validation\ValidationException;
  * @property-read Collection<int, SeriesLocalization> $localizations
  * @property-read Collection<int, Expansion> $expansions
  */
-#[Fillable(['catalog_id', 'key', 'name', 'type', 'sort_order', 'is_visible'])]
+#[Fillable(['catalog_id', 'key', 'name', 'type', 'sort_order', 'is_visible', 'display_name', 'description'])]
 class Series extends CatalogRecord
 {
+    use HasContentTranslations;
+
+    /** @var list<string> */
+    public array $translatable = ['display_name', 'description'];
+
     public const TYPES = ['series', 'block'];
 
     protected $table = 'series';
@@ -42,8 +48,8 @@ class Series extends CatalogRecord
 
     protected function performDeleteOnModel(): void
     {
-        // Run the localization's Eloquent lifecycle so image cleanup can follow the transaction.
-        foreach ($this->localizations()->get() as $localization) {
+        // Run image lifecycles so cleanup follows the enclosing transaction.
+        foreach ($this->images()->get() as $localization) {
             if (! $localization->delete()) {
                 throw ValidationException::withMessages(['record' => __('validation.images.delete-series-localization')]);
             }
@@ -62,6 +68,17 @@ class Series extends CatalogRecord
     public function localizations(): HasMany
     {
         return $this->hasMany(SeriesLocalization::class);
+    }
+
+    /** @return HasMany<SeriesImage, $this> */
+    public function images(): HasMany
+    {
+        return $this->hasMany(SeriesImage::class);
+    }
+
+    public function imageForLocale(string $locale): ?SeriesImage
+    {
+        return $this->images()->whereHas('language', fn ($query) => $query->whereRaw('lower(code) = lower(?)', [$locale]))->first();
     }
 
     /** @return HasMany<Expansion, $this> */

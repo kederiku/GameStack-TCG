@@ -4,16 +4,16 @@ namespace Tests\Feature\Catalog;
 
 use App\Models\ExpansionRelation;
 use App\Models\Game;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Inertia\Testing\AssertableInertia as Assert;
 use Tests\Concerns\BuildsCatalog;
+use Tests\Concerns\ForwardOnlyRefreshDatabase;
 use Tests\TestCase;
 
 class PublicCatalogTest extends TestCase
 {
     use BuildsCatalog;
-    use RefreshDatabase;
+    use ForwardOnlyRefreshDatabase;
 
     public function test_only_effectively_visible_records_reach_the_list_counts_and_search(): void
     {

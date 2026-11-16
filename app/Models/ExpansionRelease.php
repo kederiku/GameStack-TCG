@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Support\Localization\HasContentTranslations;
 use Carbon\CarbonImmutable;
 use DateTimeInterface;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
@@ -18,9 +19,14 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property-read ExpansionEdition $edition
  * @property-read Market $market
  */
-#[Fillable(['edition_id', 'market_id', 'channel', 'released_on', 'announced_period', 'status', 'source_url'])]
+#[Fillable(['edition_id', 'market_id', 'channel', 'released_on', 'announced_period', 'status', 'source_url', 'reference_announced_period'])]
 class ExpansionRelease extends CatalogRecord
 {
+    use HasContentTranslations;
+
+    /** @var list<string> */
+    public array $translatable = ['announced_period'];
+
     public const CHANNELS = ['general', 'specialist', 'prerelease', 'crowdfunding', 'event'];
 
     public const STATUSES = ExpansionEdition::STATUSES;

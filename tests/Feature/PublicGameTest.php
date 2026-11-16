@@ -4,13 +4,13 @@ namespace Tests\Feature;
 
 use App\Models\Game;
 use App\Models\User;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Inertia\Testing\AssertableInertia as Assert;
+use Tests\Concerns\ForwardOnlyRefreshDatabase;
 use Tests\TestCase;
 
 class PublicGameTest extends TestCase
 {
-    use RefreshDatabase;
+    use ForwardOnlyRefreshDatabase;
 
     public function test_the_landing_exposes_sorted_public_games_with_optional_images(): void
     {

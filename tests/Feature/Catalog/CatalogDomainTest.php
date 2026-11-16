@@ -13,18 +13,18 @@ use App\Support\Catalog\CatalogPresentation;
 use Closure;
 use DateTimeImmutable;
 use Illuminate\Database\QueryException;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
 use Tests\Concerns\BuildsCatalog;
+use Tests\Concerns\ForwardOnlyRefreshDatabase;
 use Tests\TestCase;
 
 class CatalogDomainTest extends TestCase
 {
     use BuildsCatalog;
-    use RefreshDatabase;
+    use ForwardOnlyRefreshDatabase;
 
     public function test_games_retain_their_identity_when_catalogs_are_added(): void
     {

@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Actions\Catalog\SaveCatalogRecord;
 use App\Support\Catalog\CatalogRules;
+use App\Support\Localization\ContentLanguageUsage;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\QueryException;
 
@@ -63,6 +64,10 @@ abstract class CatalogRecord extends Model
 
                 $this->setRawAttributes($current->getAttributes(), sync: true);
                 $this->unsetRelations();
+
+                if ($this instanceof Language) {
+                    ContentLanguageUsage::assertDeletable($this);
+                }
 
                 return parent::delete();
             });

@@ -4,17 +4,17 @@ namespace Tests\Integration;
 
 use App\Actions\Games\SaveGame;
 use App\Models\Game;
-use App\Models\SeriesLocalization;
+use App\Models\SeriesImage;
 use App\Services\CatalogImages;
 use App\Services\GameImages;
 use App\Support\PublicGames;
-use Illuminate\Foundation\Testing\DatabaseMigrations;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Tests\Concerns\BuildsCatalog;
+use Tests\Concerns\UsesLocalizedSchema;
 use Tests\TestCase;
 
 // Explicit opt-in: php artisan test tests/Integration/GarageStorageTest.php
@@ -22,7 +22,7 @@ use Tests\TestCase;
 class GarageStorageTest extends TestCase
 {
     use BuildsCatalog;
-    use DatabaseMigrations;
+    use UsesLocalizedSchema;
 
     /** @var list<string> */
     private array $paths = [];
@@ -30,6 +30,7 @@ class GarageStorageTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
+        $this->createLocalizedSchema();
         config(['game-images.disk' => 's3']);
         Storage::fake('local');
     }
@@ -104,10 +105,9 @@ class GarageStorageTest extends TestCase
     public function test_catalog_images_follow_the_database_lifecycle_on_real_storage(): void
     {
         $series = $this->series($this->catalog());
-        $localization = $this->saveCatalog(new SeriesLocalization, [
+        $localization = $this->saveCatalog(new SeriesImage, [
             'series_id' => $series->id,
             'language_id' => $this->language()->id,
-            'name' => 'Garage catalogue',
             'image' => UploadedFile::fake()->image('catalogue.png', 32, 16),
         ]);
         $this->paths[] = $original = $localization->image;

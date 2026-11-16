@@ -3,7 +3,7 @@
 namespace App\Services;
 
 use App\Models\ExpansionEdition;
-use App\Models\SeriesLocalization;
+use App\Models\SeriesImage;
 use Illuminate\Database\Connection;
 use Illuminate\Http\UploadedFile;
 use RuntimeException;
@@ -25,7 +25,7 @@ class CatalogImages extends AvifImages
     public function deleteUnused(?string $path, ?string $connection = null): void
     {
         if ($path === null || ! $this->isManagedPath($path)
-            || SeriesLocalization::on($connection)->where('image', $path)->exists()
+            || SeriesImage::on($connection)->where('image', $path)->exists()
             || ExpansionEdition::on($connection)->where('image', $path)->exists()) {
             return;
         }

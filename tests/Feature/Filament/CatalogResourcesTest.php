@@ -32,17 +32,17 @@ use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Facades\Filament;
-use Illuminate\Foundation\Testing\DatabaseMigrations;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Livewire;
 use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\Concerns\BuildsCatalog;
+use Tests\Concerns\ForwardOnlyDatabaseMigrations;
 use Tests\TestCase;
 
 class CatalogResourcesTest extends TestCase
 {
-    use BuildsCatalog, DatabaseMigrations;
+    use BuildsCatalog, ForwardOnlyDatabaseMigrations;
 
     protected function setUp(): void
     {

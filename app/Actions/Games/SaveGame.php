@@ -5,6 +5,8 @@ namespace App\Actions\Games;
 use App\Models\Game;
 use App\Services\GameImages;
 use App\Support\GameSlug;
+use App\Support\Localization\ContentLanguageUsage;
+use App\Support\Localization\TranslationPatch;
 use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Validator;
@@ -20,12 +22,16 @@ class SaveGame
     /** @param array<string, mixed> $data */
     public function handle(Game $game, array $data): Game
     {
+        $proposal = clone $game;
+        $proposal->fill(array_intersect_key($data, array_flip($game->getTranslatableAttributes())));
+        $operations = TranslationPatch::forRecord($game, $proposal->getAttributes());
         try {
-            return $game->getConnection()->transaction(function () use ($game, $data): Game {
+            return $game->getConnection()->transaction(function () use ($game, $data, $operations): Game {
+                ContentLanguageUsage::lock(array_column($operations, 'locale'), $game->getConnection());
                 // Reload under a lock so cleanup always targets the current image.
                 $record = $game->exists
-                    ? Game::query()->lockForUpdate()->findOrFail($game->id)
-                    : new Game;
+                    ? Game::on($game->getConnectionName())->lockForUpdate()->findOrFail($game->id)
+                    : (new Game)->setConnection($game->getConnectionName());
 
                 $name = is_string($data['name'] ?? null) ? trim($data['name']) : ($data['name'] ?? null);
                 $slug = $data['slug'] ?? ($record->exists ? $record->slug : null);
@@ -36,7 +42,7 @@ class SaveGame
                 }
 
                 $details = [];
-                foreach (['start_year', 'end_year', 'publisher', 'description'] as $field) {
+                foreach (['start_year', 'end_year', 'publisher', 'reference_description'] as $field) {
                     $value = array_key_exists($field, $data) ? $data[$field] : $record->getAttribute($field);
                     $value = is_string($value) ? trim($value) : $value;
                     $details[$field] = $value === '' ? null : $value;
@@ -50,7 +56,7 @@ class SaveGame
                     'start_year' => ['nullable', 'integer', 'between:1000,9999'],
                     'end_year' => ['nullable', 'integer', 'between:1000,9999', Rule::when($details['start_year'] !== null, ['gte:start_year'])],
                     'publisher' => ['nullable', 'string', 'max:255'],
-                    'description' => ['nullable', 'string'],
+                    'reference_description' => ['nullable', 'string'],
                     'is_visible' => ['required', 'boolean'],
                 ], [
                     'slug.not_in' => __('validation.catalog.reserved_slug'),
@@ -68,6 +74,7 @@ class SaveGame
 
                 $record->fill($attributes);
                 $record->image = $image;
+                TranslationPatch::apply($record, $operations);
 
                 if (! $record->save()) {
                     throw new RuntimeException(__('validation.catalog.game_save_cancelled'));
