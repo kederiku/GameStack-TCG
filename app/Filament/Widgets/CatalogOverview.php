@@ -28,7 +28,7 @@ class CatalogOverview extends Widget
     {
         $user = auth()->user();
 
-        return $user instanceof User && $user->canAccessPanel(Filament::getPanel('admin'));
+        return $user instanceof User && $user->canAccessPanel(Filament::getCurrentOrDefaultPanel());
     }
 
     /** @return array<string, mixed> */

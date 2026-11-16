@@ -26,6 +26,7 @@ use App\Models\Catalog;
 use App\Models\ExpansionRelation;
 use App\Models\Game;
 use App\Models\User;
+use App\Support\Localization\AdminPanels;
 use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
@@ -49,7 +50,7 @@ class CatalogResourcesTest extends TestCase
 
         Storage::fake('public');
         config(['game-images.disk' => 'public']);
-        Filament::setCurrentPanel(Filament::getPanel('admin'));
+        Filament::setCurrentPanel(Filament::getPanel(AdminPanels::id('fr')));
         $this->actingAs(User::factory()->create(['is_admin' => true]));
     }
 
@@ -170,8 +171,8 @@ class CatalogResourcesTest extends TestCase
         $expansion = $this->expansion($this->catalog());
         $edition = $this->edition($expansion);
         $market = $this->market();
-        $editionUrl = url('/admin/expansion-editions/'.$edition->id.'/edit');
-        $expansionUrl = url('/admin/expansions/'.$expansion->id.'/edit');
+        $editionUrl = url('/fr/admin/editions/'.$edition->id.'/modifier');
+        $expansionUrl = url('/fr/admin/extensions/'.$expansion->id.'/modifier');
         $this->get($editionUrl)->assertOk()->assertSee('Sorties')->assertSee($expansionUrl);
         Livewire::test(EditionsRelationManager::class, [
             'ownerRecord' => $expansion, 'pageClass' => EditExpansion::class,
@@ -383,7 +384,7 @@ class CatalogResourcesTest extends TestCase
                 ->setTableActionData(['language_id' => $language->id, 'name' => 'Intrus']);
 
             $this->actingAs($deniedUser);
-            $this->get('/admin/catalogs')->assertForbidden();
+            $this->get('/fr/admin/catalogues')->assertForbidden();
             Livewire::test(CreateCatalog::class)->assertForbidden();
             $edit->call('save')->assertForbidden();
             $list->call('callMountedAction')->assertForbidden();

@@ -48,33 +48,36 @@ class LocalizedRouteCacheTest extends TestCase
 
             return $process->getOutput();
         };
-        $contract = function () use ($environment): string {
+        $contract = function (string $ambient = 'fr') use ($environment): string {
             $script = <<<'PHP'
                 require 'vendor/autoload.php';
                 $app = require 'bootstrap/app.php';
+                $app->booting(fn () => $app->setLocale(getenv('TEST_AMBIENT_LOCALE')));
                 $app->make(\Illuminate\Contracts\Console\Kernel::class)->bootstrap();
                 $routes = [];
                 foreach ($app['router']->getRoutes() as $route) {
-                    if (str_starts_with($route->getName() ?? '', 'site.')) {
+                    if (str_starts_with($route->getName() ?? '', 'site.') || str_starts_with($route->getName() ?? '', 'filament.admin-')) {
                         $routes[$route->getName()] = [$route->uri(), $route->methods(), $route->getActionName(), $route->gatherMiddleware(), $route->defaults, $route->bindingFields(), $route->wheres];
                     }
                 }
                 ksort($routes);
                 echo json_encode($routes, JSON_THROW_ON_ERROR);
                 PHP;
-            $process = new Process([PHP_BINARY, '-r', $script], base_path(), $environment);
+            $process = new Process([PHP_BINARY, '-r', $script], base_path(), [...$environment, 'TEST_AMBIENT_LOCALE' => $ambient]);
             $process->mustRun();
 
             return $process->getOutput();
         };
         try {
             $contractBefore = $contract();
+            $this->assertSame($contractBefore, $contract('en'));
             $before = json_decode($run(['route:list', '--json']), true, flags: JSON_THROW_ON_ERROR);
             $run(['config:cache']);
             $run(['route:cache']);
             $this->assertFileExists($root.'/routes.php');
             $this->assertJson($contractBefore);
             $this->assertSame($contractBefore, $contract());
+            $this->assertSame($contractBefore, $contract('en'));
             $after = json_decode($run(['route:list', '--json']), true, flags: JSON_THROW_ON_ERROR);
             // Serialized vendor closures lose source locations and receive generated names.
             // Compare the route contract while excluding this cache-only debug metadata.
@@ -88,6 +91,8 @@ class LocalizedRouteCacheTest extends TestCase
             }, $inventory);
             $this->assertSame($normalize($before), $normalize($after));
             $this->assertContains('site.fr.profile.edit', array_column($after, 'name'));
+            $this->assertContains('filament.admin-fr.resources.jeux.edit', array_column($after, 'name'));
+            $this->assertContains('filament.admin-en.resources.games.create', array_column($after, 'name'));
         } finally {
             File::deleteDirectory($root);
         }

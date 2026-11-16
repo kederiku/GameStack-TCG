@@ -7,6 +7,11 @@ use App\Filament\Widgets\CatalogOverview;
 use App\Http\Controllers\AdminLoginController;
 use App\Http\Middleware\SetAdminLocale;
 use App\Support\Development\ServiceCatalog;
+use App\Support\Localization\AdminPanels;
+use App\Support\Localization\Locales;
+use App\Support\Localization\LocalizedRoutes;
+use App\Support\Localization\TranslationFiles;
+use Filament\Facades\Filament;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
@@ -29,16 +34,33 @@ use Illuminate\View\Middleware\ShareErrorsFromSession;
 
 class AdminPanelProvider extends PanelProvider
 {
+    public function register(): void
+    {
+        foreach (AdminPanels::all() as $id => $locale) {
+            Filament::registerPanel(fn (): Panel => $this->localizedPanel(Panel::make(), $id, $locale));
+        }
+    }
+
     public function panel(Panel $panel): Panel
     {
+        return $this->localizedPanel($panel, AdminPanels::id(Locales::default()), Locales::default());
+    }
+
+    private function localizedPanel(Panel $panel, string $id, string $locale): Panel
+    {
+        $paths = app(TranslationFiles::class)->routes($locale);
+
         return $panel
-            ->default()
-            ->id('admin')
-            ->path('admin')
+            ->default($locale === Locales::default())
+            ->id($id)
+            ->path($locale.'/'.$paths['admin.dashboard'])
+            ->loginRouteSlug($paths['admin.login'])
+            ->unsavedChangesAlerts()
             ->login(AdminLoginController::class)
             ->brandName('GameStackr Admin')
             ->brandLogo(fn (): View => view('filament.brand-logo'))
             ->brandLogoHeight('2rem')
+            ->renderHook(PanelsRenderHook::TOPBAR_END, fn (): View => view('filament.language-switcher'))
             ->renderHook(PanelsRenderHook::STYLES_AFTER, fn (): View => view('filament.brand-styles'))
             ->colors([
                 'primary' => Color::Amber,
@@ -49,20 +71,20 @@ class AdminPanelProvider extends PanelProvider
                 Dashboard::class,
             ])
             ->navigationGroups([
-                NavigationGroup::make('Catalogue')->collapsible(false),
-                NavigationGroup::make('Référentiels'),
-                NavigationGroup::make('Développement')->collapsed(),
+                NavigationGroup::make(fn (): string => __('admin.groups.catalog'))->collapsible(false),
+                NavigationGroup::make(fn (): string => __('admin.groups.references')),
+                NavigationGroup::make(fn (): string => __('admin.groups.development'))->collapsed(),
             ])
             ->navigationItems([
-                NavigationItem::make('Voir l’application')
+                NavigationItem::make('view-site')->label(fn (): string => __('admin.view_site'))
                     ->icon(Heroicon::OutlinedArrowTopRightOnSquare)
                     ->sort(10)
-                    ->url(fn (): string => route('home'), shouldOpenInNewTab: true),
-                NavigationItem::make('Mailpit')->group('Développement')->sort(20)
+                    ->url(fn (): string => LocalizedRoutes::url('home', [], $locale), shouldOpenInNewTab: true),
+                NavigationItem::make('Mailpit')->group(fn (): string => __('admin.groups.development'))->sort(20)
                     ->icon(Heroicon::OutlinedEnvelope)
                     ->url(fn (): string => app(ServiceCatalog::class)->links()['mailpit']['url'], shouldOpenInNewTab: true)
                     ->visible(fn (): bool => DevelopmentServices::canAccess()),
-                NavigationItem::make('Garage Web UI')->group('Développement')->sort(30)
+                NavigationItem::make('Garage Web UI')->group(fn (): string => __('admin.groups.development'))->sort(30)
                     ->icon(Heroicon::OutlinedArchiveBox)
                     ->url(fn (): string => app(ServiceCatalog::class)->links()['garage-webui']['url'], shouldOpenInNewTab: true)
                     ->visible(fn (): bool => DevelopmentServices::canAccess()),
@@ -84,7 +106,7 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->authMiddleware([
                 Authenticate::class,
-            ])
+            ], isPersistent: true)
             ->middleware([SetAdminLocale::class], isPersistent: true);
     }
 }

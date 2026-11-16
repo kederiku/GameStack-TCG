@@ -2,11 +2,13 @@
 
 namespace App\Filament\Resources\Games;
 
+use App\Filament\Concerns\HasLocalizedRoutes;
 use App\Filament\Resources\Games\Pages\CreateGame;
 use App\Filament\Resources\Games\Pages\EditGame;
 use App\Filament\Resources\Games\Pages\ListGames;
 use App\Filament\Resources\Games\Schemas\GameForm;
 use App\Filament\Resources\Games\Tables\GamesTable;
+use App\Filament\Support\LocalizedPageRegistration;
 use App\Models\Game;
 use BackedEnum;
 use Filament\Resources\Pages\PageRegistration;
@@ -14,22 +16,17 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
-use UnitEnum;
 
 /** @extends resource<Game> */
 class GameResource extends Resource
 {
+    use HasLocalizedRoutes;
+
+    protected static string $localizationKey = 'games';
+
     protected static ?string $model = Game::class;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedPuzzlePiece;
-
-    protected static ?string $modelLabel = 'jeu';
-
-    protected static ?string $pluralModelLabel = 'jeux';
-
-    protected static ?string $navigationLabel = 'Jeux';
-
-    protected static string|UnitEnum|null $navigationGroup = 'Catalogue';
 
     protected static ?int $navigationSort = 10;
 
@@ -49,9 +46,9 @@ class GameResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => ListGames::route('/'),
-            'create' => CreateGame::route('/create'),
-            'edit' => EditGame::route('/{record}/edit'),
+            'index' => LocalizedPageRegistration::make(ListGames::class, 'index'),
+            'create' => LocalizedPageRegistration::make(CreateGame::class, 'create'),
+            'edit' => LocalizedPageRegistration::make(EditGame::class, 'edit'),
         ];
     }
 }

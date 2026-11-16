@@ -40,7 +40,7 @@ class LocalizedAuthTest extends TestCase
             $user = User::where('email', $locale.'@example.com')->firstOrFail();
             $this->assertSame($locale, $user->preferred_locale);
             $this->assertFalse($user->is_admin);
-            $this->get('/admin')->assertForbidden();
+            $this->get('/fr/admin')->assertForbidden();
             $this->post('/'.$locale.'/'.($locale === 'fr' ? 'deconnexion' : 'logout'));
         }
     }

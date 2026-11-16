@@ -6,10 +6,14 @@ use App\Models\User;
 use App\Support\Development\DockerSnapshot;
 use App\Support\Development\ServiceCatalog;
 use App\Support\Development\ServiceHealth;
+use App\Support\Localization\AdminPanels;
+use App\Support\Localization\TranslationFiles;
 use BackedEnum;
 use Filament\Actions\Action;
+use Filament\Facades\Filament;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Pages\Page;
+use Filament\Panel;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
@@ -20,9 +24,27 @@ use UnitEnum;
 
 class DevelopmentServices extends Page
 {
-    protected static ?string $title = 'État des services';
+    public static function getSlug(?Panel $panel = null): string
+    {
+        $panel ??= Filament::getCurrentOrDefaultPanel();
 
-    protected static string|UnitEnum|null $navigationGroup = 'Développement';
+        return app(TranslationFiles::class)->routes(AdminPanels::locale($panel->getId()))['admin.development-services'];
+    }
+
+    public function getTitle(): string
+    {
+        return __('admin.services_title');
+    }
+
+    public static function getNavigationLabel(): string
+    {
+        return __('admin.services_title');
+    }
+
+    public static function getNavigationGroup(): string|UnitEnum|null
+    {
+        return __('admin.groups.development');
+    }
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedServerStack;
 

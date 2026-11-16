@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Support\Localization\AdminPanels;
 use App\Support\Localization\Locales;
 use App\Support\Localization\LocalizedRoutes;
 use Closure;
@@ -43,12 +44,15 @@ class HandleInertiaRequests extends Middleware
             }
 
             // Fortify resolves the destination; only local Filament pages need a full browser visit.
-            $panelUrl = rtrim(route('filament.admin.pages.dashboard'), '/');
             $destination = str($response->getTargetUrl())->before('?')->before('#')->toString();
+            foreach (AdminPanels::all() as $locale) {
+                $panelUrl = url(AdminPanels::url('dashboard', [], $locale));
+                if ($destination === $panelUrl || str_starts_with($destination, $panelUrl.'/')) {
+                    return Inertia::location($response);
+                }
+            }
 
-            return $destination === $panelUrl || str_starts_with($destination, $panelUrl.'/')
-                ? Inertia::location($response)
-                : $response;
+            return $response;
         });
     }
 

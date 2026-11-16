@@ -12,12 +12,12 @@ class AdminAccessTest extends TestCase
 
     public function test_guests_are_redirected_to_the_admin_login(): void
     {
-        $this->get('/admin')->assertRedirect('/admin/login');
+        $this->get('/fr/admin')->assertRedirect('/fr/admin/connexion');
     }
 
     public function test_admin_login_uses_the_react_authentication_flow(): void
     {
-        $this->get('/admin/login')->assertRedirect('/fr/connexion');
+        $this->get('/fr/admin/connexion')->assertRedirect('/fr/connexion');
     }
 
     public function test_regular_users_cannot_access_the_admin_panel(): void
@@ -25,7 +25,7 @@ class AdminAccessTest extends TestCase
         config(['app.env' => 'local']);
 
         $this->actingAs(User::factory()->create())
-            ->get('/admin')
+            ->get('/fr/admin')
             ->assertForbidden();
     }
 
@@ -34,7 +34,7 @@ class AdminAccessTest extends TestCase
         $user = User::factory()->create();
         $user->forceFill(['is_admin' => true])->save();
 
-        $this->actingAs($user)->get('/admin')->assertOk();
+        $this->actingAs($user)->get('/fr/admin')->assertOk();
     }
 
     public function test_unverified_administrators_cannot_access_the_admin_panel(): void
@@ -42,7 +42,7 @@ class AdminAccessTest extends TestCase
         $user = User::factory()->unverified()->create();
         $user->forceFill(['is_admin' => true])->save();
 
-        $this->actingAs($user)->get('/admin')->assertForbidden();
+        $this->actingAs($user)->get('/fr/admin')->assertForbidden();
     }
 
     public function test_registration_cannot_grant_administrator_privileges(): void
@@ -56,7 +56,7 @@ class AdminAccessTest extends TestCase
         ])->assertRedirect('/fr/mon-espace');
 
         $this->assertFalse(User::query()->where('email', 'user@example.com')->sole()->is_admin);
-        $this->get('/admin')->assertForbidden();
+        $this->get('/fr/admin')->assertForbidden();
     }
 
     public function test_admin_flag_is_not_mass_assignable(): void
@@ -72,21 +72,21 @@ class AdminAccessTest extends TestCase
         $user = User::factory()->create();
         $user->forceFill(['is_admin' => true])->save();
 
-        $this->get('/admin')->assertRedirect('/admin/login');
-        $this->get('/admin/login')->assertRedirect('/fr/connexion');
+        $this->get('/fr/admin')->assertRedirect('/fr/admin/connexion');
+        $this->get('/fr/admin/connexion')->assertRedirect('/fr/connexion');
         $this->post('/login', ['email' => $user->email, 'password' => 'password'])
-            ->assertRedirect('/admin');
-        $this->get('/admin')->assertOk();
+            ->assertRedirect('/fr/admin');
+        $this->get('/fr/admin')->assertOk();
     }
 
     public function test_inertia_login_opens_the_intended_catalog_page_as_a_full_navigation(): void
     {
         $user = User::factory()->create();
         $user->forceFill(['is_admin' => true])->save();
-        $destination = '/admin/catalogs?page=2';
+        $destination = '/fr/admin/catalogues?page=2';
 
-        $this->get($destination)->assertRedirect('/admin/login');
-        $this->get('/admin/login')->assertRedirect('/fr/connexion');
+        $this->get($destination)->assertRedirect('/fr/admin/connexion');
+        $this->get('/fr/admin/connexion')->assertRedirect('/fr/connexion');
         $this->post('/login', ['email' => $user->email, 'password' => 'password'], ['X-Inertia' => 'true'])
             ->assertConflict()
             ->assertHeader('X-Inertia-Location', url($destination))
@@ -101,7 +101,7 @@ class AdminAccessTest extends TestCase
         $user = User::factory()->create();
         $user->forceFill(['is_admin' => true])->save();
 
-        $this->get('/admin')->assertRedirect('/admin/login');
+        $this->get('/fr/admin')->assertRedirect('/fr/admin/connexion');
         $this->postJson('/login', ['email' => $user->email, 'password' => 'password'])
             ->assertOk()
             ->assertExactJson(['two_factor' => false])
@@ -116,20 +116,20 @@ class AdminAccessTest extends TestCase
         $user->forceFill(['is_admin' => true])->save();
         $recoveryCode = $user->recoveryCodes()[0];
 
-        $this->get('/admin')->assertRedirect('/admin/login');
+        $this->get('/fr/admin')->assertRedirect('/fr/admin/connexion');
         $this->post('/login', ['email' => $user->email, 'password' => 'password'], ['X-Inertia' => 'true'])
             ->assertRedirect('/fr/verification-deux-facteurs')
             ->assertHeaderMissing('X-Inertia-Location');
 
         $this->assertGuest();
-        $this->get('/admin')->assertRedirect('/admin/login');
+        $this->get('/fr/admin')->assertRedirect('/fr/admin/connexion');
 
         $this->post('/two-factor-challenge', ['recovery_code' => $recoveryCode], ['X-Inertia' => 'true'])
             ->assertConflict()
-            ->assertHeader('X-Inertia-Location', url('/admin'))
+            ->assertHeader('X-Inertia-Location', url('/fr/admin'))
             ->assertSessionMissing('url.intended');
 
         $this->assertAuthenticatedAs($user);
-        $this->get('/admin')->assertOk();
+        $this->get('/fr/admin')->assertOk();
     }
 }

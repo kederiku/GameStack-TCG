@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Support\Localization\AdminPanels;
 use App\Support\Localization\Locales;
 use App\Support\Localization\LocalizedRoutes;
 use Illuminate\Http\RedirectResponse;
@@ -33,16 +34,20 @@ final class LocalePreferenceController
         } catch (HttpExceptionInterface) {
             throw ValidationException::withMessages(['target' => __('validation.url', ['attribute' => 'target'])]);
         }
-        if ($route->getName() !== 'site.'.$data['locale'].'.'.$data['route']
-            || $destination->has('signature') || in_array('signed', $route->gatherMiddleware(), true)
-            || ! LocalizedRoutes::isPage($data['route'])) {
+        $admin = AdminPanels::identity($route);
+        $isAdminPage = $admin !== null && $admin['locale'] === $data['locale'] && 'admin.'.$admin['page'] === $data['route'];
+        if ($destination->has('signature') || in_array('signed', $route->gatherMiddleware(), true)
+            || (! $isAdminPage && ($route->getName() !== 'site.'.$data['locale'].'.'.$data['route']
+                || ! LocalizedRoutes::isPage($data['route'])))) {
             throw ValidationException::withMessages(['target' => __('validation.url', ['attribute' => 'target'])]);
         }
         // Rebuild from the matched identity, never redirect to caller-supplied arbitrary locations.
         $parameters = $route->parameters();
         unset($parameters['_locale']);
         $destination->setRouteResolver(fn () => $route);
-        $url = LocalizedRoutes::url($data['route'], [...$parameters, ...LocalizedRoutes::query($destination)], $data['locale']);
+        $url = $isAdminPage
+            ? AdminPanels::url($admin['page'], [...$parameters, ...AdminPanels::query($destination)], $data['locale'])
+            : LocalizedRoutes::url($data['route'], [...$parameters, ...LocalizedRoutes::query($destination)], $data['locale']);
         if (isset($parts['fragment'])) {
             $url .= '#'.$parts['fragment'];
         }

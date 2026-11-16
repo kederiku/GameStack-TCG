@@ -8,6 +8,7 @@ use App\Filament\Resources\Games\Pages\EditGame;
 use App\Filament\Resources\Games\Pages\ListGames;
 use App\Models\Game;
 use App\Models\User;
+use App\Support\Localization\AdminPanels;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Facades\Filament;
@@ -26,7 +27,7 @@ class GameResourceTest extends TestCase
     {
         parent::setUp();
         Storage::fake('public');
-        Filament::setCurrentPanel(Filament::getPanel('admin'));
+        Filament::setCurrentPanel(Filament::getPanel(AdminPanels::id('fr')));
         $user = User::factory()->create();
         $user->forceFill(['is_admin' => true])->save();
         $this->actingAs($user);
@@ -378,18 +379,18 @@ class GameResourceTest extends TestCase
     public function test_only_verified_administrators_can_access_game_pages(): void
     {
         $game = Game::factory()->create();
-        foreach (['/admin/games', '/admin/games/create', '/admin/games/'.$game->id.'/edit'] as $url) {
+        foreach (['/fr/admin/jeux', '/fr/admin/jeux/creer', '/fr/admin/jeux/'.$game->id.'/modifier'] as $url) {
             $this->get($url)->assertOk();
         }
 
         $this->actingAs(User::factory()->create());
         Livewire::test(CreateGame::class)->assertForbidden();
-        $this->get('/admin/games')->assertForbidden();
+        $this->get('/fr/admin/jeux')->assertForbidden();
 
         $unverified = User::factory()->unverified()->create();
         $unverified->forceFill(['is_admin' => true])->save();
         $this->actingAs($unverified);
-        $this->get('/admin/games')->assertForbidden();
+        $this->get('/fr/admin/jeux')->assertForbidden();
     }
 
     private function createWithImage(string $name): Game

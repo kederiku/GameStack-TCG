@@ -4,6 +4,7 @@ namespace Tests\Feature\Filament;
 
 use App\Filament\Pages\DevelopmentServices;
 use App\Models\User;
+use App\Support\Localization\AdminPanels;
 use Filament\Facades\Filament;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Client\Factory;
@@ -21,7 +22,7 @@ class DevelopmentServicesTest extends TestCase
         Http::preventStrayRequests();
         Http::fake(['*' => Http::response('OK')]);
         config(['development.snapshot_path' => '/missing/docker-report.json']);
-        Filament::setCurrentPanel(Filament::getPanel('admin'));
+        Filament::setCurrentPanel(Filament::getPanel(AdminPanels::id('fr')));
         $this->actingAs(User::factory()->create(['is_admin' => true]));
     }
 
@@ -30,7 +31,7 @@ class DevelopmentServicesTest extends TestCase
         $this->app['env'] = 'local';
         config(['development.mailpit_port' => 18025, 'development.garage_ui_port' => 13909]);
 
-        $this->get('/admin/development-services')->assertOk()
+        $this->get('/fr/admin/services-developpement')->assertOk()
             ->assertSee('État des services')->assertSee('PostgreSQL')
             ->assertSee('http://localhost:18025', false)->assertSee('http://localhost:13909', false)
             ->assertSee('target="_blank"', false)->assertSee('wire:poll.15s.visible', false);
@@ -42,9 +43,10 @@ class DevelopmentServicesTest extends TestCase
 
         foreach (['production', 'staging', 'testing'] as $environment) {
             $this->app['env'] = $environment;
-            $this->get('/admin')->assertOk()
+            $this->get('/fr/admin')->assertOk()
                 ->assertDontSee('État des services')->assertDontSee('Mailpit')->assertDontSee('Garage Web UI');
-            $this->get('/admin/development-services')->assertForbidden();
+            $this->get('/fr/admin/services-developpement')->assertForbidden();
+            $this->get('/en/admin/development-services')->assertForbidden();
         }
 
         Http::assertNothingSent();
@@ -54,10 +56,10 @@ class DevelopmentServicesTest extends TestCase
     {
         $this->app['env'] = 'local';
         auth()->logout();
-        $this->get('/admin/development-services')->assertRedirect('/admin/login');
-        $this->actingAs(User::factory()->create())->get('/admin/development-services')->assertForbidden();
+        $this->get('/fr/admin/services-developpement')->assertRedirect('/fr/admin/connexion');
+        $this->actingAs(User::factory()->create())->get('/fr/admin/services-developpement')->assertForbidden();
         $this->actingAs(User::factory()->unverified()->create(['is_admin' => true]))
-            ->get('/admin/development-services')->assertForbidden();
+            ->get('/fr/admin/services-developpement')->assertForbidden();
         Http::assertNothingSent();
     }
 

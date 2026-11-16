@@ -51,8 +51,21 @@ return [
     ],
     'admin' => [
         'dashboard' => 'admin',
-        'games' => 'admin/jeux',
-        'game-create' => 'admin/jeux/creer',
-        'game-edit' => 'admin/jeux/{record}/modifier',
+        'login' => 'connexion',
+        'development-services' => 'services-developpement',
+        'resources' => [
+            'games' => 'jeux',
+            'catalogs' => 'catalogues',
+            'series' => 'series',
+            'expansions' => 'extensions',
+            'expansion-editions' => 'editions',
+            'languages' => 'langues',
+            'markets' => 'marches',
+        ],
+        'pages' => [
+            'index' => '',
+            'create' => 'creer',
+            'edit' => '{record}/modifier',
+        ],
     ],
 ];

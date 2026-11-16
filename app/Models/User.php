@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Notifications\LocalizedResetPassword;
 use App\Notifications\LocalizedVerifyEmail;
+use App\Support\Localization\AdminPanels;
 use App\Support\Localization\Locales;
 use Carbon\CarbonInterface;
 use Database\Factories\UserFactory;
@@ -65,7 +66,7 @@ class User extends Authenticatable implements FilamentUser, HasLocalePreference,
 
     public function canAccessPanel(Panel $panel): bool
     {
-        return $panel->getId() === 'admin' && $this->is_admin && $this->hasVerifiedEmail();
+        return array_key_exists($panel->getId(), AdminPanels::all()) && $this->is_admin && $this->hasVerifiedEmail();
     }
 
     /**
