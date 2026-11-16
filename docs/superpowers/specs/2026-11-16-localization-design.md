@@ -1,6 +1,6 @@
 # Multilingue : routes traduites, fichiers de langue et contenus Spatie
 
-Date : 16 novembre 2026. Statut : conception proposée, à valider avant réalisation.
+Date : 16 novembre 2026. Statut : conception validée par l’utilisateur.
 
 ## Intention et décisions utilisateur
 
@@ -15,9 +15,9 @@ e-mails compris. Il a choisi l’approche B : préfixe et chemins traduits.
 Il a ensuite confirmé les préfixes de langue courts (`/fr`, `/en`), sans
 variante régionale comme `/fr-FR` pour cette livraison.
 
-Les autres décisions ci-dessous sont des propositions de l’agent, soumises à
-la validation de ce document. Le choix B ne vaut pas encore approbation de
-tous ces détails.
+Les autres décisions ci-dessous ont été proposées par l’agent, puis validées
+avec l’ensemble du document par l’utilisateur (« je valide »), après
+confirmation du format court des préfixes.
 
 ## Approches considérées
 
@@ -451,7 +451,7 @@ nulls explicites, les langues de contenu et leur suppression, l’édition des
 références historiques et le choix d’édition imprimée. Les clarifications ont
 été ajoutées ci-dessus ; sa seconde lecture conclut « nothing important left ».
 Il s’agit d’une revue de conception, pas de la revue de code ni des tests
-nécessaires à la livraison. La validation utilisateur reste attendue.
+nécessaires à la livraison. L’utilisateur a ensuite validé la conception.
 
 ## Sources et points d’appui
 
