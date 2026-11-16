@@ -21,9 +21,9 @@ confirmation du format court des préfixes.
 
 ## Approches considérées
 
-| Approche | Exemple | Compromis |
-| --- | --- | --- |
-| A : préfixe, chemins stables | `/fr/login`, `/en/login` | Intégration plus simple avec les packages ; segments non traduits. |
+| Approche                        | Exemple                      | Compromis                                                                    |
+| ------------------------------- | ---------------------------- | ---------------------------------------------------------------------------- |
+| A : préfixe, chemins stables    | `/fr/login`, `/en/login`     | Intégration plus simple avec les packages ; segments non traduits.           |
 | B : préfixe et chemins traduits | `/fr/connexion`, `/en/login` | Correspondance des routes à centraliser ; URL dans la langue de l’interface. |
 
 **B est retenue par l’utilisateur.** L’implémentation utilisera des identités
@@ -114,18 +114,18 @@ HTTP, ses paramètres, son action, ses protections et son chemin traduit.
 Chaque variante reçoit un nom Laravel unique et déterministe, par exemple
 `site.fr.login` et `site.en.login`. Aucun nom dupliqué selon l’ordre de chargement.
 
-| Page | Français | Anglais |
-| --- | --- | --- |
-| Accueil | `/fr` | `/en` |
-| Connexion | `/fr/connexion` | `/en/login` |
-| Inscription | `/fr/inscription` | `/en/register` |
-| Espace personnel | `/fr/mon-espace` | `/en/dashboard` |
-| Profil | `/fr/parametres/profil` | `/en/settings/profile` |
-| Sécurité | `/fr/parametres/securite` | `/en/settings/security` |
-| Jeu | `/fr/pokemon` | `/en/pokemon` |
-| Extension | `/fr/pokemon/international/base-set` | `/en/pokemon/international/base-set` |
-| Jeux dans l’admin | `/fr/admin/jeux` | `/en/admin/games` |
-| Modifier un jeu | `/fr/admin/jeux/42/modifier` | `/en/admin/games/42/edit` |
+| Page              | Français                             | Anglais                              |
+| ----------------- | ------------------------------------ | ------------------------------------ |
+| Accueil           | `/fr`                                | `/en`                                |
+| Connexion         | `/fr/connexion`                      | `/en/login`                          |
+| Inscription       | `/fr/inscription`                    | `/en/register`                       |
+| Espace personnel  | `/fr/mon-espace`                     | `/en/dashboard`                      |
+| Profil            | `/fr/parametres/profil`              | `/en/settings/profile`               |
+| Sécurité          | `/fr/parametres/securite`            | `/en/settings/security`              |
+| Jeu               | `/fr/pokemon`                        | `/en/pokemon`                        |
+| Extension         | `/fr/pokemon/international/base-set` | `/en/pokemon/international/base-set` |
+| Jeux dans l’admin | `/fr/admin/jeux`                     | `/en/admin/games`                    |
+| Modifier un jeu   | `/fr/admin/jeux/42/modifier`         | `/en/admin/games/42/edit`            |
 
 `admin` est un segment commun aux deux langues. Les autres chemins visibles,
 y compris création, services de développement et parcours d’authentification,
@@ -274,17 +274,17 @@ une vraie distinction métier et évite de qualifier arbitrairement de français
 un nom japonais ou anglais. Les presenters exposent toujours un simple `name`
 résolu aux consommateurs, jamais un objet JSON brut.
 
-| Modèle | Champs Spatie | Données stables ou traitement spécifique |
-| --- | --- | --- |
-| Game | `display_name`, `description` | `name`, slug, éditeur, années, image et visibilité conservés. |
-| Catalog | `display_name`, `description` | `name`, clé et langue de présentation par défaut conservés. |
-| Series | `display_name`, `description` | `name` et clé conservés ; images par langue séparées. |
-| Expansion | `display_name`, `description` | `name` et clé conservés ; éditions séparées. |
-| Market | `display_name` | Nom de référence et clé conservés, y compris zones personnalisées. |
-| ExpansionRelease | `announced_period` | Date, marché, canal, statut et source restent des faits stables. |
-| Language | Aucun | Nom de langue affiché via Intl ; `name` en repli pour tags non reconnus. |
-| ExpansionEdition | Aucun | Nom officiel dans la langue d’impression, code et image conservés. |
-| ExpansionRelation | Aucun | Notes de source conservées ; elles ne sont pas un texte public traduit. |
+| Modèle            | Champs Spatie                 | Données stables ou traitement spécifique                                 |
+| ----------------- | ----------------------------- | ------------------------------------------------------------------------ |
+| Game              | `display_name`, `description` | `name`, slug, éditeur, années, image et visibilité conservés.            |
+| Catalog           | `display_name`, `description` | `name`, clé et langue de présentation par défaut conservés.              |
+| Series            | `display_name`, `description` | `name` et clé conservés ; images par langue séparées.                    |
+| Expansion         | `display_name`, `description` | `name` et clé conservés ; éditions séparées.                             |
+| Market            | `display_name`                | Nom de référence et clé conservés, y compris zones personnalisées.       |
+| ExpansionRelease  | `announced_period`            | Date, marché, canal, statut et source restent des faits stables.         |
+| Language          | Aucun                         | Nom de langue affiché via Intl ; `name` en repli pour tags non reconnus. |
+| ExpansionEdition  | Aucun                         | Nom officiel dans la langue d’impression, code et image conservés.       |
+| ExpansionRelation | Aucun                         | Notes de source conservées ; elles ne sont pas un texte public traduit.  |
 
 Pour les champs textuels actuels sans langue connue (`Game.description`,
 `Catalog.description`, `ExpansionRelease.announced_period`), conserver leur

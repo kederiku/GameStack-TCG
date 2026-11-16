@@ -42,17 +42,17 @@ Pour chaque tâche : écrire les assertions indiquées, constater leur échec po
 la raison attendue, implémenter, les relancer, puis committer les seuls fichiers
 concernés après `git diff --check`. Ne jamais neutraliser une assertion existante.
 
-| Zone | Fichiers principaux et responsabilité |
-| --- | --- |
-| Langues | `config/localization.php`, `app/Support/Localization/Locales.php` : registre et validation ; `SyncContentLanguages.php` : référentiel de contenu. |
-| Routes | `RouteDefinitions.php`, `LocalizedRoutes.php`, `RegisterLocalizedRoutes.php` dans `app/Support/Localization` ; `routes/localized.php`, `routes/legacy.php`, `routes/auth.php`. |
-| Middleware | `SetSiteLocale.php`, `SetAdminLocale.php`, nouveau `NormalizeLocalizedRedirects.php` : langue et réponses, sans modifier la logique d’authentification. |
-| Dictionnaires | `lang/{fr,en}/{common,auth,account,catalog,admin,validation,passwords,notifications,routes}.php` ; exports frontend dérivés et ignorés par Git. |
-| Frontend | `resources/js/i18n/provider.tsx`, `resources/js/hooks/use-localized-routes.ts`, `resources/js/lib/localized-navigation.ts`, évolution de `use-locale.ts`. |
-| Admin | `app/Support/Localization/AdminPanels.php`, `app/Filament/Concerns/HasLocalizedRoutes.php`, `app/Filament/Support/LocalizedPageRegistration.php`. |
-| Contenus | `app/Support/Localization/TranslatedContent.php`, `TranslationPatch.php`, `ContentLanguageUsage.php` ; `app/Actions/Catalog/SaveTranslations.php`. |
-| Migration | `app/Console/Commands/AuditLocalization.php`, migrations nouvelles et support versionné `database/migrations/support/LocalizedContentV1.php`. |
-| Images | Nouveau `app/Models/SeriesImage.php` ; services et observer catalogue existants adaptés. |
+| Zone          | Fichiers principaux et responsabilité                                                                                                                                          |
+| ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Langues       | `config/localization.php`, `app/Support/Localization/Locales.php` : registre et validation ; `SyncContentLanguages.php` : référentiel de contenu.                              |
+| Routes        | `RouteDefinitions.php`, `LocalizedRoutes.php`, `RegisterLocalizedRoutes.php` dans `app/Support/Localization` ; `routes/localized.php`, `routes/legacy.php`, `routes/auth.php`. |
+| Middleware    | `SetSiteLocale.php`, `SetAdminLocale.php`, nouveau `NormalizeLocalizedRedirects.php` : langue et réponses, sans modifier la logique d’authentification.                        |
+| Dictionnaires | `lang/{fr,en}/{common,auth,account,catalog,admin,validation,passwords,notifications,routes}.php` ; exports frontend dérivés et ignorés par Git.                                |
+| Frontend      | `resources/js/i18n/provider.tsx`, `resources/js/hooks/use-localized-routes.ts`, `resources/js/lib/localized-navigation.ts`, évolution de `use-locale.ts`.                      |
+| Admin         | `app/Support/Localization/AdminPanels.php`, `app/Filament/Concerns/HasLocalizedRoutes.php`, `app/Filament/Support/LocalizedPageRegistration.php`.                              |
+| Contenus      | `app/Support/Localization/TranslatedContent.php`, `TranslationPatch.php`, `ContentLanguageUsage.php` ; `app/Actions/Catalog/SaveTranslations.php`.                             |
+| Migration     | `app/Console/Commands/AuditLocalization.php`, migrations nouvelles et support versionné `database/migrations/support/LocalizedContentV1.php`.                                  |
+| Images        | Nouveau `app/Models/SeriesImage.php` ; services et observer catalogue existants adaptés.                                                                                       |
 
 Types partagés à définir dans les fichiers propriétaires, et à réutiliser :
 
@@ -73,6 +73,7 @@ pas à cause d’un service arrêté ou d’une erreur d’import accidentelle.
 **Interfaces:** `Locales::all(): array<string,LocaleDefinition>`, `supports(string): bool`, `default(): string`, `definition(string): array` ; `TranslationFiles::validate(): list<string>` et `frontend(string $locale): array<string,string>` ; commande `localization:check` et commande idempotente `localization:sync-languages` (insert manquants, noms existants inchangés).
 
 Assertion repère (`test_active_locales_are_independent_from_content_languages`) :
+
 ```php
 $this->assertSame(['fr', 'en'], array_keys(Locales::all()));
 $this->assertSame('fr', Locales::default());
@@ -93,6 +94,7 @@ $this->assertFalse(Locales::supports('ja'));
 **Interfaces:** `localization:export` produit des JSON plats et `TranslationKey`/`LocaleCode` dans `resources/js/i18n/generated/` (ignoré) depuis `TranslationFiles::frontend()`. `useLocale()` fournit `locale`, `t(key,replacements?)`, `tChoice(key,count,replacements?)`, `date`, `languageName`. Le provider reçoit la locale des props Inertia à chaque navigation.
 
 Assertion repère (`test_frontend_export_excludes_backend_domains`) :
+
 ```php
 $messages = TranslationFiles::frontend('en');
 $this->assertSame('Log in', $messages['auth.login.title']);
@@ -115,6 +117,7 @@ $this->assertSame([], array_filter(array_keys($messages), fn ($key) => str_start
 **Interfaces:** `RouteDefinitions::all(): array<string,LocalizedRouteDefinition>` ; `LocalizedRoutes::url(string $key, array $parameters = [], ?string $locale = null, bool $absolute = false): string` ; `alternates(Request $request): array<string,string>` ; `RegisterLocalizedRoutes::register(): void`. `useLocalizedRoutes()` fournit les fonctions Wayfinder correspondant à la locale, avec `.url`/`.form` et paramètres typés. `localization:export` génère le registre TS d’adaptateurs à partir des locales actives, sans dupliquer les templates d’URL.
 
 Assertion repère (`test_legacy_game_url_keeps_selection`) après création d’un jeu visible `pokemon` :
+
 ```php
 $this->get('/pokemon?lang=en&edition=ja&page=2')
     ->assertStatus(302)
@@ -137,6 +140,7 @@ $this->get('/pokemon?lang=en&edition=ja&page=2')
 **Interfaces:** `LocalePreferenceController::__invoke(Request): RedirectResponse` reçoit `locale` et une identité de route cible validée ; écrit cookie + préférence du compte uniquement sur action explicite. `User::preferredLocale(): string` implémente le contrat Laravel des notifications localisées. Les classes de notification conservent signatures et tokens des notifications Laravel, avec liens construits par `LocalizedRoutes`.
 
 Assertion repère (`test_url_does_not_overwrite_saved_preference`) :
+
 ```php
 $user = User::factory()->create(['preferred_locale' => 'fr']);
 $this->actingAs($user)->get('/en')->assertOk();
@@ -161,6 +165,7 @@ $this->assertSame('fr', $user->fresh()->preferred_locale);
 **Interfaces:** `AdminPanels::all(): array<string,string>` associe panel ID à locale ; `locale(string $panelId): string`, `id(string $locale): string`, `url(string $page, array $parameters, string $locale): string`. Le trait résout `getSlug(?Panel $panel = null): string`, les noms de route et labels sans cache de la première langue. `LocalizedPageRegistration::make(string $pageClass, string $pathKey): PageRegistration` résout les chemins à partir du Panel reçu.
 
 Assertion repère (`test_panel_locale_is_explicit`) :
+
 ```php
 $this->assertSame(['admin-fr' => 'fr', 'admin-en' => 'en'], AdminPanels::all());
 $this->assertSame('en', AdminPanels::locale('admin-en'));
@@ -183,6 +188,7 @@ $this->assertSame('en', AdminPanels::locale('admin-en'));
 **Interfaces:** tous les consommateurs utilisent `t(TranslationKey, replacements?)`/`tChoice`, `__()`/`trans_choice()` ; les méthodes de CatalogLabels deviennent `seriesTypes(): array`, `expansionTypes(): array`, `relationTypes(): array`, `statuses(): array`, `channels(): array`, avec clés métier inchangées.
 
 Assertion repère (`test_english_login_title`) :
+
 ```php
 $this->get('/en/login')->assertOk();
 $this->assertSame('Log in', __('auth.login.title', [], 'en'));
@@ -203,6 +209,7 @@ $this->get('/en/connexion')->assertNotFound();
 **Interfaces:** support versionné `LocalizedContentV1::audit(Connection): LocalizationAudit`, `up(Connection): void`, `verify(Connection): LocalizationAudit`. Commande `localization:audit` en lecture seule, code 1 sur problème, code 0 sinon. Elle sait distinguer ancien schéma et schéma final sans supposer une migration déjà appliquée.
 
 Assertion repère (`test_legacy_null_and_reference_are_preserved`) après conversion de la fixture :
+
 ```php
 $row = $connection->table('expansions')->where('id', 42)->first();
 $this->assertSame('参考名', $row->name);
@@ -225,6 +232,7 @@ $this->assertSame(['fr' => null, 'en' => 'English description'], json_decode($ro
 **Interfaces:** `TranslatedContent::resolve(array $translations, array $locales, ?string $reference = null): ResolvedText`, `field(Model $record,string $attribute,string $locale): ResolvedText`. `TranslationPatch::between(array $original,array $pending): list<TranslationOperation>` ; `SaveTranslations::handle(Model $record,string $locale,array $values,bool $remove = false): Model`. `ContentLanguageUsage::assertDeletable(Language): void` et `lock(array $codes): void`.
 
 Assertion repère (`test_explicit_null_stops_fallback`) :
+
 ```php
 $this->assertSame(
     ['value' => null, 'locale' => 'fr', 'fallback' => false],
@@ -248,6 +256,7 @@ $this->assertSame(
 **Interfaces:** DTO publics gardent `name: string` et `description: string|null` ; chaque texte traduit dispose de sa provenance (`nameLanguage/nameFallback`, `descriptionLanguage/descriptionFallback`, équivalents nécessaires pour période). `TranslatedContent::field` est l’unique résolveur ; `CatalogPresentation` délègue pour maintenir ses appelants, sans seconde règle.
 
 Assertion repère (`test_missing_translation_does_not_change_edition`) avec une fixture visible et édition JA :
+
 ```php
 $this->get('/fr/pokemon/international/base-set?edition=ja')
     ->assertInertia(fn (Assert $page) => $page
@@ -269,6 +278,7 @@ $this->get('/fr/pokemon/international/base-set?edition=ja')
 **Interfaces:** `TranslationFields::schema(string $modelClass): array<Component>` déclare langue de contenu et valeurs enregistrées sans fallback ; sauvegarde via `SaveTranslations::handle`. Les champs de référence restent dans une section distincte, éditable ; enlever une traduction est une action différente de vider une description.
 
 Assertion repère (`test_saving_french_keeps_japanese`) avec `$expansion` contenant la traduction JA :
+
 ```php
 SaveTranslations::handle($expansion, 'fr', ['display_name' => 'Nom français', 'description' => null]);
 $this->assertSame('日本語', $expansion->fresh()->getTranslation('display_name', 'ja', false));
@@ -289,6 +299,7 @@ $this->assertArrayHasKey('fr', $expansion->fresh()->getTranslations('description
 **Interfaces:** `PublicMetadata::for(Request): array{canonical:?string,alternates:array<string,string>,robots:?string}` ; commande `localization:finalize --dry-run` / `localization:finalize` retire uniquement les tables historiques après vérification de migration, maintenance active et absence de dépendances runtime. La simulation n’écrit rien.
 
 Assertion repère (`test_french_page_has_reciprocal_alternate`) :
+
 ```php
 $this->get('/fr')->assertSee('hreflang="en"', false)->assertSee('hreflang="x-default"', false);
 $this->get('/en')->assertSee('hreflang="fr"', false);
