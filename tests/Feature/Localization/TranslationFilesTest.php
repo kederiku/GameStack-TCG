@@ -5,6 +5,7 @@ namespace Tests\Feature\Localization;
 use App\Support\Localization\TranslationFiles;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\File;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\TestCase;
 
 class TranslationFilesTest extends TestCase
@@ -39,6 +40,30 @@ class TranslationFilesTest extends TestCase
         $this->artisan('localization:check')
             ->expectsOutputToContain('en/routes.php: missing key auth.login.')
             ->assertFailed();
+    }
+
+    #[DataProvider('duplicateRouteParameters')]
+    public function test_route_parameter_names_cannot_repeat(string $path): void
+    {
+        $root = $this->useTemporaryDictionaries();
+        $this->writeDictionary($root, 'en', 'routes', [
+            'home' => '',
+            'auth' => ['login' => 'login', 'reset-password' => $path],
+        ]);
+
+        $this->assertContains(
+            'en/routes.php: auth.reset-password repeats parameter {token}.',
+            app(TranslationFiles::class)->validate(),
+        );
+    }
+
+    /** @return array<string, array{string}> */
+    public static function duplicateRouteParameters(): array
+    {
+        return [
+            'required twice' => ['reset-password/{token}/{token}'],
+            'required and optional' => ['reset-password/{token}/{token?}'],
+        ];
     }
 
     public function test_plural_forms_follow_the_locale_instead_of_matching_the_fallback_form_count(): void

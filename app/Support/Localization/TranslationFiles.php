@@ -15,7 +15,9 @@ final class TranslationFiles
 
     private const FRAMEWORK_AUTH_KEYS = ['failed', 'password', 'throttle'];
 
-    private const ROUTE_SEGMENT = '[\pL\pN\pM-]+|\{[a-zA-Z_][a-zA-Z0-9_]*\??\}';
+    private const ROUTE_PARAMETER = '\{([a-zA-Z_][a-zA-Z0-9_]*)\??\}';
+
+    private const ROUTE_SEGMENT = '[\pL\pN\pM-]+|'.self::ROUTE_PARAMETER;
 
     /** @return list<string> */
     public function validate(): array
@@ -144,6 +146,15 @@ final class TranslationFiles
             $errors[] = "{$file}: {$key} must be a relative path with literal segments or named parameters.";
         }
 
+        if ($route) {
+            preg_match_all('/'.self::ROUTE_PARAMETER.'/', $target, $matches);
+            foreach (array_count_values($matches[1]) as $name => $count) {
+                if ($count > 1) {
+                    $errors[] = "{$file}: {$key} repeats parameter {{$name}}.";
+                }
+            }
+        }
+
         $expected = $this->placeholders($source, $route);
         $actual = $this->placeholders($target, $route);
 
@@ -171,7 +182,7 @@ final class TranslationFiles
     /** @return list<string> */
     private function placeholders(string $value, bool $route): array
     {
-        $pattern = $route ? '/\{[a-zA-Z_][a-zA-Z0-9_]*\??\}/' : '/(?<!:):[a-zA-Z_][a-zA-Z0-9_]*/';
+        $pattern = $route ? '/'.self::ROUTE_PARAMETER.'/' : '/(?<!:):[a-zA-Z_][a-zA-Z0-9_]*/';
         preg_match_all($pattern, $route ? $value : strtolower($value), $matches);
         $parameters = array_values(array_unique($matches[0]));
         sort($parameters, SORT_STRING);
