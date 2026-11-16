@@ -71,6 +71,7 @@ return [
         'enable-twofactor-authentication' => 'Enable two-factor authentication',
     ],
     'passkey-item' => [
+        'deleting' => 'Deleting…',
         'added' => 'Added:',
         'last-used' => 'Last used:',
         'delete-passkey' => 'Delete passkey',

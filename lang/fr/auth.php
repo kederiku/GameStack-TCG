@@ -71,6 +71,7 @@ return [
         'enable-twofactor-authentication' => 'Activer la double authentification',
     ],
     'passkey-item' => [
+        'deleting' => 'Suppression…',
         'added' => 'Ajoutée :',
         'last-used' => 'Dernière utilisation :',
         'delete-passkey' => 'Supprimer la clé',

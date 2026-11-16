@@ -87,4 +87,24 @@ class LocalizedCopyTest extends TestCase
             }
         }
     }
+
+    public function test_email_shell_escapes_translated_greetings_and_salutation(): void
+    {
+        app()->setLocale('en');
+        app('translator')->addLines([
+            'notifications.mail.greeting' => '<img src=x onerror="alert(1)">Hello',
+            'notifications.mail.error' => '<img src=x onerror="alert(2)">Oops',
+            'notifications.mail.salutation' => '<img src=x onerror="alert(3)">Regards',
+        ], 'en');
+        $mail = (new LocalizedResetPassword('token', 'en'))->toMail(User::factory()->create());
+        foreach (['info' => 'Hello', 'error' => 'Oops'] as $level => $greeting) {
+            $mail->level($level);
+            $html = (string) app(Markdown::class)->render($mail->markdown, $mail->data());
+            $this->assertStringNotContainsString('<img src="x"', $html);
+            $this->assertStringNotContainsString('<img src=x', $html);
+            $this->assertStringContainsString('&lt;img src=x onerror=', $html);
+            $this->assertStringContainsString('&gt;'.$greeting, $html);
+            $this->assertStringContainsString('&gt;Regards', $html);
+        }
+    }
 }

@@ -88,18 +88,30 @@ export default function PasskeyItem({ passkey, onDelete }: Props) {
                                 {t('auth.passkey-item.cancel')}
                             </Button>
                         </DialogClose>
-                        <Button
-                            variant="destructive"
-                            onClick={handleDelete}
-                            disabled={isDeleting}
-                        >
-                            {isDeleting
-                                ? 'Suppression…'
-                                : t('auth.passkey-item.delete-title')}
-                        </Button>
+                        <PasskeyDeleteButton
+                            isDeleting={isDeleting}
+                            onDelete={handleDelete}
+                        />
                     </DialogFooter>
                 </DialogContent>
             </Dialog>
         </div>
+    );
+}
+
+export function PasskeyDeleteButton({
+    isDeleting,
+    onDelete,
+}: {
+    isDeleting: boolean;
+    onDelete: () => void;
+}) {
+    const { t } = useLocale();
+    return (
+        <Button variant="destructive" onClick={onDelete} disabled={isDeleting}>
+            {isDeleting
+                ? t('auth.passkey-item.deleting')
+                : t('auth.passkey-item.delete-title')}
+        </Button>
     );
 }

@@ -4,9 +4,9 @@
 # {{ $greeting }}
 @else
 @if ($level === 'error')
-# @lang('notifications.mail.error')
+# {{ __('notifications.mail.error') }}
 @else
-# @lang('notifications.mail.greeting')
+# {{ __('notifications.mail.greeting') }}
 @endif
 @endif
 
@@ -39,7 +39,7 @@
 @if (! empty($salutation))
 {{ $salutation }}
 @else
-@lang('notifications.mail.salutation')<br>
+{{ __('notifications.mail.salutation') }}<br>
 {{ config('app.name') }}
 @endif
 

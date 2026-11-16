@@ -211,3 +211,49 @@ void test('real Inertia auth and account renders translate layouts, accessible c
         await server.close();
     }
 });
+
+void test('passkey deletion renders localized pending and idle states', async () => {
+    const server = await createServer({
+        configFile: false,
+        server: { middlewareMode: true },
+        resolve: { alias: { '@': `${process.cwd()}/resources/js` } },
+    });
+    try {
+        const { LocaleProvider } = await server.ssrLoadModule(
+            '/resources/js/i18n/provider.tsx',
+        );
+        const { PasskeyDeleteButton } = await server.ssrLoadModule(
+            '/resources/js/components/passkey-item.tsx',
+        );
+        for (const [locale, pending, idle] of [
+            ['en', 'Deleting…', 'Delete passkey'],
+            ['fr', 'Suppression…', 'Supprimer la clé d’accès'],
+        ]) {
+            for (const isDeleting of [false, true]) {
+                const response = await createInertiaApp({
+                    page: {
+                        component: 'passkey-delete-button',
+                        props: { locale, isDeleting, errors: {} },
+                        url: `/${locale}/settings/security`,
+                        version: null,
+                        clearHistory: false,
+                        encryptHistory: false,
+                    },
+                    render: renderToString,
+                    resolve: () => PasskeyDeleteButton,
+                    layout: () => [LocaleProvider],
+                    setup: ({ App, props }) => createElement(App, props),
+                });
+                assert.ok(response && typeof response === 'object');
+                assert.match(
+                    response.body,
+                    new RegExp(`>${isDeleting ? pending : idle}</button>`),
+                    `${locale} pending=${isDeleting}`,
+                );
+                assert.equal(response.body.includes('disabled=""'), isDeleting);
+            }
+        }
+    } finally {
+        await server.close();
+    }
+});

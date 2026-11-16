@@ -21,7 +21,7 @@
     {{-- Footer --}}
     <x-slot:footer>
         <x-mail::footer>
-            © {{ date('Y') }} {{ config('app.name') }}. @lang('notifications.mail.rights')
+            © {{ date('Y') }} {{ config('app.name') }}. {{ __('notifications.mail.rights') }}
         </x-mail::footer>
     </x-slot:footer>
 </x-mail::layout>
