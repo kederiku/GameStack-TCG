@@ -12,6 +12,8 @@ L’utilisateur a demandé un préfixe de langue dans les URL, des fichiers de
 langue, et l’utilisation de `spatie/laravel-translatable` pour les données qui
 s’y prêtent. Il a précisé que le périmètre couvre **tout**, administration et
 e-mails compris. Il a choisi l’approche B : préfixe et chemins traduits.
+Il a ensuite confirmé les préfixes de langue courts (`/fr`, `/en`), sans
+variante régionale comme `/fr-FR` pour cette livraison.
 
 Les autres décisions ci-dessous sont des propositions de l’agent, soumises à
 la validation de ce document. Le choix B ne vaut pas encore approbation de
@@ -70,6 +72,7 @@ navigateur et des logiciels externes comme Mailpit restent sous leur contrôle.
 Un registre `config/localization.php` définit les langues d’interface actives,
 leur nom natif, tag HTML/Intl, identifiant Laravel, direction et langue de repli.
 FR et EN sont actives au départ ; FR est la langue par défaut et de repli.
+Les préfixes canoniques sont `/fr` et `/en`, conformément au choix utilisateur.
 Les éventuelles différences `pt-BR`/`pt_BR` ont une correspondance explicite.
 
 La table `languages` conserve son rôle de référentiel des langues des contenus
