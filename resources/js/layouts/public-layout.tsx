@@ -1,19 +1,16 @@
 import { Link } from '@inertiajs/react';
 import type { PropsWithChildren } from 'react';
-import { useEffect } from 'react';
 import { useLocale } from '@/hooks/use-locale';
+import { localeDefinitions } from '@/i18n/generated/types';
 import { BrandLogo } from '@/components/brand-logo';
 import { PublicHeader } from '@/components/public/public-header';
 import { home } from '@/routes';
 
 export default function PublicLayout({ children }: PropsWithChildren) {
     const { locale, t, localizedUrl } = useLocale();
-    useEffect(() => {
-        document.documentElement.lang = locale;
-    }, [locale]);
     return (
         <div
-            lang={locale}
+            lang={localeDefinitions[locale].htmlLang}
             className="flex min-h-screen flex-col bg-background text-foreground"
         >
             <a

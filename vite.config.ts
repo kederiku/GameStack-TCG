@@ -1,3 +1,5 @@
+import { execFileSync } from 'node:child_process';
+import { resolve, sep } from 'node:path';
 import inertia from '@inertiajs/vite';
 import { wayfinder } from '@laravel/vite-plugin-wayfinder';
 import babel from '@rolldown/plugin-babel';
@@ -6,9 +8,51 @@ import react, { reactCompilerPreset } from '@vitejs/plugin-react';
 import laravel from 'laravel-vite-plugin';
 import { bunny, google } from 'laravel-vite-plugin/fonts';
 import { defineConfig, lazyPlugins } from 'vite-plus';
+import type { Plugin } from 'vite';
+
+function frontendTranslations(): Plugin {
+    function exportTranslations(root: string) {
+        execFileSync('php', ['artisan', 'localization:export'], {
+            cwd: root,
+            stdio: 'inherit',
+        });
+    }
+
+    return {
+        name: 'gamestackr-frontend-translations',
+        configResolved({ root }) {
+            exportTranslations(root);
+        },
+        configureServer(server) {
+            const { root, logger } = server.config;
+            const lang = resolve(root, 'lang');
+            const localeConfig = resolve(root, 'config/localization.php');
+            server.watcher.add([lang, localeConfig]);
+            server.watcher.on('all', (event, path) => {
+                if (
+                    !['add', 'change', 'unlink'].includes(event) ||
+                    !(
+                        path === localeConfig ||
+                        (path.startsWith(lang + sep) && path.endsWith('.php'))
+                    )
+                ) {
+                    return;
+                }
+
+                try {
+                    exportTranslations(root);
+                    server.ws.send({ type: 'full-reload' });
+                } catch (error) {
+                    logger.error(String(error));
+                }
+            });
+        },
+    };
+}
 
 export default defineConfig({
     plugins: lazyPlugins(() => [
+        frontendTranslations(),
         laravel({
             input: [
                 'resources/css/app.css',
@@ -61,6 +105,7 @@ export default defineConfig({
             'bootstrap/ssr/**',
             'tailwind.config.js',
             'resources/js/actions/**',
+            'resources/js/i18n/generated/**',
             'resources/js/components/ui/*',
             'resources/js/routes/**',
             'resources/js/wayfinder/**',
@@ -80,6 +125,7 @@ export default defineConfig({
         ignorePatterns: [
             '.github/**',
             'composer.json',
+            'resources/js/i18n/generated/**',
             'resources/js/components/ui/*',
             'resources/views/mail/*',
         ],

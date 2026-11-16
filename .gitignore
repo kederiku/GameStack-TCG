@@ -20,6 +20,7 @@
 /public/hot
 /public/storage
 /resources/js/actions/
+/resources/js/i18n/generated/
 /resources/js/routes/
 /resources/js/wayfinder/
 *.tsbuildinfo

@@ -1,10 +1,24 @@
-import { usePage } from '@inertiajs/react';
+import { localeDefinitions } from '@/i18n/generated/types';
+import { useTranslations } from '@/i18n/provider';
+import type { LocaleCode, Replacements, TranslationKey } from '@/i18n/types';
 
-export type Locale = 'fr' | 'en';
+export type Locale = LocaleCode;
 
 export function useLocale() {
-    const { locale } = usePage().props;
-    const t = (fr: string, en: string) => (locale === 'en' ? en : fr);
+    const { locale, t: translate, tChoice } = useTranslations();
+    const { htmlLang } = localeDefinitions[locale];
+
+    function t(key: TranslationKey, replacements?: Replacements): string;
+    /** @deprecated Use a semantic translation key from the Laravel dictionaries. */
+    function t(fr: string, en: string): string;
+    function t(key: string, replacements?: Replacements | string): string {
+        return typeof replacements === 'string'
+            ? locale === 'en'
+                ? replacements
+                : key
+            : translate(key as TranslationKey, replacements);
+    }
+
     const localizedUrl = (path: string) => {
         const url = new URL(path, 'http://local');
         url.searchParams.set('lang', locale);
@@ -12,17 +26,17 @@ export function useLocale() {
     };
     const date = (value: string | null) =>
         value
-            ? new Intl.DateTimeFormat(locale, {
+            ? new Intl.DateTimeFormat(htmlLang, {
                   day: 'numeric',
                   month: 'short',
                   year: 'numeric',
                   timeZone: 'UTC',
               }).format(new Date(`${value}T12:00:00Z`))
-            : t('Date non renseignée', 'Date not listed');
+            : t('common.date-unavailable');
     const languageName = (code: string, fallback?: string) => {
         try {
             return (
-                new Intl.DisplayNames([locale], { type: 'language' }).of(
+                new Intl.DisplayNames([htmlLang], { type: 'language' }).of(
                     code,
                 ) ??
                 fallback ??
@@ -33,5 +47,5 @@ export function useLocale() {
         }
     };
 
-    return { locale, t, localizedUrl, date, languageName };
+    return { locale, t, tChoice, localizedUrl, date, languageName };
 }

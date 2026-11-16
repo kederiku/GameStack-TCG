@@ -2,6 +2,7 @@ import { createInertiaApp } from '@inertiajs/react';
 import { Toaster } from '@/components/ui/sonner';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { initializeTheme } from '@/hooks/use-appearance';
+import { LocaleProvider } from '@/i18n/provider';
 import AppLayout from '@/layouts/app-layout';
 import AuthLayout from '@/layouts/auth-layout';
 import PublicLayout from '@/layouts/public-layout';
@@ -15,13 +16,13 @@ void createInertiaApp({
         switch (true) {
             case name === 'welcome':
             case name.startsWith('games/'):
-                return PublicLayout;
+                return [LocaleProvider, PublicLayout];
             case name.startsWith('auth/'):
-                return AuthLayout;
+                return [LocaleProvider, AuthLayout];
             case name.startsWith('settings/'):
-                return [AppLayout, SettingsLayout];
+                return [LocaleProvider, AppLayout, SettingsLayout];
             default:
-                return AppLayout;
+                return [LocaleProvider, AppLayout];
         }
     },
     strictMode: true,

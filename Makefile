@@ -9,7 +9,7 @@ RUN := $(DC) run --rm --no-deps app
 EXEC := $(DC) exec app
 ARGS ?=
 
-.PHONY: help env init up down stop restart logs ps admin artisan composer npm shell migrate test test-storage check build assets format storage-init storage-password
+.PHONY: help env init up down stop restart logs ps admin artisan composer npm shell migrate test test-storage check build assets translations format storage-init storage-password
 
 help: ## Afficher les commandes disponibles
 	@awk 'BEGIN {FS = ":.*## "} /^[a-zA-Z_-]+:.*## / {printf "  %-12s %s\n", $$1, $$2}' $(MAKEFILE_LIST)
@@ -99,6 +99,9 @@ build: ## Construire l’image Docker
 
 assets: ## Compiler les assets de production
 	$(RUN) npm run build
+
+translations: ## Générer les dictionnaires et types React
+	$(RUN) php artisan localization:export
 
 format: ## Formater PHP et frontend
 	$(RUN) composer lint
