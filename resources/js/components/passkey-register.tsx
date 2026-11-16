@@ -1,3 +1,5 @@
+import { passkeyErrorMessage } from '@/lib/passkey-error';
+import { useLocale } from '@/hooks/use-locale';
 import { useLocalizedRoutes } from '@/hooks/use-localized-routes';
 import { usePasskeyRegister } from '@laravel/passkeys/react';
 import { Plus } from 'lucide-react';
@@ -12,6 +14,7 @@ type Props = {
 };
 
 export default function PasskeyRegistration({ onSuccess }: Props) {
+    const { t } = useLocale();
     const localized = useLocalizedRoutes();
     const [name, setName] = useState(() => {
         const ua = navigator.userAgent;
@@ -32,21 +35,25 @@ export default function PasskeyRegistration({ onSuccess }: Props) {
             { pattern: /Windows/, name: 'Windows' },
         ].find(({ pattern }) => pattern.test(ua))?.name;
 
-        return [browser, os].filter(Boolean).join(' sur ') || '';
+        return (
+            [browser, os].filter(Boolean).join(t('auth.passkey-register.on')) ||
+            ''
+        );
     });
 
     const [showForm, setShowForm] = useState(false);
-    const { register, isLoading, error, isSupported } = usePasskeyRegister({
-        routes: {
-            options: localized['passkey.registration-options'].url(),
-            submit: localized['passkey.store'].url(),
-        },
-        onSuccess: () => {
-            setName('');
-            setShowForm(false);
-            onSuccess();
-        },
-    });
+    const { register, isLoading, errorInstance, isSupported } =
+        usePasskeyRegister({
+            routes: {
+                options: localized['passkey.registration-options'].url(),
+                submit: localized['passkey.store'].url(),
+            },
+            onSuccess: () => {
+                setName('');
+                setShowForm(false);
+                onSuccess();
+            },
+        });
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -63,10 +70,12 @@ export default function PasskeyRegistration({ onSuccess }: Props) {
         setName('');
     };
 
+    const error = passkeyErrorMessage(errorInstance, t);
+
     if (!isSupported) {
         return (
             <div className="text-sm text-muted-foreground">
-                Les clés d’accès ne sont pas prises en charge par ce navigateur.
+                {t('auth.passkey-register.unsupported')}
             </div>
         );
     }
@@ -74,8 +83,8 @@ export default function PasskeyRegistration({ onSuccess }: Props) {
     if (!showForm) {
         return (
             <Button variant="outline" onClick={() => setShowForm(true)}>
-                <Plus className="size-4" aria-hidden="true" /> Ajouter une clé
-                d’accès
+                <Plus className="size-4" aria-hidden="true" />
+                {t('auth.passkey-register.add-a-passkey')}
             </Button>
         );
     }
@@ -86,18 +95,20 @@ export default function PasskeyRegistration({ onSuccess }: Props) {
             className="space-y-4 rounded-xl border border-border bg-background/50 p-4"
         >
             <div className="grid gap-2">
-                <Label htmlFor="passkey-name">Nom de la clé</Label>
+                <Label htmlFor="passkey-name">
+                    {t('auth.passkey-register.passkey-name')}
+                </Label>
                 <Input
                     id="passkey-name"
                     type="text"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
-                    placeholder="Ex. : mon MacBook, mon iPhone"
+                    placeholder={t('auth.passkey-register.name-placeholder')}
                     className="mt-1 block w-full border-foreground/20"
                     autoFocus
                 />
                 <p className="text-xs text-muted-foreground">
-                    Un nom vous aidera à reconnaître cette clé plus tard.
+                    {t('auth.passkey-register.name-help')}
                 </p>
             </div>
 
@@ -105,10 +116,12 @@ export default function PasskeyRegistration({ onSuccess }: Props) {
 
             <div className="flex flex-wrap gap-2">
                 <Button type="submit" disabled={isLoading || !name.trim()}>
-                    {isLoading ? 'Enregistrement…' : 'Enregistrer la clé'}
+                    {isLoading
+                        ? t('auth.passkey-register.saving')
+                        : t('auth.passkey-register.save-passkey')}
                 </Button>
                 <Button type="button" variant="ghost" onClick={handleCancel}>
-                    Annuler
+                    {t('auth.passkey-register.cancel')}
                 </Button>
             </div>
         </form>

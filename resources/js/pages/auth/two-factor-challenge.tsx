@@ -1,3 +1,4 @@
+import { useLocale } from '@/hooks/use-locale';
 import { useLocalizedRoutes } from '@/hooks/use-localized-routes';
 import { Form, Head, setLayoutProps } from '@inertiajs/react';
 import { REGEXP_ONLY_DIGITS } from 'input-otp';
@@ -14,6 +15,7 @@ import {
 import { OTP_MAX_LENGTH } from '@/hooks/use-two-factor-auth';
 
 export default function TwoFactorChallenge() {
+    const { t } = useLocale();
     const localized = useLocalizedRoutes();
     const store = localized['two-factor.login.store'];
 
@@ -27,20 +29,22 @@ export default function TwoFactorChallenge() {
     }>(() => {
         if (showRecoveryInput) {
             return {
-                title: 'Code de récupération',
-                description:
-                    'Saisissez l’un des codes de récupération conservés lors de l’activation de la double authentification.',
-                toggleText: 'Utiliser un code d’authentification',
+                title: t('auth.two-factor-challenge.recovery-code'),
+                description: t(
+                    'auth.two-factor-challenge.recovery-description',
+                ),
+                toggleText: t(
+                    'auth.two-factor-challenge.use-an-authentication-code',
+                ),
             };
         }
 
         return {
-            title: 'Vérification en deux étapes',
-            description:
-                'Saisissez le code à six chiffres de votre application d’authentification.',
-            toggleText: 'Utiliser un code de récupération',
+            title: t('auth.two-factor-challenge.twostep-verification'),
+            description: t('auth.two-factor-challenge.code-description'),
+            toggleText: t('auth.two-factor-challenge.use-a-recovery-code'),
         };
-    }, [showRecoveryInput]);
+    }, [showRecoveryInput, t]);
 
     setLayoutProps({
         title: authConfigContent.title,
@@ -55,7 +59,9 @@ export default function TwoFactorChallenge() {
 
     return (
         <>
-            <Head title="Double authentification" />
+            <Head
+                title={t('auth.two-factor-challenge.twofactor-authentication')}
+            />
 
             <div className="space-y-6">
                 <Form
@@ -69,7 +75,9 @@ export default function TwoFactorChallenge() {
                             {showRecoveryInput ? (
                                 <>
                                     <Label htmlFor="recovery_code">
-                                        Code de récupération
+                                        {t(
+                                            'auth.two-factor-challenge.recovery-code',
+                                        )}
                                     </Label>
                                     <Input
                                         id="recovery_code"
@@ -78,7 +86,9 @@ export default function TwoFactorChallenge() {
                                         )}
                                         name="recovery_code"
                                         type="text"
-                                        placeholder="Votre code de récupération"
+                                        placeholder={t(
+                                            'auth.two-factor-challenge.your-recovery-code',
+                                        )}
                                         autoComplete="off"
                                         autoFocus={showRecoveryInput}
                                         required
@@ -91,7 +101,9 @@ export default function TwoFactorChallenge() {
                             ) : (
                                 <div className="flex flex-col items-center justify-center space-y-3 text-center">
                                     <Label htmlFor="code">
-                                        Code d’authentification
+                                        {t(
+                                            'auth.two-factor-challenge.authentication-code',
+                                        )}
                                     </Label>
                                     <div className="flex w-full items-center justify-center">
                                         <InputOTP
@@ -131,7 +143,7 @@ export default function TwoFactorChallenge() {
                                 className="w-full"
                                 disabled={processing}
                             >
-                                Continuer
+                                {t('auth.two-factor-challenge.continue')}
                             </Button>
 
                             <div className="text-center text-sm text-muted-foreground">

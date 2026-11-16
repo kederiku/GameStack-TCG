@@ -2,45 +2,45 @@
     <div class="gs-admin-overview">
         <section class="gs-admin-welcome" aria-labelledby="catalogue-welcome-title">
             <div>
-                <p class="gs-admin-eyebrow">VOTRE ESPACE DE GESTION</p>
-                <h2 id="catalogue-welcome-title">Construisez votre catalogue, étape par étape.</h2>
-                <p>Retrouvez vos jeux, organisez leurs extensions et renseignez les éditions dans chaque langue.</p>
+                <p class="gs-admin-eyebrow">{{ __('admin.overview.eyebrow') }}</p>
+                <h2 id="catalogue-welcome-title">{{ __('admin.overview.title') }}</h2>
+                <p>{{ __('admin.overview.description') }}</p>
             </div>
             <div class="gs-admin-quick-actions">
-                <x-filament::button tag="a" :href="$links['createGame']" icon="heroicon-o-plus">Ajouter un jeu</x-filament::button>
-                <x-filament::button tag="a" :href="$links['createExpansion']" color="gray" icon="heroicon-o-rectangle-stack">Ajouter une extension</x-filament::button>
+                <x-filament::button tag="a" :href="$links['createGame']" icon="heroicon-o-plus">{{ __('admin.overview.add_game') }}</x-filament::button>
+                <x-filament::button tag="a" :href="$links['createExpansion']" color="gray" icon="heroicon-o-rectangle-stack">{{ __('admin.overview.add_expansion') }}</x-filament::button>
             </div>
         </section>
 
-        <div class="gs-admin-stat-grid" aria-label="Contenu du catalogue">
-            @foreach (['games' => ['Jeux', 'Univers de cartes', 'heroicon-o-puzzle-piece'], 'catalogs' => ['Catalogues', 'Versions éditoriales', 'heroicon-o-circle-stack'], 'expansions' => ['Extensions', 'Ensembles de cartes', 'heroicon-o-rectangle-stack']] as $key => [$label, $description, $icon])
+        <div class="gs-admin-stat-grid" aria-label="{{ __('admin.overview.content_label') }}">
+            @foreach (['games' => [__('admin.overview.games'), __('admin.overview.games_description'), 'heroicon-o-puzzle-piece'], 'catalogs' => [__('admin.overview.catalogs'), __('admin.overview.catalogs_description'), 'heroicon-o-circle-stack'], 'expansions' => [__('admin.overview.expansions'), __('admin.overview.expansions_description'), 'heroicon-o-rectangle-stack']] as $key => [$label, $description, $icon])
                 <a class="gs-admin-stat" href="{{ $links[$key] }}">
                     <x-filament::icon :icon="$icon" class="gs-admin-stat-icon" />
-                    <span class="gs-admin-stat-number">{{ number_format($totals[$key], 0, ',', ' ') }}</span>
+                    <span class="gs-admin-stat-number">{{ \Illuminate\Support\Number::format($totals[$key], locale: app()->getLocale()) }}</span>
                     <span class="gs-admin-stat-label">{{ $label }}</span>
                     <span class="gs-admin-stat-caption">{{ $description }} <span aria-hidden="true">→</span></span>
                 </a>
             @endforeach
             <div class="gs-admin-stat">
                 <x-filament::icon icon="heroicon-o-language" class="gs-admin-stat-icon" />
-                <span class="gs-admin-stat-number">{{ number_format($totals['editions'], 0, ',', ' ') }}</span>
-                <span class="gs-admin-stat-label">Éditions linguistiques</span>
-                <span class="gs-admin-stat-caption">À gérer depuis une extension</span>
+                <span class="gs-admin-stat-number">{{ \Illuminate\Support\Number::format($totals['editions'], locale: app()->getLocale()) }}</span>
+                <span class="gs-admin-stat-label">{{ __('admin.overview.editions') }}</span>
+                <span class="gs-admin-stat-caption">{{ __('admin.overview.editions_help') }}</span>
             </div>
         </div>
 
         <section class="gs-admin-guide" aria-labelledby="catalogue-guide-title">
             <div class="gs-admin-guide-heading">
-                <h2 id="catalogue-guide-title">Par où commencer ?</h2>
-                <p>Chaque fiche se rattache au niveau précédent. La série est facultative.</p>
+                <h2 id="catalogue-guide-title">{{ __('admin.overview.guide_title') }}</h2>
+                <p>{{ __('admin.overview.guide_description') }}</p>
             </div>
             <ol class="gs-admin-steps">
-                <li><span class="gs-admin-step-number">1</span><div><a href="{{ $links['games'] }}">Choisir un jeu</a><p>Pokémon, Magic, One Piece… Le point de départ du catalogue.</p></div></li>
-                <li><span class="gs-admin-step-number">2</span><div><a href="{{ $links['catalogs'] }}">Organiser ses catalogues</a><p>Séparez les ensembles quand leur contenu diffère selon les versions du jeu.</p></div></li>
-                <li><span class="gs-admin-step-number">3</span><div><a href="{{ $links['expansions'] }}">Ajouter une extension</a><p>Rattachez-la à une <a href="{{ $links['series'] }}">série ou un bloc</a> si le jeu en utilise.</p></div></li>
-                <li><span class="gs-admin-step-number">4</span><div><strong>Préciser les éditions et sorties</strong><p>Depuis l’extension, ajoutez les langues imprimées, puis les marchés et dates de sortie.</p></div></li>
+                <li><span class="gs-admin-step-number">1</span><div><a href="{{ $links['games'] }}">{{ __('admin.overview.choose_game') }}</a><p>{{ __('admin.overview.choose_game_help') }}</p></div></li>
+                <li><span class="gs-admin-step-number">2</span><div><a href="{{ $links['catalogs'] }}">{{ __('admin.overview.organize_catalogs') }}</a><p>{{ __('admin.overview.organize_catalogs_help') }}</p></div></li>
+                <li><span class="gs-admin-step-number">3</span><div><a href="{{ $links['expansions'] }}">{{ __('admin.overview.add_expansion') }}</a><p>{{ __('admin.overview.series_prefix') }} <a href="{{ $links['series'] }}">{{ __('admin.overview.series_link') }}</a> {{ __('admin.overview.series_suffix') }}</p></div></li>
+                <li><span class="gs-admin-step-number">4</span><div><strong>{{ __('admin.overview.releases_title') }}</strong><p>{{ __('admin.overview.releases_help') }}</p></div></li>
             </ol>
         </section>
-        <p class="gs-admin-footnote">Les chiffres incluent les fiches masquées. L’affichage public des extensions est encore en préparation.</p>
+        <p class="gs-admin-footnote">{{ __('admin.overview.footnote') }}</p>
     </div>
 </x-filament-widgets::widget>

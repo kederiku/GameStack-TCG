@@ -42,15 +42,14 @@ export function ExpansionCard({ expansion }: { expansion: PublicExpansion }) {
                     ) : edition ? (
                         statuses[edition.status]
                     ) : (
-                        t('Éditions à venir', 'Editions coming soon')
+                        t('catalog.expansion-card.editions-coming-soon')
                     )}
                 </p>
                 <div className="mt-auto flex items-end justify-between gap-3 pt-4">
                     <span
                         className="flex flex-wrap gap-1.5"
                         aria-label={t(
-                            'Langues disponibles',
-                            'Available languages',
+                            'catalog.expansion-card.available-languages',
                         )}
                     >
                         {expansion.languages.map((language) => (

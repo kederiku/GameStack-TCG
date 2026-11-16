@@ -75,6 +75,9 @@ class TranslationFilesTest extends TestCase
         ]);
         config(['localization.locales.ja' => ['laravelLocale' => 'ja', 'htmlLang' => 'ja', 'label' => '日本語', 'direction' => 'ltr']]);
         File::copyDirectory($root.'/en', $root.'/ja');
+        foreach (['fortify', 'passkeys', 'laravel'] as $package) {
+            File::copyDirectory($root.'/vendor/'.$package.'/en', $root.'/vendor/'.$package.'/ja');
+        }
         $this->writeDictionary($root, 'ja', 'common', [
             'welcome' => 'ようこそ、:name！',
             'results' => ':count 件の検索結果',
@@ -111,7 +114,13 @@ class TranslationFilesTest extends TestCase
             'localization.locales.pt-BR' => ['laravelLocale' => 'pt_BR', 'htmlLang' => 'pt-BR', 'label' => 'Português do Brasil', 'direction' => 'ltr'],
         ]);
         File::copyDirectory($root.'/en', $root.'/de');
+        foreach (['fortify', 'passkeys', 'laravel'] as $package) {
+            File::copyDirectory($root.'/vendor/'.$package.'/en', $root.'/vendor/'.$package.'/de');
+        }
         File::copyDirectory($root.'/en', $root.'/pt_BR');
+        foreach (['fortify', 'passkeys', 'laravel'] as $package) {
+            File::copyDirectory($root.'/vendor/'.$package.'/en', $root.'/vendor/'.$package.'/pt_BR');
+        }
         $this->writeDictionary($root, 'pt_BR', 'common', [
             'welcome' => 'Olá, :name!',
             'results' => ':count resultado|:count resultados',
@@ -131,6 +140,22 @@ class TranslationFilesTest extends TestCase
             'common.results' => ':count resultado|:count resultados',
             'common.welcome' => 'Olá, :name!',
         ], $files->frontend('pt-BR'));
+    }
+
+    public function test_vendor_aliases_are_required_checked_and_never_exported(): void
+    {
+        $root = sys_get_temp_dir().'/gamestackr-vendor-copy-'.bin2hex(random_bytes(8));
+        File::copyDirectory(lang_path(), $root);
+        $this->beforeApplicationDestroyed(fn () => File::deleteDirectory($root));
+        $this->app->useLangPath($root);
+        $path = $root.'/vendor/passkeys/en/messages.php';
+        $lines = require $path;
+        unset($lines['Unable to register this passkey.']);
+        File::put($path, '<?php return '.var_export($lines, true).';');
+        $errors = app(TranslationFiles::class)->validate();
+        $this->assertContains('vendor/passkeys/en/messages.php: missing key Unable to register this passkey..', $errors);
+        $this->artisan('localization:check')->assertFailed();
+        $this->assertArrayNotHasKey('Unable to register this passkey.', app(TranslationFiles::class)->frontend('en'));
     }
 
     private function useTemporaryDictionaries(): string
@@ -161,6 +186,10 @@ class TranslationFilesTest extends TestCase
                 'attributes' => [],
             ]);
             $this->writeDictionary($root, $locale, 'passwords', ['reset' => 'Password reset.']);
+            foreach (['fortify', 'passkeys', 'laravel'] as $package) {
+                File::ensureDirectoryExists($root.'/vendor/'.$package.'/'.$locale);
+                File::put($root.'/vendor/'.$package.'/'.$locale.'/messages.php', "<?php return ['Vendor message' => 'Vendor message'];");
+            }
         }
 
         return $root;

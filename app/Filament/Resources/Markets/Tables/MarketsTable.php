@@ -10,7 +10,7 @@ class MarketsTable
     public static function configure(Table $table): Table
     {
         return CatalogTables::standard($table)->columns([
-            CatalogTables::name('Marché'), CatalogTables::key(),
+            CatalogTables::name(__('admin.labels.market')), CatalogTables::key(),
         ]);
     }
 }

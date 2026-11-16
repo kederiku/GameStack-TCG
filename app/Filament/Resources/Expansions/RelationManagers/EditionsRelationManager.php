@@ -15,12 +15,16 @@ use Filament\Schemas\Schema;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Model;
 
 class EditionsRelationManager extends CatalogRelationManager
 {
     protected static string $relationship = 'editions';
 
-    protected static ?string $title = 'Éditions';
+    public static function getTitle(Model $ownerRecord, string $pageClass): string
+    {
+        return __('admin.labels.editions');
+    }
 
     public function form(Schema $schema): Schema
     {
@@ -30,23 +34,23 @@ class EditionsRelationManager extends CatalogRelationManager
     public function table(Table $table): Table
     {
         return $table->recordTitleAttribute('name')
-            ->description('Les versions réellement imprimées ou annoncées de cet ensemble, une par langue. Ouvrez « Modifier et gérer les sorties » pour préciser les marchés et dates.')
-            ->searchPlaceholder('Rechercher')
-            ->emptyStateHeading('Aucune édition')
-            ->emptyStateDescription('Créez une édition pour chaque langue confirmée par l’éditeur. Une simple traduction du nom se renseigne dans « Localisations ».')
+            ->description(__('admin.editions.description'))
+            ->searchPlaceholder(__('admin.labels.search'))
+            ->emptyStateHeading(__('admin.labels.no-editions'))
+            ->emptyStateDescription(__('admin.editions.empty_help'))
             ->columns([
-                ImageColumn::make('image')->label('Visuel')->disk(fn (): string => CatalogImages::diskName())
+                ImageColumn::make('image')->label(__('admin.labels.artwork'))->disk(fn (): string => CatalogImages::diskName())
                     ->visibility('public')->imageHeight(40),
-                CatalogTables::name('Édition'),
-                TextColumn::make('language.code')->label('Langue')->badge()->searchable(),
-                TextColumn::make('official_code')->label('Code officiel')->searchable(),
-                CatalogTables::enum('status', 'État', CatalogLabels::STATUSES),
+                CatalogTables::name(__('admin.labels.edition')),
+                TextColumn::make('language.code')->label(__('admin.labels.language'))->badge()->searchable(),
+                TextColumn::make('official_code')->label(__('admin.labels.official-code'))->searchable(),
+                CatalogTables::enum('status', __('admin.labels.status'), CatalogLabels::statuses()),
                 CatalogTables::visibility(),
             ])
             ->defaultSort('name')
-            ->headerActions([$this->createCatalogAction('Créer une édition', 'expansion_id')])
+            ->headerActions([$this->createCatalogAction(__('admin.labels.create-an-edition'), 'expansion_id')])
             ->recordActions([
-                EditAction::make()->label('Modifier et gérer les sorties')
+                EditAction::make()->label(__('admin.editions.manage_releases'))
                     ->url(fn (ExpansionEdition $record): string => ExpansionEditionResource::getUrl('edit', ['record' => $record]))
                     ->visible(fn (ExpansionEdition $record): bool => ExpansionEditionResource::canEdit($record)),
                 CatalogActions::delete(),

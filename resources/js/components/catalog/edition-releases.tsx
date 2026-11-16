@@ -12,14 +12,11 @@ export function EditionReleases({ releases }: { releases: EditionRelease[] }) {
                 id="edition-releases"
                 className="mb-4 font-display text-2xl font-bold sm:text-3xl"
             >
-                {t('Les sorties de cette édition', 'Releases for this edition')}
+                {t('catalog.edition-releases.releases-for-this-edition')}
             </h2>
             {releases.length === 0 ? (
                 <p className="rounded-xl border border-border bg-card px-5 py-6 text-sm text-muted-foreground">
-                    {t(
-                        'Aucune sortie renseignée pour le moment.',
-                        'No releases listed yet.',
-                    )}
+                    {t('catalog.edition-releases.no-releases-listed-yet')}
                 </p>
             ) : (
                 <ul className="divide-y divide-border overflow-hidden rounded-xl border border-border bg-card">
@@ -42,8 +39,7 @@ export function EditionReleases({ releases }: { releases: EditionRelease[] }) {
                                         ? date(release.releasedOn)
                                         : (release.announcedPeriod ??
                                           t(
-                                              'Date non renseignée',
-                                              'Date not listed',
+                                              'catalog.edition-releases.date-not-listed',
                                           ))}
                                 </span>
                                 <Badge

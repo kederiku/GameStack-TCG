@@ -22,43 +22,45 @@ use Filament\Support\Icons\Heroicon;
 
 class CatalogFields
 {
-    public static function name(string $label = 'Nom'): TextInput
+    public static function name(?string $label = null): TextInput
     {
+        $label ??= __('admin.labels.name');
+
         return TextInput::make('name')->label($label)->required()->maxLength(255);
     }
 
     public static function key(): TextInput
     {
         return TextInput::make('key')
-            ->label('Identifiant interne')
+            ->label(__('admin.labels.internal-identifier'))
             ->disabledOn('edit')
             ->maxLength(255)
-            ->helperText('Généré si laissé vide. Minuscules, chiffres et tirets ; définitif après création.');
+            ->helperText(__('admin.fields.key_help'));
     }
 
     public static function description(): Textarea
     {
-        return Textarea::make('description')->label('Description')->rows(4)->columnSpanFull()
-            ->helperText('Facultatif : présentez cette fiche en quelques phrases.');
+        return Textarea::make('description')->label(__('admin.labels.description'))->rows(4)->columnSpanFull()
+            ->helperText(__('admin.fields.description_help'));
     }
 
     public static function sourceUrl(): TextInput
     {
-        return TextInput::make('source_url')->label('URL source')->url()->maxLength(2048)->columnSpanFull()
-            ->helperText('Lien vers la page qui confirme ces informations, de préférence sur le site de l’éditeur.');
+        return TextInput::make('source_url')->label(__('admin.labels.source-url'))->url()->maxLength(2048)->columnSpanFull()
+            ->helperText(__('admin.fields.source_help'));
     }
 
     public static function order(): TextInput
     {
-        return TextInput::make('sort_order')->label('Ordre d’affichage')->integer()
+        return TextInput::make('sort_order')->label(__('admin.labels.display-order'))->integer()
             ->minValue(0)->maxValue(2147483647)->required()->default(0)
-            ->helperText('Les petits nombres passent en premier. 0 par défaut ; sans effet sur le tri de l’admin.');
+            ->helperText(__('admin.fields.order_help'));
     }
 
     public static function visibility(): Toggle
     {
-        return Toggle::make('is_visible')->label('Afficher sur le site')->default(true)
-            ->helperText('Une fiche masquée reste modifiable ici. Ses parents doivent aussi être visibles pour l’affichage public.');
+        return Toggle::make('is_visible')->label(__('admin.labels.show-on-site'))->default(true)
+            ->helperText(__('admin.fields.visibility_help'));
     }
 
     /** @param array<string, string> $options */
@@ -69,15 +71,15 @@ class CatalogFields
 
     public static function game(): Select
     {
-        return Select::make('game_id')->label('Jeu')->required()->searchable()->disabledOn('edit')
-            ->helperText('Rattachement définitif après création.')
+        return Select::make('game_id')->label(__('admin.labels.game'))->required()->searchable()->disabledOn('edit')
+            ->helperText(__('admin.fields.parent_help'))
             ->options(fn (): array => Game::query()->orderBy('name')->pluck('name', 'id')->all());
     }
 
     public static function catalogue(): Select
     {
-        return Select::make('catalog_id')->label('Catalogue')->required()->searchable()->disabledOn('edit')
-            ->helperText('Version du jeu, par exemple Pokémon — International. Rattachement définitif après création.')
+        return Select::make('catalog_id')->label(__('admin.labels.catalog'))->required()->searchable()->disabledOn('edit')
+            ->helperText(__('admin.fields.catalog_help'))
             ->options(fn (): array => Catalog::query()->with(['game', 'defaultLanguage'])->orderBy('name')->get()
                 ->mapWithKeys(fn (Catalog $catalog): array => [$catalog->id => self::catalogueLabel($catalog)])->all());
     }
@@ -89,8 +91,8 @@ class CatalogFields
 
     public static function series(): Select
     {
-        return Select::make('series_id')->label('Série')->searchable()
-            ->helperText('Facultatif. Une série ou un bloc du même catalogue.')
+        return Select::make('series_id')->label(__('admin.labels.series'))->searchable()
+            ->helperText(__('admin.fields.series_help'))
             ->disabled(fn (Get $get): bool => self::positiveId($get('catalog_id')) === null)
             ->options(function (Get $get): array {
                 $catalogId = self::positiveId($get('catalog_id'));
@@ -111,8 +113,10 @@ class CatalogFields
         return $id === false ? null : $id;
     }
 
-    public static function language(string $field = 'language_id', string $label = 'Langue'): Select
+    public static function language(string $field = 'language_id', ?string $label = null): Select
     {
+        $label ??= __('admin.labels.language');
+
         return Select::make($field)->label($label)->required()->searchable()
             ->options(fn (): array => Language::query()->orderBy('name')->get()
                 ->mapWithKeys(fn (Language $language): array => [$language->id => "{$language->name} ({$language->code})"])->all());
@@ -129,7 +133,7 @@ class CatalogFields
             ->rules(['dimensions:max_width=4096,max_height=4096'])
             ->preventFilePathTampering()
             ->storeFiles(false)
-            ->helperText(trim($description.' JPEG, PNG, WebP, AVIF ou SVG. Taille maximale de 5 Mio et 4096 × 4096 px hors SVG.'));
+            ->helperText(trim($description.' '.__('admin.image-help')));
     }
 
     /**
@@ -139,12 +143,12 @@ class CatalogFields
      */
     public static function layout(Schema $schema, array $presentation, array $publication = [], ?FileUpload $image = null, ?string $description = null, array $advanced = []): Schema
     {
-        $main = Section::make('Présentation')->icon(Heroicon::OutlinedIdentification)
+        $main = Section::make(__('admin.labels.presentation'))->icon(Heroicon::OutlinedIdentification)
             ->columns(['default' => 1, 'md' => 2])->schema($presentation)->columnSpanFull();
         $content = [$main];
         if ($advanced !== []) {
-            $content[] = Section::make('Options avancées')->icon(Heroicon::OutlinedAdjustmentsHorizontal)
-                ->description('Identifiant et classement : les valeurs proposées conviennent dans la plupart des cas.')
+            $content[] = Section::make(__('admin.labels.advanced-options'))->icon(Heroicon::OutlinedAdjustmentsHorizontal)
+                ->description(__('admin.fields.advanced_help'))
                 ->collapsed()->columns(['default' => 1, 'md' => 2])->schema($advanced);
         }
         if ($description !== null) {
@@ -157,11 +161,11 @@ class CatalogFields
 
         $sidebar = [];
         if ($image !== null) {
-            $sidebar[] = Section::make('Visuel')->icon(Heroicon::OutlinedPhoto)->schema([$image]);
+            $sidebar[] = Section::make(__('admin.labels.artwork'))->icon(Heroicon::OutlinedPhoto)->schema([$image]);
         }
         if ($publication !== []) {
-            $sidebar[] = Section::make('Publication')->icon(Heroicon::OutlinedGlobeAlt)
-                ->description('Affichage public en préparation. Réglages conservés.')
+            $sidebar[] = Section::make(__('admin.labels.publication'))->icon(Heroicon::OutlinedGlobeAlt)
+                ->description(__('admin.fields.publication_help'))
                 ->schema($publication);
         }
 
@@ -173,7 +177,7 @@ class CatalogFields
 
     public static function help(string $text): Section
     {
-        return Section::make('Comprendre cette fiche')->icon(Heroicon::OutlinedQuestionMarkCircle)
+        return Section::make(__('admin.labels.understanding-this-record'))->icon(Heroicon::OutlinedQuestionMarkCircle)
             ->collapsed()->schema([Text::make($text)])->columnSpanFull();
     }
 }

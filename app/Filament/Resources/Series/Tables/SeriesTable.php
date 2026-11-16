@@ -17,17 +17,17 @@ class SeriesTable
         return CatalogTables::standard($table)
             ->modifyQueryUsing(fn (Builder $query): Builder => $query->with('catalog.game'))
             ->columns([
-                CatalogTables::name('Série'),
+                CatalogTables::name(__('admin.labels.series')),
                 CatalogTables::key(),
-                TextColumn::make('catalog.name')->label('Catalogue / jeu')->searchable()->wrap()
+                TextColumn::make('catalog.name')->label(__('admin.labels.catalog-game'))->searchable()->wrap()
                     ->description(fn (Series $record): string => $record->catalog->game->name),
-                TextColumn::make('catalog.game.name')->label('Jeu')->searchable()->toggleable(isToggledHiddenByDefault: true),
-                CatalogTables::enum('type', 'Type', CatalogLabels::SERIES_TYPES),
+                TextColumn::make('catalog.game.name')->label(__('admin.labels.game'))->searchable()->toggleable(isToggledHiddenByDefault: true),
+                CatalogTables::enum('type', __('admin.labels.type'), CatalogLabels::seriesTypes()),
                 CatalogTables::visibility(),
             ])->filters([
                 CatalogTables::gameFilter('catalog.game'),
                 CatalogTables::catalogFilter(),
-                SelectFilter::make('type')->label('Type')->options(CatalogLabels::SERIES_TYPES),
+                SelectFilter::make('type')->label(__('admin.labels.type'))->options(CatalogLabels::seriesTypes()),
                 CatalogTables::visibilityFilter(),
             ]);
     }

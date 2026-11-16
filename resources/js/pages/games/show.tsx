@@ -30,7 +30,7 @@ export default function GameShow({
     catalogData: CatalogData;
 }) {
     const routes = useLocalizedRoutes();
-    const { t, languageName } = useLocale();
+    const { t, tChoice, languageName } = useLocale();
     const groups = new Map<string, PublicExpansion[]>();
     for (const expansion of catalogData.expansions.data) {
         const key = `${expansion.catalog.id}-${expansion.series?.id ?? 'none'}`;
@@ -44,23 +44,22 @@ export default function GameShow({
     const pagination = catalogData.expansions;
     return (
         <>
-            <Head title={`${currentGame.name} — ${t('Catalogue', 'Catalog')}`}>
+            <Head title={`${currentGame.name} — ${t('catalog.show.catalog')}`}>
                 <meta
                     name="description"
-                    content={t(
-                        `Explorez les séries et extensions ${currentGame.name}, leurs éditions et leurs sorties.`,
-                        `Explore ${currentGame.name} series, expansions, editions and releases.`,
-                    )}
+                    content={t('catalog.game-description', {
+                        name: currentGame.name,
+                    })}
                 />
             </Head>
             <Breadcrumbs
                 breadcrumbs={[
-                    { title: t('Jeux', 'Games'), href: routes.home.url() },
+                    { title: t('catalog.show.games'), href: routes.home.url() },
                     {
                         title: currentGame.name,
                         href: currentGame.url,
                     },
-                    { title: t('Catalogue', 'Catalog'), href: '' },
+                    { title: t('catalog.show.catalog'), href: '' },
                 ]}
             />
             <GameCatalogHeading
@@ -79,20 +78,16 @@ export default function GameShow({
             >
                 <p>
                     <span className="text-foreground">
-                        {pagination.total}{' '}
-                        {t(
-                            pagination.total === 1 ? 'extension' : 'extensions',
-                            pagination.total === 1 ? 'expansion' : 'expansions',
-                        )}
+                        {tChoice('catalog.expansions.count', pagination.total)}
                     </span>{' '}
                     ·{' '}
                     {catalogData.filters.language === '*'
-                        ? t('Toutes les langues', 'All languages')
+                        ? t('catalog.show.all-languages')
                         : languageName(catalogData.filters.language)}
                 </p>
                 <span className="flex items-center gap-2">
                     <Layers2 className="size-4" aria-hidden="true" />
-                    {t('Séries & extensions', 'Series & expansions')}
+                    {t('catalog.show.series-expansions')}
                 </span>
             </div>
             {catalogData.filters.series && (
@@ -102,7 +97,7 @@ export default function GameShow({
                             href={`${currentGame.url}?catalog=${encodeURIComponent(catalogData.filters.catalog)}`}
                         >
                             <X className="size-3" />
-                            {t('Toutes les séries', 'All series')}
+                            {t('catalog.show.all-series')}
                         </Link>
                     </Button>
                 </div>
@@ -112,8 +107,7 @@ export default function GameShow({
                     const first = expansions[0];
                     const series = first.series;
                     const name =
-                        series?.name ??
-                        t('Hors série', 'Standalone expansions');
+                        series?.name ?? t('catalog.show.standalone-expansions');
                     return (
                         <Collapsible
                             key={`${key}-${JSON.stringify(catalogData.filters)}`}
@@ -141,8 +135,7 @@ export default function GameShow({
                                         <span
                                             className="ml-3 align-middle font-sans text-xs font-normal text-muted-foreground"
                                             title={t(
-                                                'Extensions sur cette page',
-                                                'Expansions on this page',
+                                                'catalog.show.expansions-on-this-page',
                                             )}
                                         >
                                             {expansions.length}
@@ -153,10 +146,9 @@ export default function GameShow({
                                     <Button
                                         variant="ghost"
                                         size="icon"
-                                        aria-label={t(
-                                            `Afficher ou masquer ${name}`,
-                                            `Show or hide ${name}`,
-                                        )}
+                                        aria-label={t('catalog.toggle-series', {
+                                            name,
+                                        })}
                                         className="shrink-0 data-[state=closed]:[&>svg]:-rotate-90"
                                     >
                                         <ChevronDown className="size-4 transition-transform" />
@@ -182,34 +174,19 @@ export default function GameShow({
                         titleAs="h2"
                         title={
                             filtered
-                                ? t(
-                                      'Aucune extension trouvée',
-                                      'No expansions found',
-                                  )
-                                : t(
-                                      'Le catalogue se prépare',
-                                      'The catalog is coming soon',
-                                  )
+                                ? t('catalog.show.no-expansions-found')
+                                : t('catalog.show.empty-title')
                         }
                         description={
                             filtered
-                                ? t(
-                                      'Essayez une autre recherche ou une autre langue.',
-                                      'Try a different search or language.',
-                                  )
-                                : t(
-                                      'Les séries et extensions publiées rejoindront bientôt cet espace.',
-                                      'Published series and expansions will appear here soon.',
-                                  )
+                                ? t('catalog.show.filter-help')
+                                : t('catalog.show.empty-description')
                         }
                     >
                         {filtered && (
                             <Button asChild variant="secondary">
                                 <Link href={currentGame.url}>
-                                    {t(
-                                        'Réinitialiser les filtres',
-                                        'Reset filters',
-                                    )}
+                                    {t('catalog.show.reset-filters')}
                                 </Link>
                             </Button>
                         )}
@@ -217,36 +194,33 @@ export default function GameShow({
                 )}
                 {pagination.last_page > 1 && (
                     <nav
-                        aria-label={t(
-                            'Pagination des extensions',
-                            'Expansion pages',
-                        )}
+                        aria-label={t('catalog.show.expansion-pages')}
                         className="flex flex-wrap items-center justify-center gap-4 border-t border-border pt-7"
                     >
                         {pagination.prev_page_url ? (
                             <Button asChild variant="secondary">
                                 <Link href={pagination.prev_page_url}>
-                                    {t('Précédent', 'Previous')}
+                                    {t('catalog.show.previous')}
                                 </Link>
                             </Button>
                         ) : (
                             <Button variant="secondary" disabled>
-                                {t('Précédent', 'Previous')}
+                                {t('catalog.show.previous')}
                             </Button>
                         )}
                         <span className="text-xs text-muted-foreground">
-                            {t('Page', 'Page')} {pagination.current_page} /{' '}
+                            {t('catalog.show.page')} {pagination.current_page} /{' '}
                             {pagination.last_page}
                         </span>
                         {pagination.next_page_url ? (
                             <Button asChild variant="secondary">
                                 <Link href={pagination.next_page_url}>
-                                    {t('Suivant', 'Next')}
+                                    {t('catalog.show.next')}
                                 </Link>
                             </Button>
                         ) : (
                             <Button variant="secondary" disabled>
-                                {t('Suivant', 'Next')}
+                                {t('catalog.show.next')}
                             </Button>
                         )}
                     </nav>

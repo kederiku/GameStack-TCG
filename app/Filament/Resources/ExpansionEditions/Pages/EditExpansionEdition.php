@@ -21,7 +21,7 @@ class EditExpansionEdition extends EditCatalogRecord
     protected function getHeaderActions(): array
     {
         return [
-            Action::make('expansion')->label('Retour à l’extension')->icon(Heroicon::OutlinedArrowUturnLeft)
+            Action::make('expansion')->label(__('admin.labels.back-to-expansion'))->icon(Heroicon::OutlinedArrowUturnLeft)
                 ->url($this->expansionUrl()),
             CatalogActions::delete()->successRedirectUrl($this->expansionUrl()),
         ];
@@ -43,9 +43,9 @@ class EditExpansionEdition extends EditCatalogRecord
         assert($edition instanceof ExpansionEdition);
 
         return [
-            ExpansionResource::getUrl() => 'Extensions et ensembles',
+            ExpansionResource::getUrl() => __('admin.labels.expansions-and-sets'),
             $this->expansionUrl() => $edition->expansion->name,
-            'Édition',
+            __('admin.labels.edition'),
         ];
     }
 

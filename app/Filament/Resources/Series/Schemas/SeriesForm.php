@@ -12,9 +12,9 @@ class SeriesForm
     {
         return CatalogFields::layout($schema, [
             CatalogFields::catalogue(),
-            CatalogFields::enum('type', 'Type', CatalogLabels::SERIES_TYPES)
-                ->helperText('Le terme utilisé par l’éditeur : série ou bloc.'),
-            CatalogFields::name()->helperText('Ex. Écarlate et Violet. Ajoutez les traductions dans « Localisations » après création.'),
-        ], [CatalogFields::visibility()], description: 'Une série ou un bloc regroupe plusieurs extensions d’un même catalogue. Ce niveau est facultatif : tous les TCG ne l’utilisent pas.', advanced: [CatalogFields::key(), CatalogFields::order()]);
+            CatalogFields::enum('type', __('admin.labels.type'), CatalogLabels::seriesTypes())
+                ->helperText(__('admin.series.type_help')),
+            CatalogFields::name()->helperText(__('admin.series.name_help')),
+        ], [CatalogFields::visibility()], description: __('admin.series.help'), advanced: [CatalogFields::key(), CatalogFields::order()]);
     }
 }

@@ -1,3 +1,4 @@
+import { useLocale } from '@/hooks/use-locale';
 import { useLocalizedRoutes } from '@/hooks/use-localized-routes';
 import { router } from '@inertiajs/react';
 import { KeyRound } from 'lucide-react';
@@ -14,6 +15,7 @@ export type Props = {
 };
 
 export default function ManagePasskeys(props: Props) {
+    const { t, tChoice } = useLocale();
     const localized = useLocalizedRoutes();
     const destroy = localized['passkey.destroy'];
 
@@ -37,15 +39,12 @@ export default function ManagePasskeys(props: Props) {
     return (
         <SettingsSection
             id="passkeys"
-            title="Clés d’accès"
-            description="Connectez-vous avec votre appareil, sans saisir de mot de passe."
+            title={t('auth.manage-passkeys.passkeys')}
+            description={t('auth.manage-passkeys.description')}
             icon={KeyRound}
             action={
                 <Badge variant="secondary">
-                    {passkeys.length}{' '}
-                    {passkeys.length > 1
-                        ? 'clés enregistrées'
-                        : 'clé enregistrée'}
+                    {tChoice('auth.passkeys.count', passkeys.length)}
                 </Badge>
             }
         >
@@ -62,8 +61,10 @@ export default function ManagePasskeys(props: Props) {
                     ) : (
                         <EmptyState
                             icon={KeyRound}
-                            title="Votre prochaine clé"
-                            description="Ajoutez une clé d’accès pour retrouver votre espace avec votre empreinte, votre visage ou le verrouillage de votre appareil."
+                            title={t('auth.manage-passkeys.your-next-passkey')}
+                            description={t(
+                                'auth.manage-passkeys.empty-description',
+                            )}
                             className="border-0 bg-transparent py-8"
                         />
                     )}

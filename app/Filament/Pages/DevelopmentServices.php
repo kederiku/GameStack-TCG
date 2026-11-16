@@ -50,7 +50,10 @@ class DevelopmentServices extends Page
 
     protected static ?int $navigationSort = 10;
 
-    protected ?string $subheading = 'Votre environnement local, en un coup d’œil.';
+    public function getSubheading(): ?string
+    {
+        return __('admin.services.subtitle');
+    }
 
     /** @var array<string, array{responding: bool, milliseconds: int}> */
     #[Locked]
@@ -87,7 +90,7 @@ class DevelopmentServices extends Page
     /** @return array<Action> */
     protected function getHeaderActions(): array
     {
-        return [Action::make('refresh')->label('Actualiser')->icon(Heroicon::OutlinedArrowPath)
+        return [Action::make('refresh')->label(__('admin.labels.refresh'))->icon(Heroicon::OutlinedArrowPath)
             ->color('gray')->action(fn () => $this->refreshStatus())];
     }
 
@@ -97,34 +100,34 @@ class DevelopmentServices extends Page
         return $schema
             ->extraAttributes(['wire:poll.15s.visible' => 'refreshStatus'])
             ->components([
-                Section::make('Vue d’ensemble')
+                Section::make(__('admin.labels.overview'))
                     ->icon(Heroicon::OutlinedSignal)
-                    ->description('Actualisation automatique toutes les 15 secondes pendant la consultation.')
+                    ->description(__('admin.services.refresh_help'))
                     ->schema([
-                        TextEntry::make('availability')->label('Services disponibles')
+                        TextEntry::make('availability')->label(__('admin.labels.available-services'))
                             ->state(fn (): string => count(array_filter($this->health, fn (array $result): bool => $result['responding'])).' / 3')
                             ->badge()->color(fn (): string => count(array_filter($this->health, fn (array $result): bool => $result['responding'])) === 3 ? 'success' : 'warning'),
-                        TextEntry::make('last_check')->label('Dernier contrôle')
+                        TextEntry::make('last_check')->label(__('admin.labels.last-check'))
                             ->state(fn (): string => $this->checkedAt)->icon(Heroicon::OutlinedClock),
-                        TextEntry::make('docker_report')->label('Relevé Docker')
-                            ->state(fn (): string => $this->docker === [] ? 'Indisponible' : 'À jour')
-                            ->helperText(fn (): string => $this->docker === [] ? 'Le collecteur est arrêté ou son relevé est périmé.' : 'Collecte toutes les 5 secondes.')
+                        TextEntry::make('docker_report')->label(__('admin.labels.docker-snapshot'))
+                            ->state(fn (): string => $this->docker === [] ? __('admin.labels.unavailable') : __('admin.labels.up-to-date'))
+                            ->helperText(fn (): string => $this->docker === [] ? __('admin.services.snapshot_expired') : __('admin.services.snapshot_interval'))
                             ->badge()->color(fn (): string => $this->docker === [] ? 'warning' : 'success'),
                     ])->columns(['md' => 3]),
                 Grid::make(['md' => 2, 'xl' => 3])->schema([
-                    $this->serviceCard('postgres', 'PostgreSQL', 'Base de données', Heroicon::OutlinedCircleStack),
-                    $this->serviceCard('mailpit', 'Mailpit', 'E-mails de développement', Heroicon::OutlinedEnvelope, 'mailpit'),
-                    $this->serviceCard('garage', 'Garage', 'Stockage des images', Heroicon::OutlinedArchiveBox, 'garage-webui'),
+                    $this->serviceCard('postgres', 'PostgreSQL', __('admin.labels.database'), Heroicon::OutlinedCircleStack),
+                    $this->serviceCard('mailpit', 'Mailpit', __('admin.labels.development-emails'), Heroicon::OutlinedEnvelope, 'mailpit'),
+                    $this->serviceCard('garage', 'Garage', __('admin.labels.image-storage'), Heroicon::OutlinedArchiveBox, 'garage-webui'),
                 ]),
-                Section::make('Autres conteneurs')
-                    ->description('État Docker des outils qui accompagnent l’application. Un conteneur en cours ne garantit pas que son service répond.')
+                Section::make(__('admin.labels.other-containers'))
+                    ->description(__('admin.services.containers_help'))
                     ->icon(Heroicon::OutlinedCpuChip)
                     ->schema([
-                        $this->containerEntry('app', 'Application'),
-                        $this->containerEntry('queue', 'Tâches en arrière-plan'),
+                        $this->containerEntry('app', __('admin.labels.application')),
+                        $this->containerEntry('queue', __('admin.labels.background-jobs')),
                         $this->containerEntry('vite', 'Vite'),
                         $this->containerEntry('garage-webui', 'Garage Web UI'),
-                        $this->containerEntry('service-status', 'Collecteur Docker'),
+                        $this->containerEntry('service-status', __('admin.labels.docker-collector')),
                     ])->columns(['md' => 2, 'xl' => 3]),
             ]);
     }
@@ -132,19 +135,19 @@ class DevelopmentServices extends Page
     private function serviceCard(string $service, string $name, string $description, Heroicon $icon, ?string $link = null): Section
     {
         $section = Section::make($name)->description($description)->icon($icon)->schema([
-            TextEntry::make($service.'_response')->label('Disponibilité')
-                ->state(fn (): string => $this->health[$service]['responding'] ? 'Répond' : 'Ne répond pas')
+            TextEntry::make($service.'_response')->label(__('admin.labels.availability'))
+                ->state(fn (): string => $this->health[$service]['responding'] ? __('admin.labels.responding') : __('admin.labels.not-responding'))
                 ->badge()->color(fn (): string => $this->health[$service]['responding'] ? 'success' : 'danger')
                 ->icon(fn (): Heroicon => $this->health[$service]['responding'] ? Heroicon::OutlinedCheckCircle : Heroicon::OutlinedExclamationCircle),
-            TextEntry::make($service.'_latency')->label('Durée du contrôle')
+            TextEntry::make($service.'_latency')->label(__('admin.labels.check-duration'))
                 ->state(fn (): string => $this->health[$service]['milliseconds'].' ms'),
-            $this->containerEntry($service, 'Conteneur Docker'),
+            $this->containerEntry($service, __('admin.labels.docker-container')),
         ]);
 
         if ($link !== null) {
             $destination = app(ServiceCatalog::class)->links()[$link];
             $section->footerActions([
-                Action::make('open_'.$service)->label('Ouvrir '.$destination['label'])
+                Action::make('open_'.$service)->label(__('admin.service_actions.open', ['service' => $destination['label']]))
                     ->url($destination['url'])->openUrlInNewTab()->color('gray')
                     ->icon(Heroicon::OutlinedArrowTopRightOnSquare),
             ]);
@@ -164,35 +167,35 @@ class DevelopmentServices extends Page
     private function containerStatus(string $service): array
     {
         if ($this->docker === []) {
-            return ['label' => 'Indisponible', 'color' => 'gray'];
+            return ['label' => __('admin.labels.unavailable'), 'color' => 'gray'];
         }
 
         $containers = $this->docker['services'][$service] ?? [];
 
         if ($containers === []) {
-            return ['label' => 'Absent', 'color' => 'gray'];
+            return ['label' => __('admin.labels.missing'), 'color' => 'gray'];
         }
 
         $states = array_unique(array_column($containers, 'state'));
         $health = array_column($containers, 'health');
         $state = count($states) === 1 ? $states[0] : 'mixed';
         $label = match ($state) {
-            'running' => 'En cours', 'exited' => 'Arrêté', 'restarting' => 'Redémarrage',
-            'paused' => 'En pause', 'created' => 'Créé', 'removing' => 'Suppression',
-            'dead' => 'En échec', 'mixed' => 'État mixte', default => 'Inconnu',
+            'running' => __('admin.labels.running'), 'exited' => __('admin.labels.stopped'), 'restarting' => __('admin.labels.restarting'),
+            'paused' => __('admin.labels.paused'), 'created' => __('admin.labels.created'), 'removing' => __('admin.labels.removing'),
+            'dead' => __('admin.labels.failed'), 'mixed' => __('admin.labels.mixed-status'), default => __('admin.labels.unknown'),
         };
         $color = match ($state) {
             'running' => 'success', 'exited', 'dead' => 'danger', 'unknown' => 'gray', default => 'warning',
         };
 
         if ($state === 'running' && in_array('unhealthy', $health, true)) {
-            $label .= ' · Dégradé';
+            $label .= __('admin.labels.degraded');
             $color = 'danger';
         } elseif ($state === 'running' && in_array('starting', $health, true)) {
-            $label .= ' · Initialisation';
+            $label .= __('admin.initializing');
             $color = 'warning';
         } elseif ($state === 'running' && ! in_array('none', $health, true)) {
-            $label .= ' · Sain';
+            $label .= __('admin.healthy');
         }
 
         return ['label' => $label, 'color' => $color];

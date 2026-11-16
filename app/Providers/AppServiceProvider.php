@@ -13,7 +13,9 @@ use App\Models\Market;
 use App\Models\Series;
 use App\Models\SeriesLocalization;
 use App\Policies\CatalogPolicy;
+use App\Support\Localization\VendorTranslationLoader;
 use Carbon\CarbonImmutable;
+use Illuminate\Contracts\Translation\Loader;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
@@ -27,7 +29,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        $this->app->extend('translation.loader', fn (Loader $loader) => new VendorTranslationLoader($loader));
     }
 
     /**

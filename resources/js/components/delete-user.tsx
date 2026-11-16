@@ -1,3 +1,4 @@
+import { useLocale } from '@/hooks/use-locale';
 import { Form } from '@inertiajs/react';
 import { Trash2 } from 'lucide-react';
 import { useRef } from 'react';
@@ -18,25 +19,25 @@ import {
 import { Label } from '@/components/ui/label';
 
 export default function DeleteUser() {
+    const { t } = useLocale();
     const routes = useLocalizedRoutes();
     const passwordInput = useRef<HTMLInputElement>(null);
 
     return (
         <SettingsSection
             id="delete-account"
-            title="Supprimer mon compte"
-            description="La suppression du compte et de ses données est définitive."
+            title={t('account.delete-user.delete-my-account')}
+            description={t('account.delete-user.description')}
             icon={Trash2}
             destructive
         >
             <div className="space-y-4">
                 <div className="space-y-1 text-sm leading-6 text-muted-foreground">
                     <p className="font-medium text-foreground">
-                        Une action irréversible
+                        {t('account.delete-user.an-irreversible-action')}
                     </p>
                     <p className="text-sm">
-                        Assurez-vous de vouloir quitter GameStackr avant de
-                        continuer.
+                        {t('account.delete-user.warning')}
                     </p>
                 </div>
 
@@ -46,17 +47,17 @@ export default function DeleteUser() {
                             variant="destructive"
                             data-test="delete-user-button"
                         >
-                            Supprimer mon compte
+                            {t('account.delete-user.delete-my-account')}
                         </Button>
                     </DialogTrigger>
                     <DialogContent>
                         <DialogTitle>
-                            Supprimer définitivement votre compte ?
+                            {t(
+                                'account.delete-user.permanently-delete-your-account',
+                            )}
                         </DialogTitle>
                         <DialogDescription>
-                            Votre compte et toutes ses données seront supprimés.
-                            Saisissez votre mot de passe pour confirmer cette
-                            action. Vous ne pourrez pas revenir en arrière.
+                            {t('account.delete-user.confirmation')}
                         </DialogDescription>
 
                         <Form
@@ -72,14 +73,16 @@ export default function DeleteUser() {
                                 <>
                                     <div className="grid gap-2">
                                         <Label htmlFor="password">
-                                            Mot de passe
+                                            {t('account.delete-user.password')}
                                         </Label>
 
                                         <PasswordInput
                                             id="password"
                                             name="password"
                                             ref={passwordInput}
-                                            placeholder="Votre mot de passe"
+                                            placeholder={t(
+                                                'account.delete-user.your-password',
+                                            )}
                                             autoComplete="current-password"
                                         />
 
@@ -94,7 +97,9 @@ export default function DeleteUser() {
                                                     resetAndClearErrors()
                                                 }
                                             >
-                                                Annuler
+                                                {t(
+                                                    'account.delete-user.cancel',
+                                                )}
                                             </Button>
                                         </DialogClose>
 
@@ -107,7 +112,9 @@ export default function DeleteUser() {
                                                 type="submit"
                                                 data-test="confirm-delete-user-button"
                                             >
-                                                Supprimer mon compte
+                                                {t(
+                                                    'account.delete-user.delete-my-account',
+                                                )}
                                             </button>
                                         </Button>
                                     </DialogFooter>

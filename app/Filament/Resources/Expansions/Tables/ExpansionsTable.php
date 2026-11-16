@@ -17,19 +17,19 @@ class ExpansionsTable
         return CatalogTables::standard($table)
             ->modifyQueryUsing(fn (Builder $query): Builder => $query->with('catalog.game'))
             ->columns([
-                CatalogTables::name('Extension ou ensemble'),
+                CatalogTables::name(__('admin.labels.expansion-or-set')),
                 CatalogTables::key(),
-                TextColumn::make('catalog.name')->label('Catalogue / jeu')->searchable()->wrap()
+                TextColumn::make('catalog.name')->label(__('admin.labels.catalog-game'))->searchable()->wrap()
                     ->description(fn (Expansion $record): string => $record->catalog->game->name),
-                TextColumn::make('catalog.game.name')->label('Jeu')->searchable()->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('series.name')->label('Série')->searchable()->placeholder('Sans série')->wrap()->toggleable(),
-                CatalogTables::enum('type', 'Type', CatalogLabels::EXPANSION_TYPES)->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('catalog.game.name')->label(__('admin.labels.game'))->searchable()->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('series.name')->label(__('admin.labels.series'))->searchable()->placeholder(__('admin.labels.no-series'))->wrap()->toggleable(),
+                CatalogTables::enum('type', __('admin.labels.type'), CatalogLabels::expansionTypes())->toggleable(isToggledHiddenByDefault: true),
                 CatalogTables::visibility(),
             ])->filters([
                 CatalogTables::gameFilter('catalog.game'),
                 CatalogTables::catalogFilter(),
                 CatalogTables::seriesFilter(),
-                SelectFilter::make('type')->label('Type')->options(CatalogLabels::EXPANSION_TYPES),
+                SelectFilter::make('type')->label(__('admin.labels.type'))->options(CatalogLabels::expansionTypes()),
                 CatalogTables::visibilityFilter(),
             ]);
     }

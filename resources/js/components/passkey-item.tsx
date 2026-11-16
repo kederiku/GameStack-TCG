@@ -1,3 +1,4 @@
+import { useLocale } from '@/hooks/use-locale';
 import { KeyRound, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
@@ -18,6 +19,7 @@ type Props = {
 };
 
 export default function PasskeyItem({ passkey, onDelete }: Props) {
+    const { t } = useLocale();
     const [isDeleting, setIsDeleting] = useState(false);
 
     const handleDelete = () => {
@@ -43,13 +45,13 @@ export default function PasskeyItem({ passkey, onDelete }: Props) {
                         )}
                     </div>
                     <p className="text-sm text-muted-foreground">
-                        Ajoutée : {passkey.created_at_diff}
+                        {t('auth.passkey-item.added')} {passkey.created_at_diff}
                         {passkey.last_used_at_diff && (
                             <>
                                 <span className="mx-1 text-muted-foreground/50">
                                     /
                                 </span>
-                                Dernière utilisation :{' '}
+                                {t('auth.passkey-item.last-used')}{' '}
                                 {passkey.last_used_at_diff}
                             </>
                         )}
@@ -66,19 +68,25 @@ export default function PasskeyItem({ passkey, onDelete }: Props) {
                     >
                         <Trash2 className="h-4 w-4" />
                         <span className="sr-only">
-                            Supprimer la clé {passkey.name}
+                            {t('auth.passkey-item.delete-passkey')}{' '}
+                            {passkey.name}
                         </span>
                     </Button>
                 </DialogTrigger>
                 <DialogContent>
-                    <DialogTitle>Supprimer la clé d’accès</DialogTitle>
+                    <DialogTitle>
+                        {t('auth.passkey-item.delete-title')}
+                    </DialogTitle>
                     <DialogDescription>
-                        Voulez-vous supprimer la clé « {passkey.name} » ? Vous
-                        ne pourrez plus l’utiliser pour vous connecter.
+                        {t('auth.passkeys.delete-confirm', {
+                            name: passkey.name,
+                        })}
                     </DialogDescription>
                     <DialogFooter className="gap-2">
                         <DialogClose asChild>
-                            <Button variant="secondary">Annuler</Button>
+                            <Button variant="secondary">
+                                {t('auth.passkey-item.cancel')}
+                            </Button>
                         </DialogClose>
                         <Button
                             variant="destructive"
@@ -87,7 +95,7 @@ export default function PasskeyItem({ passkey, onDelete }: Props) {
                         >
                             {isDeleting
                                 ? 'Suppression…'
-                                : 'Supprimer la clé d’accès'}
+                                : t('auth.passkey-item.delete-title')}
                         </Button>
                     </DialogFooter>
                 </DialogContent>

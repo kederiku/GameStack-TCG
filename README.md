@@ -57,8 +57,8 @@ logo et formulaire dans un panneau à gauche, trois rangées de logos des jeux
 défilant en continu à droite sur ordinateur, formulaire seul sur mobile.
 Les images suivent le catalogue administré ; le défilement peut être mis en pause
 et devient une grille fixe lorsque les animations sont réduites.
-Les libellés sont en français ; les messages de validation
-serveur et du navigateur conservent leur langue d’origine. Passkeys, double
+Les textes applicatifs, la validation serveur et les e-mails sont disponibles en
+français et en anglais. Les messages natifs du navigateur suivent sa langue. Passkeys, double
 authentification et récupération restent disponibles. Les vérifications sont
 consignées dans [le dernier rapport de design](docs/superpowers/auth-game-marquee-verification.md).
 
@@ -517,3 +517,35 @@ pour un simple arrêt.
 Starter officiel : [laravel/react-starter-kit](https://github.com/laravel/react-starter-kit),
 commit `012f4248f70e255e32ad93f540aca5fb7e8c96fe` (14 novembre 2026).
 Voir `docs/superpowers/verification.md` pour les vérifications effectuées.
+
+## Traductions de l’interface
+
+Les neuf domaines de `lang/fr` et `lang/en` constituent la source éditable PHP.
+Utiliser des clés sémantiques (`admin.languages.code_help`,
+`validation.catalog.immutable_identity`) et résoudre les textes pendant le rendu,
+jamais dans une propriété statique ou une constante traduite. React consomme
+`useLocale().t(key, replacements)` et `tChoice(key, count, replacements)` ; les
+noms de routes passent par `useLocalizedRoutes`. Les paramètres restent du texte
+échappé par React ou Blade, sans HTML dans les traductions.
+
+`make translations` génère les exports et types frontend ignorés par Git ; seuls
+`common`, `auth`, `account` et `catalog` sont exportés. `make artisan
+ARGS='localization:check'` vérifie les clés, paramètres et pluriels. La compilation
+et les vérifications frontend régénèrent aussi ces exports. Ne pas modifier les
+JSON générés ni créer une seconde source JSON éditable.
+
+Fortify, Passkeys et le résumé de validation Laravel demandent certains messages
+par leur phrase anglaise. `VendorTranslationLoader` adapte uniquement leur espace
+de clés littérales (`*`) à `lang/vendor/{fortify,passkeys,laravel}/{locale}/messages.php`.
+Ces fichiers PHP sont les overrides applicatifs de cette API vendor ; le loader
+délègue les autres domaines et namespaces sans modifier l’authentification. Le
+contrôle de parité couvre aussi ces trois fichiers. Les vues applicatives sous
+`resources/views/vendor` traduisent l’habillage HTML et texte des e-mails.
+
+Pour préparer une autre langue d’interface, fournir les neuf domaines et ces trois
+fichiers vendor, avec les placeholders identiques, puis l’ajouter au registre
+`config/localization.php`, contrôler les traductions et reconstruire les assets.
+Les traductions des contenus et les langues des éditions imprimées restent des
+notions distinctes. Les comptages applicatifs sont non négatifs ; FR/EN sont les
+langues actuellement livrées. Le contrôle visuel complet après migration fait
+partie du parcours de livraison.

@@ -31,7 +31,7 @@ class CatalogImages extends AvifImages
         }
 
         if (! self::disk()->delete($path)) {
-            throw new RuntimeException('Impossible de supprimer l’image du catalogue : '.$path);
+            throw new RuntimeException(__('validation.images.delete-catalog', ['path' => $path]));
         }
     }
 

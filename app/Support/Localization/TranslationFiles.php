@@ -11,7 +11,7 @@ final class TranslationFiles
 {
     private const FRONTEND_DOMAINS = ['common', 'auth', 'account', 'catalog'];
 
-    private const DOMAINS = [...self::FRONTEND_DOMAINS, 'admin', 'validation', 'passwords', 'notifications', 'routes'];
+    private const DOMAINS = [...self::FRONTEND_DOMAINS, 'admin', 'validation', 'passwords', 'notifications', 'routes', 'vendor/fortify/messages', 'vendor/passkeys/messages', 'vendor/laravel/messages'];
 
     private const FRAMEWORK_AUTH_KEYS = ['failed', 'password', 'throttle'];
 
@@ -56,7 +56,7 @@ final class TranslationFiles
             $reference = ($dictionaries[$default] ?? []) + array_merge([], ...array_values($dictionaries));
             foreach ($reference as $key => $source) {
                 foreach ($dictionaries as $code => $lines) {
-                    $file = $locales[$code].'/'.$domain.'.php';
+                    $file = $this->file($locales[$code], $domain);
                     $target = $lines[$key] ?? null;
 
                     if ($target === null) {
@@ -101,10 +101,21 @@ final class TranslationFiles
         return $this->read(Locales::definition($locale)['laravelLocale'], 'routes');
     }
 
+    private function file(string $locale, string $domain): string
+    {
+        if (str_starts_with($domain, 'vendor/')) {
+            [, $package, $group] = explode('/', $domain);
+
+            return 'vendor/'.$package.'/'.$locale.'/'.$group.'.php';
+        }
+
+        return $locale.'/'.$domain.'.php';
+    }
+
     /** @return array<string, string> */
     private function read(string $locale, string $domain): array
     {
-        $file = $locale.'/'.$domain.'.php';
+        $file = $this->file($locale, $domain);
         $path = lang_path($file);
 
         if (! is_file($path)) {

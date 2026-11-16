@@ -53,15 +53,15 @@ class SaveGame
                     'description' => ['nullable', 'string'],
                     'is_visible' => ['required', 'boolean'],
                 ], [
-                    'slug.not_in' => 'Ce slug est réservé à une page de l’application. Choisissez un autre identifiant.',
-                    'end_year.gte' => 'L’année de fin doit être supérieure ou égale à l’année de création.',
+                    'slug.not_in' => __('validation.catalog.reserved_slug'),
+                    'end_year.gte' => __('validation.catalog.end_year'),
                 ])->validate();
 
                 if ($image instanceof UploadedFile) {
                     GameImages::validateUpload($image);
                     $image = $this->images->store($image, $attributes['name'], $record->getConnection());
                 } elseif ($image !== null && (! is_string($image) || $image !== $record->image)) {
-                    throw ValidationException::withMessages(['image' => 'Cette image ne correspond plus à celle du jeu. Rechargez le formulaire.']);
+                    throw ValidationException::withMessages(['image' => __('validation.images.stale_game')]);
                 } elseif ($image !== null && $name !== $record->name) {
                     $image = $this->images->rename($image, $attributes['name'], $record->getConnection());
                 }
@@ -70,14 +70,14 @@ class SaveGame
                 $record->image = $image;
 
                 if (! $record->save()) {
-                    throw new RuntimeException('L’enregistrement du jeu a été annulé.');
+                    throw new RuntimeException(__('validation.catalog.game_save_cancelled'));
                 }
 
                 return $record;
             });
         } catch (UniqueConstraintViolationException) {
             // Also handle two concurrent creates passing validation together.
-            throw ValidationException::withMessages(['slug' => 'Ce slug est déjà utilisé par un autre jeu.']);
+            throw ValidationException::withMessages(['slug' => __('validation.catalog.duplicate_slug')]);
         }
     }
 }

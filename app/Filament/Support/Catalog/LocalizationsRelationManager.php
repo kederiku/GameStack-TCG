@@ -8,12 +8,16 @@ use Filament\Schemas\Schema;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Model;
 
 abstract class LocalizationsRelationManager extends CatalogRelationManager
 {
     protected static string $relationship = 'localizations';
 
-    protected static ?string $title = 'Localisations';
+    public static function getTitle(Model $ownerRecord, string $pageClass): string
+    {
+        return __('admin.labels.localizations');
+    }
 
     protected static string $parentField;
 
@@ -21,10 +25,10 @@ abstract class LocalizationsRelationManager extends CatalogRelationManager
     {
         return CatalogFields::layout($schema, [
             CatalogFields::language()->disabledOn('edit')
-                ->helperText('Langue dans laquelle présenter la fiche. Une traduction par langue ; ce choix est définitif après création.'),
-            CatalogFields::name('Nom localisé')->helperText('Nom à afficher dans cette langue. Traduire la présentation ne crée pas d’édition imprimée.'),
+                ->helperText(__('admin.localizations.language_help')),
+            CatalogFields::name(__('admin.labels.localized-name'))->helperText(__('admin.localizations.name_help')),
             CatalogFields::description(),
-        ], image: $this->imageField(), description: 'Une localisation traduit la présentation : nom, description et, pour une série, image. Elle ne prouve pas que des cartes existent dans cette langue. Le nom de référence reste disponible sans traduction.');
+        ], image: $this->imageField(), description: __('admin.localizations.help'));
     }
 
     protected function imageField(): ?FileUpload
@@ -35,21 +39,21 @@ abstract class LocalizationsRelationManager extends CatalogRelationManager
     public function table(Table $table): Table
     {
         $columns = [
-            CatalogTables::name('Nom localisé'),
-            TextColumn::make('language.name')->label('Langue')->searchable(),
-            TextColumn::make('language.code')->label('Code')->badge()->searchable(),
+            CatalogTables::name(__('admin.labels.localized-name')),
+            TextColumn::make('language.name')->label(__('admin.labels.language'))->searchable(),
+            TextColumn::make('language.code')->label(__('admin.labels.code'))->badge()->searchable(),
         ];
 
         if ($this->imageField() !== null) {
-            $columns[] = ImageColumn::make('image')->label('Visuel')->disk(fn (): string => CatalogImages::diskName())
+            $columns[] = ImageColumn::make('image')->label(__('admin.labels.artwork'))->disk(fn (): string => CatalogImages::diskName())
                 ->visibility('public')->imageHeight(40);
         }
 
-        return $table->columns($columns)->recordTitleAttribute('name')->searchPlaceholder('Rechercher')
-            ->description('Traductions d’affichage. Pour des cartes réellement imprimées dans une langue, créez une édition.')
-            ->emptyStateHeading('Aucune localisation')
-            ->emptyStateDescription('Ajoutez les langues utiles à la présentation de cette fiche. Le nom de référence reste disponible sans traduction.')
-            ->headerActions([$this->createCatalogAction('Créer une localisation', static::$parentField)])
+        return $table->columns($columns)->recordTitleAttribute('name')->searchPlaceholder(__('admin.labels.search'))
+            ->description(__('admin.localizations.description'))
+            ->emptyStateHeading(__('admin.labels.no-localizations'))
+            ->emptyStateDescription(__('admin.localizations.empty_help'))
+            ->headerActions([$this->createCatalogAction(__('admin.labels.create-a-localization'), static::$parentField)])
             ->recordActions([$this->editCatalogAction(), CatalogActions::delete()])
             ->defaultSort('name');
     }

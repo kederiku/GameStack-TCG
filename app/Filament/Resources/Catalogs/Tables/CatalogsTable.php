@@ -13,11 +13,11 @@ class CatalogsTable
     public static function configure(Table $table): Table
     {
         return CatalogTables::standard($table)->columns([
-            CatalogTables::name('Catalogue'),
+            CatalogTables::name(__('admin.labels.catalog')),
             CatalogTables::key(),
-            TextColumn::make('game.name')->label('Jeu')->searchable()->wrap()
+            TextColumn::make('game.name')->label(__('admin.labels.game'))->searchable()->wrap()
                 ->url(fn (Catalog $record): string => GameResource::getUrl('edit', ['record' => $record->game_id])),
-            TextColumn::make('defaultLanguage.code')->label('Langue de repli')->badge()->searchable()->toggleable(isToggledHiddenByDefault: true),
+            TextColumn::make('defaultLanguage.code')->label(__('admin.labels.fallback-language'))->badge()->searchable()->toggleable(isToggledHiddenByDefault: true),
             CatalogTables::visibility(),
         ])->filters([CatalogTables::gameFilter(), CatalogTables::visibilityFilter()]);
     }

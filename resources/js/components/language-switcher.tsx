@@ -41,7 +41,7 @@ export function LanguageSwitcher() {
             }}
         >
             <SelectTrigger
-                aria-label={t('Langue du site', 'Site language')}
+                aria-label={t('common.language-switcher.site-language')}
                 className="h-11 w-auto gap-2 border-transparent bg-transparent px-2 shadow-none hover:bg-accent"
             >
                 <Globe2

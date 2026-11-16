@@ -20,7 +20,7 @@ export function Breadcrumbs({
     return (
         <>
             {breadcrumbs.length > 0 && (
-                <Breadcrumb aria-label={t('Fil d’Ariane', 'Breadcrumb')}>
+                <Breadcrumb aria-label={t('common.breadcrumbs.breadcrumb')}>
                     <BreadcrumbList>
                         {breadcrumbs.map((item, index) => {
                             const isLast = index === breadcrumbs.length - 1;

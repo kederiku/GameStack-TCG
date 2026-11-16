@@ -13,6 +13,6 @@ class ListGames extends ListRecords
     /** @return array<CreateAction> */
     protected function getHeaderActions(): array
     {
-        return [CreateAction::make()->label('Créer un jeu')];
+        return [CreateAction::make()->label(__('admin.labels.create-a-game'))];
     }
 }

@@ -16,6 +16,7 @@ use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Model;
 
 class ReleasesRelationManager extends CatalogRelationManager
 {
@@ -23,45 +24,48 @@ class ReleasesRelationManager extends CatalogRelationManager
 
     protected static bool $isLazy = false;
 
-    protected static ?string $title = 'Sorties';
+    public static function getTitle(Model $ownerRecord, string $pageClass): string
+    {
+        return __('admin.labels.releases');
+    }
 
     public function form(Schema $schema): Schema
     {
         return $schema->components([
-            Select::make('market_id')->label('Marché')->required()->searchable()->disabledOn('edit')
-                ->helperText('Territoire de commercialisation, indépendant de la langue. Définitif après création.')
+            Select::make('market_id')->label(__('admin.labels.market'))->required()->searchable()->disabledOn('edit')
+                ->helperText(__('admin.releases.market_help'))
                 ->options(fn (): array => Market::query()->orderBy('name')->pluck('name', 'id')->all()),
-            CatalogFields::enum('channel', 'Canal', CatalogLabels::CHANNELS)->default('general')->disabledOn('edit')
-                ->helperText('Mode de distribution, définitif après création.'),
-            CatalogFields::enum('status', 'État', CatalogLabels::STATUSES)->default('announced')
-                ->helperText('Annoncée : à venir ; publiée : sortie ; annulée : abandonnée. Publier une sortie publie aussi l’édition.'),
-            DatePicker::make('released_on')->label('Date de sortie')
-                ->helperText('Date exacte pour ce marché et ce canal, lorsqu’elle est confirmée. Laissez vide si seule une période est connue.'),
-            TextInput::make('announced_period')->label('Période annoncée')->maxLength(255)
-                ->helperText('Facultatif : indication de l’éditeur, par exemple « deuxième trimestre 2027 ». N’inventez pas de jour précis.'),
+            CatalogFields::enum('channel', __('admin.labels.channel'), CatalogLabels::channels())->default('general')->disabledOn('edit')
+                ->helperText(__('admin.releases.channel_help')),
+            CatalogFields::enum('status', __('admin.labels.status'), CatalogLabels::statuses())->default('announced')
+                ->helperText(__('admin.releases.status_help')),
+            DatePicker::make('released_on')->label(__('admin.labels.release-date'))
+                ->helperText(__('admin.releases.date_help')),
+            TextInput::make('announced_period')->label(__('admin.labels.announced-period'))->maxLength(255)
+                ->helperText(__('admin.releases.period_help')),
             CatalogFields::sourceUrl(),
-            CatalogFields::help('Une sortie indique où, comment et quand cette édition est commercialisée. Une fiche par marché et canal décrit la première sortie, pas les réapprovisionnements. Une avant-première ou une sortie en boutiques spécialisées peut précéder la distribution générale.'),
+            CatalogFields::help(__('admin.releases.help')),
         ]);
     }
 
     public function table(Table $table): Table
     {
         return $table->recordTitleAttribute('status')
-            ->description('Première commercialisation par marché et canal. Les réapprovisionnements ne créent pas de nouvelle sortie.')
-            ->searchPlaceholder('Rechercher')
-            ->emptyStateHeading('Aucune sortie')
-            ->emptyStateDescription('Ajoutez les marchés et canaux confirmés. Une date exacte peut rester vide si elle n’est pas connue.')
+            ->description(__('admin.releases.description'))
+            ->searchPlaceholder(__('admin.labels.search'))
+            ->emptyStateHeading(__('admin.labels.no-releases'))
+            ->emptyStateDescription(__('admin.releases.empty_help'))
             ->columns([
-                TextColumn::make('market.name')->label('Marché')->searchable()->sortable(),
-                CatalogTables::enum('channel', 'Canal', CatalogLabels::CHANNELS),
-                CatalogTables::enum('status', 'État', CatalogLabels::STATUSES),
-                TextColumn::make('released_on')->label('Date de sortie')->date('d/m/Y')->sortable(),
-                TextColumn::make('announced_period')->label('Période annoncée'),
-                TextColumn::make('source_url')->label('Source')->limit(40)->url(fn (ExpansionRelease $record): ?string => $record->source_url, true),
+                TextColumn::make('market.name')->label(__('admin.labels.market'))->searchable()->sortable(),
+                CatalogTables::enum('channel', __('admin.labels.channel'), CatalogLabels::channels()),
+                CatalogTables::enum('status', __('admin.labels.status'), CatalogLabels::statuses()),
+                TextColumn::make('released_on')->label(__('admin.labels.release-date'))->date('d/m/Y')->sortable(),
+                TextColumn::make('announced_period')->label(__('admin.labels.announced-period')),
+                TextColumn::make('source_url')->label(__('admin.labels.source'))->limit(40)->url(fn (ExpansionRelease $record): ?string => $record->source_url, true),
             ])
             ->defaultSort('released_on', 'desc')
             ->headerActions([
-                $this->createCatalogAction('Créer une sortie', 'edition_id')->after($this->notifyEditionStatusChange(...)),
+                $this->createCatalogAction(__('admin.labels.create-a-release'), 'edition_id')->after($this->notifyEditionStatusChange(...)),
             ])
             ->recordActions([
                 $this->editCatalogAction()->after($this->notifyEditionStatusChange(...)),

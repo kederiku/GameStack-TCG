@@ -18,7 +18,7 @@ export default function PublicLayout({ children }: PropsWithChildren) {
                 href="#main-content"
                 className="sr-only z-50 rounded-md bg-primary px-4 py-3 text-primary-foreground focus:not-sr-only focus:absolute focus:top-2 focus:left-2"
             >
-                {t('Aller au contenu', 'Skip to content')}
+                {t('common.public-layout.skip-to-content')}
             </a>
             <PublicHeader />
             <main
@@ -32,17 +32,13 @@ export default function PublicLayout({ children }: PropsWithChildren) {
                     <Link
                         href={routes.home.url()}
                         aria-label={t(
-                            'GameStackr TCG — accueil',
-                            'GameStackr TCG — home',
+                            'common.public-layout.gamestackr-tcg-home',
                         )}
                     >
                         <BrandLogo className="brand-logo-small" />
                     </Link>
                     <p className="text-xs text-muted-foreground">
-                        {t(
-                            'Vos cartes, vos collections, votre espace.',
-                            'Your cards, your collections, your space.',
-                        )}
+                        {t('common.public-layout.tagline')}
                     </p>
                 </div>
             </footer>

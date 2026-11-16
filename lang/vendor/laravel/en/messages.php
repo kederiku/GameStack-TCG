@@ -1,0 +1,7 @@
+<?php
+
+return [
+    'The given data was invalid.' => 'The given data was invalid.',
+    '(and :count more error)' => '(and :count more error)',
+    '(and :count more errors)' => '(and :count more errors)',
+];

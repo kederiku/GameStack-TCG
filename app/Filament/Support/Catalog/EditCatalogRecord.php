@@ -35,26 +35,26 @@ abstract class EditCatalogRecord extends EditRecord
 
     public function getTitle(): string
     {
-        return 'Modifier · '.static::getResource()::getRecordTitle($this->getRecord());
+        return __('admin.record_titles.edit', ['record' => static::getResource()::getRecordTitle($this->getRecord())]);
     }
 
     public function getBreadcrumb(): string
     {
-        return 'Modifier';
+        return __('admin.labels.edit');
     }
 
     protected function getSaveFormAction(): Action
     {
-        return parent::getSaveFormAction()->label('Enregistrer');
+        return parent::getSaveFormAction()->label(__('admin.labels.save'));
     }
 
     protected function getCancelFormAction(): Action
     {
-        return parent::getCancelFormAction()->label('Annuler');
+        return parent::getCancelFormAction()->label(__('admin.labels.cancel'));
     }
 
     protected function getSavedNotificationTitle(): string
     {
-        return 'Fiche enregistrée';
+        return __('admin.labels.record-saved');
     }
 }

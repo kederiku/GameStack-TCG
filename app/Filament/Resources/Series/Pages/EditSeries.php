@@ -21,13 +21,13 @@ class EditSeries extends EditCatalogRecord
         assert($series instanceof Series);
 
         return [
-            Action::make('expansions')->label('Voir les extensions')->icon(Heroicon::OutlinedRectangleStack)
+            Action::make('expansions')->label(__('admin.labels.view-expansions'))->icon(Heroicon::OutlinedRectangleStack)
                 ->visible(fn (): bool => ExpansionResource::canAccess())
                 ->url(ExpansionResource::getUrl(parameters: ['filters' => [
                     'catalog' => ['value' => $series->catalog_id],
                     'series' => ['value' => $series->id],
                 ]])),
-            Action::make('catalog')->label('Retour au catalogue')->color('gray')->icon(Heroicon::OutlinedArrowUturnLeft)
+            Action::make('catalog')->label(__('admin.labels.back-to-catalog'))->color('gray')->icon(Heroicon::OutlinedArrowUturnLeft)
                 ->visible(fn (): bool => CatalogResource::canEdit($series->catalog))
                 ->url(CatalogResource::getUrl('edit', ['record' => $series->catalog_id])),
             ...parent::getHeaderActions(),

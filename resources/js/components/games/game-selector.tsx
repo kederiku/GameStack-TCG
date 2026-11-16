@@ -31,13 +31,12 @@ export function GameSelector({
                     disabled={games.length === 0}
                     aria-label={
                         games.length === 0
-                            ? t('Aucun jeu disponible', 'No games available')
+                            ? t('catalog.game-selector.no-games-available')
                             : currentGame
-                              ? t(
-                                    `Changer de jeu : ${currentGame.name}`,
-                                    `Switch game: ${currentGame.name}`,
-                                )
-                              : t('Choisir un jeu', 'Choose a game')
+                              ? t('catalog.change-game', {
+                                    name: currentGame.name,
+                                })
+                              : t('catalog.game-selector.choose-a-game')
                     }
                     className="h-11 w-full min-w-0 justify-between bg-card px-3 font-normal"
                 >
@@ -53,12 +52,9 @@ export function GameSelector({
                         )}
                         <span className="truncate">
                             {games.length === 0
-                                ? t(
-                                      'Aucun jeu disponible',
-                                      'No games available',
-                                  )
+                                ? t('catalog.game-selector.no-games-available')
                                 : (currentGame?.name ??
-                                  t('Choisir un jeu', 'Choose a game'))}
+                                  t('catalog.game-selector.choose-a-game'))}
                         </span>
                     </span>
                     <ChevronDown className="size-4 shrink-0 text-muted-foreground" />
@@ -71,7 +67,7 @@ export function GameSelector({
                 className="max-h-[min(26rem,var(--radix-dropdown-menu-content-available-height))] w-72 max-w-[calc(100vw-2rem)] overflow-y-auto rounded-xl p-1.5"
             >
                 <DropdownMenuLabel className="px-2.5 py-2 text-xs font-medium tracking-widest text-muted-foreground uppercase">
-                    {t('Vos univers', 'Your games')}
+                    {t('catalog.game-selector.your-games')}
                 </DropdownMenuLabel>
                 {games.map((game) => (
                     <DropdownMenuItem key={game.id} asChild>
@@ -99,7 +95,7 @@ export function GameSelector({
                         className="gap-3 px-2.5 py-3"
                     >
                         <House className="size-4" />
-                        {t('Tous les jeux', 'All games')}
+                        {t('catalog.game-selector.all-games')}
                     </Link>
                 </DropdownMenuItem>
             </DropdownMenuContent>

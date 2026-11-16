@@ -16,4 +16,11 @@ return [
         'subject' => 'Vérification de votre adresse e-mail',
         'action' => 'Vérifier mon adresse e-mail',
     ],
+    'mail' => [
+        'greeting' => 'Bonjour !',
+        'error' => 'Oups !',
+        'salutation' => 'Cordialement,',
+        'rights' => 'Tous droits réservés.',
+        'subcopy' => 'Si vous ne parvenez pas à cliquer sur le bouton « :actionText », copiez et collez l’URL ci-dessous dans votre navigateur :',
+    ],
 ];

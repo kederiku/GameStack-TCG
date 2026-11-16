@@ -20,43 +20,43 @@ class GamesTable
         return $table
             ->columns([
                 ImageColumn::make('image')
-                    ->label('Visuel')
+                    ->label(__('admin.labels.artwork'))
                     ->disk(fn (): string => GameImages::diskName())
                     ->visibility('public')
                     ->imageHeight(40)
                     ->visibleFrom('md'),
                 TextColumn::make('name')
-                    ->label('Jeu')
+                    ->label(__('admin.labels.game'))
                     ->description(fn (Game $record): ?string => $record->publisher)
                     ->wrap()
                     ->weight(FontWeight::SemiBold)
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('slug')
-                    ->label('Slug')
+                    ->label(__('admin.labels.slug'))
                     ->searchable()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('publisher')
-                    ->label('Éditeur')
-                    ->placeholder('Non renseigné')
+                    ->label(__('admin.labels.publisher'))
+                    ->placeholder(__('admin.labels.not-listed'))
                     ->wrap()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('is_visible')
-                    ->label('Visibilité')
+                    ->label(__('admin.labels.visibility'))
                     ->badge()
-                    ->formatStateUsing(fn (bool $state): string => $state ? 'Visible' : 'Masqué')
+                    ->formatStateUsing(fn (bool $state): string => $state ? __('admin.labels.visible') : __('admin.labels.hidden'))
                     ->color(fn (bool $state): string => $state ? 'success' : 'gray')
                     ->icon(fn (bool $state): Heroicon => $state ? Heroicon::OutlinedEye : Heroicon::OutlinedEyeSlash),
                 TextColumn::make('updated_at')
-                    ->label('Modifié le')
+                    ->label(__('admin.labels.updated-at'))
                     ->dateTime('d/m/Y H:i')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->defaultSort('name')
             ->recordActions([
-                EditAction::make()->label('Modifier'),
+                EditAction::make()->label(__('admin.labels.edit')),
                 CatalogActions::delete(),
             ])
             ->toolbarActions([
@@ -64,7 +64,7 @@ class GamesTable
                     CatalogActions::deleteBulk(),
                 ]),
             ])
-            ->emptyStateHeading('Aucun jeu')
-            ->emptyStateDescription('Créez un jeu pour commencer.');
+            ->emptyStateHeading(__('admin.labels.no-games'))
+            ->emptyStateDescription(__('admin.games.empty_help'));
     }
 }

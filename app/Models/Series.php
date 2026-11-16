@@ -45,7 +45,7 @@ class Series extends CatalogRecord
         // Run the localization's Eloquent lifecycle so image cleanup can follow the transaction.
         foreach ($this->localizations()->get() as $localization) {
             if (! $localization->delete()) {
-                throw ValidationException::withMessages(['record' => 'Une localisation de cette série n’a pas pu être supprimée.']);
+                throw ValidationException::withMessages(['record' => __('validation.images.delete-series-localization')]);
             }
         }
 

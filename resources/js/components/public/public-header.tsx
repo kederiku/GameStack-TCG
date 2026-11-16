@@ -12,7 +12,6 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { login, register } from '@/routes';
 import type { PublicGamePageProps } from '@/types/game';
 
 export function PublicHeader() {
@@ -26,10 +25,7 @@ export function PublicHeader() {
             <div className="mx-auto flex max-w-7xl flex-wrap items-center gap-x-5 gap-y-4 px-4 py-5 sm:px-6 lg:gap-x-7 lg:px-8">
                 <Link
                     href={routes.home.url()}
-                    aria-label={t(
-                        'GameStackr TCG — accueil',
-                        'GameStackr TCG — home',
-                    )}
+                    aria-label={t('common.public-header.gamestackr-tcg-home')}
                     className="shrink-0 rounded-sm focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ring"
                 >
                     <BrandLogo />
@@ -38,7 +34,7 @@ export function PublicHeader() {
                     <GameSelector games={games} currentGame={currentGame} />
                 </div>
                 <nav
-                    aria-label={t('Compte', 'Account')}
+                    aria-label={t('common.public-header.account')}
                     className="ml-auto flex shrink-0 items-center gap-2"
                 >
                     <LanguageSwitcher />
@@ -47,10 +43,10 @@ export function PublicHeader() {
                             <Link href={routes.dashboard()}>
                                 <UserRound className="size-4" />
                                 <span className="hidden md:inline">
-                                    {t('Mon espace', 'My space')}
+                                    {t('common.public-header.my-space')}
                                 </span>
                                 <span className="sr-only md:hidden">
-                                    {t('Mon espace', 'My space')}
+                                    {t('common.public-header.my-space')}
                                 </span>
                             </Link>
                         </Button>
@@ -58,16 +54,15 @@ export function PublicHeader() {
                         <>
                             <div className="hidden items-center gap-2 md:flex">
                                 <Button variant="ghost" asChild>
-                                    <Link href={login()}>
-                                        {t('Connexion', 'Log in')}
+                                    <Link href={routes.login()}>
+                                        {t('common.public-header.log-in')}
                                     </Link>
                                 </Button>
                                 {canRegister && (
                                     <Button asChild>
-                                        <Link href={register()}>
+                                        <Link href={routes.register()}>
                                             {t(
-                                                'Créer un compte',
-                                                'Create account',
+                                                'common.public-header.create-account',
                                             )}
                                             <ArrowUpRight className="size-4" />
                                         </Link>
@@ -82,8 +77,7 @@ export function PublicHeader() {
                                             size="icon"
                                             className="size-11 bg-card"
                                             aria-label={t(
-                                                'Accéder à mon compte',
-                                                'Open account menu',
+                                                'common.public-header.open-account-menu',
                                             )}
                                         >
                                             <UserRound className="size-4" />
@@ -95,16 +89,17 @@ export function PublicHeader() {
                                         className="w-48"
                                     >
                                         <DropdownMenuItem asChild>
-                                            <Link href={login()}>
-                                                {t('Connexion', 'Log in')}
+                                            <Link href={routes.login()}>
+                                                {t(
+                                                    'common.public-header.log-in',
+                                                )}
                                             </Link>
                                         </DropdownMenuItem>
                                         {canRegister && (
                                             <DropdownMenuItem asChild>
-                                                <Link href={register()}>
+                                                <Link href={routes.register()}>
                                                     {t(
-                                                        'Créer un compte',
-                                                        'Create account',
+                                                        'common.public-header.create-account',
                                                     )}
                                                 </Link>
                                             </DropdownMenuItem>

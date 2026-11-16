@@ -1,23 +1,12 @@
 import { localeDefinitions } from '@/i18n/generated/types';
 import { useTranslations } from '@/i18n/provider';
-import type { LocaleCode, Replacements, TranslationKey } from '@/i18n/types';
+import type { LocaleCode } from '@/i18n/types';
 
 export type Locale = LocaleCode;
 
 export function useLocale() {
-    const { locale, t: translate, tChoice } = useTranslations();
+    const { locale, t, tChoice } = useTranslations();
     const { htmlLang } = localeDefinitions[locale];
-
-    function t(key: TranslationKey, replacements?: Replacements): string;
-    /** @deprecated Use a semantic translation key from the Laravel dictionaries. */
-    function t(fr: string, en: string): string;
-    function t(key: string, replacements?: Replacements | string): string {
-        return typeof replacements === 'string'
-            ? locale === 'en'
-                ? replacements
-                : key
-            : translate(key as TranslationKey, replacements);
-    }
 
     const date = (value: string | null) =>
         value

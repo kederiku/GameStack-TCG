@@ -17,7 +17,7 @@ export function GameCard({ game }: { game: PublicGame }) {
                     {game.name}
                 </span>
                 <span className="mt-1.5 block text-xs text-muted-foreground">
-                    {t('Découvrir ce TCG', 'Explore this TCG')}
+                    {t('catalog.game-card.explore-this-tcg')}
                 </span>
             </span>
             <ArrowUpRight

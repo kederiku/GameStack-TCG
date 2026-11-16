@@ -70,7 +70,7 @@ export function CatalogFilters({
         <div className="space-y-6">
             {data.catalogs.length > 0 && (
                 <SegmentedPicker
-                    label={t('Catalogues', 'Catalogs')}
+                    label={t('catalog.catalog-filters.catalogs')}
                     value={data.filters.catalog}
                     onValueChange={(catalog) =>
                         update({ catalog, language: '*', series: '' })
@@ -78,7 +78,7 @@ export function CatalogFilters({
                     options={[
                         {
                             value: '*',
-                            label: t('Tous', 'All'),
+                            label: t('catalog.catalog-filters.all'),
                             count: data.total,
                         },
                         ...data.catalogs.map((catalog) => ({
@@ -99,7 +99,7 @@ export function CatalogFilters({
             >
                 <div className="relative col-span-2 md:col-span-1">
                     <Label htmlFor="catalog-search" className="sr-only">
-                        {t('Rechercher une extension', 'Search expansions')}
+                        {t('catalog.catalog-filters.search-expansions')}
                     </Label>
                     <Search
                         className="pointer-events-none absolute top-3.5 left-3.5 size-4 text-muted-foreground"
@@ -112,8 +112,7 @@ export function CatalogFilters({
                         value={query}
                         className="h-11 bg-card pr-10 pl-10 text-sm"
                         placeholder={t(
-                            'Rechercher une extension…',
-                            'Search expansions…',
+                            'catalog.catalog-filters.search-placeholder',
                         )}
                         onChange={(event) => {
                             const next = event.target.value;
@@ -128,8 +127,7 @@ export function CatalogFilters({
                             size="icon"
                             className="absolute top-0.5 right-1 size-10"
                             aria-label={t(
-                                'Effacer la recherche',
-                                'Clear search',
+                                'catalog.catalog-filters.clear-search',
                             )}
                             onClick={() => {
                                 setQuery('');
@@ -141,25 +139,25 @@ export function CatalogFilters({
                     )}
                 </div>
                 <FilterSelect
-                    label={t('Langue des éditions', 'Edition language')}
+                    label={t('catalog.catalog-filters.edition-language')}
                     value={data.filters.language}
                     onValueChange={(language) => update({ language })}
                     options={[
                         {
                             value: '*',
-                            label: t('Toutes les langues', 'All languages'),
+                            label: t('catalog.catalog-filters.all-languages'),
                         },
                         ...options,
                     ]}
                 />
                 <FilterSelect
-                    label={t('Type', 'Type')}
+                    label={t('catalog.catalog-filters.type')}
                     value={data.filters.type}
                     onValueChange={(type) => update({ type })}
                     options={[
                         {
                             value: 'all',
-                            label: t('Tous les types', 'All types'),
+                            label: t('catalog.catalog-filters.all-types'),
                         },
                         ...Object.entries(types).map(([value, label]) => ({
                             value,
@@ -168,19 +166,22 @@ export function CatalogFilters({
                     ]}
                 />
                 <FilterSelect
-                    label={t('Trier', 'Sort')}
+                    label={t('catalog.catalog-filters.sort')}
                     value={data.filters.sort}
                     onValueChange={(sort) => update({ sort })}
                     options={[
                         {
                             value: 'recent',
-                            label: t('Plus récentes', 'Newest first'),
+                            label: t('catalog.catalog-filters.newest-first'),
                         },
                         {
                             value: 'oldest',
-                            label: t('Plus anciennes', 'Oldest first'),
+                            label: t('catalog.catalog-filters.oldest-first'),
                         },
-                        { value: 'name', label: t('Nom A–Z', 'Name A–Z') },
+                        {
+                            value: 'name',
+                            label: t('catalog.catalog-filters.name-az'),
+                        },
                     ]}
                 />
             </form>

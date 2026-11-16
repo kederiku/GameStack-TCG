@@ -16,30 +16,34 @@ use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 
 class RelationsRelationManager extends CatalogRelationManager
 {
     protected static string $relationship = 'relations';
 
-    protected static ?string $title = 'Rapprochements';
+    public static function getTitle(Model $ownerRecord, string $pageClass): string
+    {
+        return __('admin.labels.relationships');
+    }
 
     public function form(Schema $schema): Schema
     {
         return $schema->components([
-            Select::make('source_expansion_id')->label('Extension source')
+            Select::make('source_expansion_id')->label(__('admin.labels.source-expansion'))
                 ->visibleOn('edit')->disabled()->native(false)
-                ->helperText('Point de départ du lien : lisez « source → type de lien → cible ».')
+                ->helperText(__('admin.relationships.source_help'))
                 ->getOptionLabelUsing(fn (mixed $value): ?string => $this->expansionLabel($value)),
-            Select::make('target_expansion_id')->label('Extension cible')->required()->searchable()->disabledOn('edit')
-                ->helperText('Un ensemble du même jeu, y compris dans un autre catalogue. Choix définitif après création.')
+            Select::make('target_expansion_id')->label(__('admin.labels.target-expansion'))->required()->searchable()->disabledOn('edit')
+                ->helperText(__('admin.relationships.target_help'))
                 ->getSearchResultsUsing(fn (string $search): array => $this->candidateExpansions($search))
                 ->getOptionLabelUsing(fn (mixed $value): ?string => $this->expansionLabel($value)),
-            CatalogFields::enum('type', 'Type', CatalogLabels::RELATION_TYPES)->disabledOn('edit')
-                ->helperText('Type et ensembles définitifs après création. Consultez l’aide pour le sens du lien.'),
-            Textarea::make('notes')->label('Justification')->required()->rows(4)->columnSpanFull()
-                ->helperText('Expliquez le lien et ses limites à partir d’une source vérifiable.'),
+            CatalogFields::enum('type', __('admin.labels.type'), CatalogLabels::relationTypes())->disabledOn('edit')
+                ->helperText(__('admin.relationships.type_help')),
+            Textarea::make('notes')->label(__('admin.labels.justification'))->required()->rows(4)->columnSpanFull()
+                ->helperText(__('admin.relationships.justification_help')),
             CatalogFields::sourceUrl()->required(),
-            CatalogFields::help('Lisez le lien : source → type de lien → cible. « Liée à » est réciproque. « Adaptée de » et « Inclut du contenu de » se lisent de la source vers la cible ; à la création, l’extension ouverte est la source. Des noms proches ne suffisent pas à établir que deux ensembles contiennent les mêmes cartes.'),
+            CatalogFields::help(__('admin.relationships.help')),
         ]);
     }
 
@@ -53,22 +57,22 @@ class RelationsRelationManager extends CatalogRelationManager
             ->where(fn (Builder $query): Builder => $query->where('source_expansion_id', $owner->id)->orWhere('target_expansion_id', $owner->id))
             ->with(['sourceExpansion.catalog', 'targetExpansion.catalog']))
             ->recordTitleAttribute('type')
-            ->description('Documentez les liens entre ensembles sans les fusionner ni supposer un contenu identique. Une justification et une source sont nécessaires.')
-            ->searchPlaceholder('Rechercher')
-            ->emptyStateHeading('Aucun rapprochement')
-            ->emptyStateDescription('Ajoutez un lien seulement si vous disposez d’une source qui le confirme.')
+            ->description(__('admin.relationships.description'))
+            ->searchPlaceholder(__('admin.labels.search'))
+            ->emptyStateHeading(__('admin.labels.no-relationships'))
+            ->emptyStateDescription(__('admin.relationships.empty_help'))
             ->columns([
-                TextColumn::make('sourceExpansion.name')->label('Extension source')->searchable()
+                TextColumn::make('sourceExpansion.name')->label(__('admin.labels.source-expansion'))->searchable()
                     ->description(fn (ExpansionRelation $record): string => $record->sourceExpansion->catalog->name)
                     ->url(fn (ExpansionRelation $record): string => ExpansionResource::getUrl('edit', ['record' => $record->source_expansion_id])),
-                CatalogTables::enum('type', 'Type', CatalogLabels::RELATION_TYPES),
-                TextColumn::make('targetExpansion.name')->label('Extension cible')->searchable()
+                CatalogTables::enum('type', __('admin.labels.type'), CatalogLabels::relationTypes()),
+                TextColumn::make('targetExpansion.name')->label(__('admin.labels.target-expansion'))->searchable()
                     ->description(fn (ExpansionRelation $record): string => $record->targetExpansion->catalog->name)
                     ->url(fn (ExpansionRelation $record): string => ExpansionResource::getUrl('edit', ['record' => $record->target_expansion_id])),
-                TextColumn::make('notes')->label('Justification')->limit(60),
-                TextColumn::make('source_url')->label('Source')->limit(40)->url(fn (ExpansionRelation $record): string => $record->source_url, true),
+                TextColumn::make('notes')->label(__('admin.labels.justification'))->limit(60),
+                TextColumn::make('source_url')->label(__('admin.labels.source'))->limit(40)->url(fn (ExpansionRelation $record): string => $record->source_url, true),
             ])
-            ->headerActions([$this->createCatalogAction('Créer un rapprochement', 'source_expansion_id')])
+            ->headerActions([$this->createCatalogAction(__('admin.labels.create-a-relationship'), 'source_expansion_id')])
             ->recordActions([$this->editCatalogAction(), CatalogActions::delete()]);
     }
 

@@ -1,3 +1,5 @@
+import { passkeyErrorMessage } from '@/lib/passkey-error';
+import { useLocale } from '@/hooks/use-locale';
 import { useLocalizedRoutes } from '@/hooks/use-localized-routes';
 import type { UrlMethodPair } from '@inertiajs/core';
 import { router } from '@inertiajs/react';
@@ -24,8 +26,9 @@ export default function PasskeyVerify({
     loadingLabel,
     separator,
 }: Props = {}) {
+    const { t } = useLocale();
     const localized = useLocalizedRoutes();
-    const { verify, isLoading, error, isSupported } = usePasskeyVerify({
+    const { verify, isLoading, errorInstance, isSupported } = usePasskeyVerify({
         routes: {
             options:
                 routes?.options.url ?? localized['passkey.login-options'].url(),
@@ -35,6 +38,8 @@ export default function PasskeyVerify({
             router.visit(response.redirect ?? localized.dashboard.url());
         },
     });
+
+    const error = passkeyErrorMessage(errorInstance, t);
 
     if (!isSupported) {
         return null;
@@ -52,8 +57,8 @@ export default function PasskeyVerify({
                 >
                     {isLoading ? <Spinner /> : <KeyRound className="h-4 w-4" />}
                     {isLoading
-                        ? (loadingLabel ?? 'Connexion…')
-                        : (label ?? 'Se connecter avec une clé d’accès')}
+                        ? (loadingLabel ?? t('auth.loading'))
+                        : (label ?? t('auth.passkey-verify.login'))}
                 </Button>
                 {error && (
                     <InputError message={error} className="text-center" />
@@ -66,7 +71,7 @@ export default function PasskeyVerify({
                 </div>
                 <div className="relative flex justify-center text-xs uppercase">
                     <span className="bg-card px-2 text-center text-muted-foreground">
-                        {separator ?? 'Ou continuer avec votre e-mail'}
+                        {separator ?? t('auth.passkey-verify.separator')}
                     </span>
                 </div>
             </div>

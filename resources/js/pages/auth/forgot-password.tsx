@@ -1,3 +1,4 @@
+import { useLocale } from '@/hooks/use-locale';
 import { useLocalizedRoutes } from '@/hooks/use-localized-routes';
 import { Form, Head } from '@inertiajs/react';
 import { LoaderCircle } from 'lucide-react';
@@ -8,13 +9,14 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 
 export default function ForgotPassword({ status }: { status?: string }) {
+    const { t } = useLocale();
     const localized = useLocalizedRoutes();
     const login = localized['login'];
     const email = localized['password.email'];
 
     return (
         <>
-            <Head title="Mot de passe oublié" />
+            <Head title={t('auth.forgot-password.forgot-password')} />
 
             {status && (
                 <div role="status" className="auth-status">
@@ -27,7 +29,9 @@ export default function ForgotPassword({ status }: { status?: string }) {
                     {({ processing, errors }) => (
                         <>
                             <div className="grid gap-2">
-                                <Label htmlFor="email">Adresse e-mail</Label>
+                                <Label htmlFor="email">
+                                    {t('auth.forgot-password.email-address')}
+                                </Label>
                                 <Input
                                     id="email"
                                     aria-invalid={Boolean(errors.email)}
@@ -36,7 +40,9 @@ export default function ForgotPassword({ status }: { status?: string }) {
                                     autoComplete="email"
                                     required
                                     autoFocus
-                                    placeholder="vous@exemple.fr"
+                                    placeholder={t(
+                                        'auth.forgot-password.youexamplecom',
+                                    )}
                                 />
 
                                 <InputError
@@ -54,7 +60,7 @@ export default function ForgotPassword({ status }: { status?: string }) {
                                     {processing && (
                                         <LoaderCircle className="h-4 w-4 animate-spin" />
                                     )}
-                                    Envoyer le lien
+                                    {t('auth.forgot-password.send-link')}
                                 </Button>
                             </div>
                         </>
@@ -62,8 +68,10 @@ export default function ForgotPassword({ status }: { status?: string }) {
                 </Form>
 
                 <div className="space-x-1 text-center text-sm text-muted-foreground">
-                    <span>Revenir à la</span>
-                    <TextLink href={login()}>connexion</TextLink>
+                    <span>{t('auth.forgot-password.return-to')}</span>
+                    <TextLink href={login()}>
+                        {t('auth.forgot-password.login')}
+                    </TextLink>
                 </div>
             </div>
         </>
@@ -71,7 +79,6 @@ export default function ForgotPassword({ status }: { status?: string }) {
 }
 
 ForgotPassword.layout = {
-    title: 'Mot de passe oublié ?',
-    description:
-        'Indiquez votre adresse e-mail pour recevoir un lien de réinitialisation.',
+    titleKey: 'auth.forgot-password.forgot-your-password',
+    descriptionKey: 'auth.forgot-password.description',
 };

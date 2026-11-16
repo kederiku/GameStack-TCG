@@ -14,7 +14,7 @@ class ListSeries extends ListCatalogRecords
     /** @return list<CreateAction> */
     protected function getHeaderActions(): array
     {
-        return [CreateAction::make()->label('Ajouter une série')
+        return [CreateAction::make()->label(__('admin.labels.add-a-series'))
             ->url(fn (): string => SeriesResource::getUrl('create', array_filter([
                 'catalog' => CatalogFields::positiveId($this->tableFilters['catalog']['value'] ?? null),
             ])))];
@@ -22,6 +22,6 @@ class ListSeries extends ListCatalogRecords
 
     public function getSubheading(): string
     {
-        return 'Regroupez les extensions en séries ou blocs lorsque le jeu en utilise.';
+        return __('admin.series.list_help');
     }
 }

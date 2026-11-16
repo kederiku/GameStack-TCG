@@ -11,10 +11,10 @@ class CatalogForm
     {
         return CatalogFields::layout($schema, [
             CatalogFields::game(),
-            CatalogFields::language('default_language_id', 'Langue par défaut')
-                ->helperText('Langue des noms sans traduction. Indépendante des langues imprimées.'),
-            CatalogFields::name()->helperText('Un nom qui distingue ce catalogue dans le jeu, par exemple International ou Japonais.'),
+            CatalogFields::language('default_language_id', __('admin.labels.default-language'))
+                ->helperText(__('admin.catalogs.language_help')),
+            CatalogFields::name()->helperText(__('admin.catalogs.name_help')),
             CatalogFields::description(),
-        ], [CatalogFields::visibility()], description: 'Un catalogue rassemble les extensions d’une même version du jeu : internationale, japonaise, etc. Créez-en un autre si les ensembles diffèrent selon les marchés ; une simple traduction peut rester dans le même catalogue.', advanced: [CatalogFields::key(), CatalogFields::order()]);
+        ], [CatalogFields::visibility()], description: __('admin.catalogs.help'), advanced: [CatalogFields::key(), CatalogFields::order()]);
     }
 }

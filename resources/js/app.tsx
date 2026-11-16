@@ -1,3 +1,4 @@
+import type { PropsWithChildren } from 'react';
 import { createInertiaApp } from '@inertiajs/react';
 import { Toaster } from '@/components/ui/sonner';
 import { TooltipProvider } from '@/components/ui/tooltip';
@@ -8,6 +9,15 @@ import AuthLayout from '@/layouts/auth-layout';
 import PublicLayout from '@/layouts/public-layout';
 import SettingsLayout from '@/layouts/settings/layout';
 
+function LocalizedApp({ children }: PropsWithChildren) {
+    return (
+        <LocaleProvider>
+            {children}
+            <Toaster />
+        </LocaleProvider>
+    );
+}
+
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 
 void createInertiaApp({
@@ -16,23 +26,18 @@ void createInertiaApp({
         switch (true) {
             case name === 'welcome':
             case name.startsWith('games/'):
-                return [LocaleProvider, PublicLayout];
+                return [LocalizedApp, PublicLayout];
             case name.startsWith('auth/'):
-                return [LocaleProvider, AuthLayout];
+                return [LocalizedApp, AuthLayout];
             case name.startsWith('settings/'):
-                return [LocaleProvider, AppLayout, SettingsLayout];
+                return [LocalizedApp, AppLayout, SettingsLayout];
             default:
-                return [LocaleProvider, AppLayout];
+                return [LocalizedApp, AppLayout];
         }
     },
     strictMode: true,
     withApp(app) {
-        return (
-            <TooltipProvider delayDuration={0}>
-                {app}
-                <Toaster />
-            </TooltipProvider>
-        );
+        return <TooltipProvider delayDuration={0}>{app}</TooltipProvider>;
     },
     progress: {
         color: '#3767ef',

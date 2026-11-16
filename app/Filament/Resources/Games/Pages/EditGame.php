@@ -24,7 +24,7 @@ class EditGame extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
-            Action::make('catalogues')->label('Catalogues du jeu')->icon(Heroicon::OutlinedCircleStack)
+            Action::make('catalogues')->label(__('admin.labels.game-catalogs'))->icon(Heroicon::OutlinedCircleStack)
                 ->visible(fn (): bool => CatalogResource::canAccess())
                 ->url(fn (): string => CatalogResource::getUrl('index', [
                     'filters' => ['game' => ['value' => $this->getRecord()->getKey()]],

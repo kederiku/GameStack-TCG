@@ -31,7 +31,7 @@ class SaveCatalogRecord
         $record = clone $record;
 
         if (! $record->saveCatalogAttributes($data)) {
-            throw new RuntimeException('L’enregistrement de la fiche a été annulé.');
+            throw new RuntimeException(__('validation.catalog.save_cancelled'));
         }
 
         return $record;
@@ -68,7 +68,7 @@ class SaveCatalogRecord
 
                 if (! $write()) {
                     if ($uploaded) {
-                        throw new RuntimeException('L’enregistrement de la fiche a été annulé.');
+                        throw new RuntimeException(__('validation.catalog.save_cancelled'));
                     }
 
                     return false;
@@ -77,7 +77,7 @@ class SaveCatalogRecord
                 if ($record instanceof ExpansionRelease && $record->status === 'released'
                     && $edition !== null && $edition->status !== 'released'
                     && ! $edition->update(['status' => 'released'])) {
-                    throw new RuntimeException('La publication de l’édition a été annulée.');
+                    throw new RuntimeException(__('validation.catalog.publish_cancelled'));
                 }
 
                 return true;
@@ -105,7 +105,7 @@ class SaveCatalogRecord
         }
 
         if (! $record instanceof SeriesLocalization && ! $record instanceof ExpansionEdition) {
-            throw ValidationException::withMessages(['image' => 'Cette fiche ne peut pas recevoir d’image.']);
+            throw ValidationException::withMessages(['image' => __('validation.images.unsupported_record')]);
         }
 
         $image = $attributes['image'] ?? null;
@@ -117,7 +117,7 @@ class SaveCatalogRecord
         }
 
         if ($image !== null && $image !== $current?->getRawOriginal('image')) {
-            throw ValidationException::withMessages(['image' => 'Cette image ne correspond plus à celle de la fiche. Rechargez le formulaire.']);
+            throw ValidationException::withMessages(['image' => __('validation.images.stale_record')]);
         }
 
         return false;

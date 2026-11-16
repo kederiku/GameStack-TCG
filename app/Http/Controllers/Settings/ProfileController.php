@@ -49,7 +49,7 @@ class ProfileController extends Controller
 
         $request->user()->save();
 
-        Inertia::flash('toast', ['type' => 'success', 'message' => __('Profile updated.')]);
+        Inertia::flash('toast', ['type' => 'success', 'message' => __('account.messages.profile-updated')]);
 
         return redirect(LocalizedRoutes::url('profile.edit'));
     }

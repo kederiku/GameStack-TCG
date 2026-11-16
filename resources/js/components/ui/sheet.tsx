@@ -1,3 +1,4 @@
+import { useLocale } from '@/hooks/use-locale';
 import * as SheetPrimitive from "@radix-ui/react-dialog"
 import { XIcon } from "lucide-react"
 import * as React from "react"
@@ -50,6 +51,7 @@ function SheetContent({
 }: React.ComponentProps<typeof SheetPrimitive.Content> & {
   side?: "top" | "right" | "bottom" | "left"
 }) {
+    const { t } = useLocale();
   return (
     <SheetPortal>
       <SheetOverlay />
@@ -72,7 +74,7 @@ function SheetContent({
         {children}
         <SheetPrimitive.Close className="ring-offset-background focus:ring-ring data-[state=open]:bg-secondary absolute top-4 right-4 flex size-8 items-center justify-center rounded-lg opacity-70 transition-opacity hover:opacity-100 focus:ring-2 focus:ring-offset-2 focus:outline-hidden disabled:pointer-events-none">
           <XIcon className="size-4" />
-          <span className="sr-only">Fermer</span>
+          <span className="sr-only">{t('common.sheet.close')}</span>
         </SheetPrimitive.Close>
       </SheetPrimitive.Content>
     </SheetPortal>

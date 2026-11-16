@@ -1,3 +1,5 @@
+import { useLocalizedRoutes } from '@/hooks/use-localized-routes';
+import { useLocale } from '@/hooks/use-locale';
 import { Head, Link, usePage } from '@inertiajs/react';
 import {
     ArrowRight,
@@ -16,59 +18,58 @@ import { GameGrid } from '@/components/games/game-grid';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
-import { dashboard } from '@/routes';
-import { edit as profile } from '@/routes/profile';
-import { edit as security } from '@/routes/security';
 import type { PublicGame } from '@/types/game';
 
-const collectionFeatures = [
-    {
-        icon: Layers2,
-        title: 'Vos cartes',
-        description: 'Chaque pièce à sa place.',
-    },
-    {
-        icon: BookOpen,
-        title: 'Vos séries',
-        description: 'La prochaine carte manquante.',
-    },
-    {
-        icon: Heart,
-        title: 'Vos envies',
-        description: 'Les trouvailles à venir.',
-    },
-];
-const accountLinks = [
-    {
-        icon: UserRound,
-        title: 'Mon profil',
-        description: 'Vos informations personnelles',
-        href: profile(),
-    },
-    {
-        icon: ShieldCheck,
-        title: 'Sécurité',
-        description: 'Protéger votre compte',
-        href: security(),
-    },
-];
-
 export default function Dashboard({ games }: { games: PublicGame[] }) {
+    const { t } = useLocale();
+    const routes = useLocalizedRoutes();
+    const collectionFeatures = [
+        {
+            icon: Layers2,
+            title: t('account.dashboard.your-cards'),
+            description: t('account.dashboard.cards-description'),
+        },
+        {
+            icon: BookOpen,
+            title: t('account.dashboard.your-series'),
+            description: t('account.dashboard.your-next-missing-card'),
+        },
+        {
+            icon: Heart,
+            title: t('account.dashboard.your-wishlist'),
+            description: t('account.dashboard.discoveries-to-come'),
+        },
+    ];
+    const accountLinks = [
+        {
+            icon: UserRound,
+            title: t('account.dashboard.my-profile'),
+            description: t('account.dashboard.your-personal-information'),
+            href: routes['profile.edit'](),
+        },
+        {
+            icon: ShieldCheck,
+            title: t('account.dashboard.security'),
+            description: t('account.dashboard.protect-your-account'),
+            href: routes['security.edit'](),
+        },
+    ];
+
     const { auth } = usePage().props;
     const firstName =
-        auth.user?.name.trim().split(/\s+/)[0] || 'collectionneur';
+        auth.user?.name.trim().split(/\s+/)[0] || t('account.collector');
 
     return (
         <>
-            <Head title="Mon espace" />
+            <Head title={t('account.dashboard.my-space')} />
             <div className="mx-auto flex w-full max-w-7xl flex-1 flex-col gap-8 px-4 py-7 sm:px-8 sm:py-9">
                 <div className="flex flex-wrap items-end justify-between gap-5">
                     <div className="min-w-0">
                         <p className="mb-2 text-sm [overflow-wrap:anywhere] text-muted-foreground">
-                            Bonjour {firstName}, bienvenue chez vous.
+                            {t('account.greeting', { name: firstName })}
                         </p>
                         <h1 className="font-display text-4xl leading-none font-black uppercase sm:text-5xl">
-                            Mon espace
+                            {t('account.dashboard.my-space')}
                             <span className="text-brand-highlight">.</span>
                         </h1>
                     </div>
@@ -79,7 +80,7 @@ export default function Dashboard({ games }: { games: PublicGame[] }) {
                     >
                         <a href="#jeux">
                             <Compass className="size-4" aria-hidden="true" />
-                            Explorer les jeux
+                            {t('account.dashboard.explore-games')}
                         </a>
                     </Button>
                 </div>
@@ -91,22 +92,20 @@ export default function Dashboard({ games }: { games: PublicGame[] }) {
                     <div className="relative z-10 max-w-md xl:max-w-[60%]">
                         <p className="mb-4 flex items-center gap-2 text-[0.65rem] font-semibold tracking-[0.18em] text-brand-highlight uppercase">
                             <Sparkles className="size-3.5" aria-hidden="true" />
-                            Chaque collection a son histoire
+                            {t('account.dashboard.welcome-eyebrow')}
                         </p>
                         <h2
                             id="welcome-title"
                             className="font-display text-3xl leading-tight font-extrabold uppercase sm:text-4xl"
                         >
-                            La vôtre commence ici.
+                            {t('account.dashboard.yours-starts-here')}
                         </h2>
                         <p className="mt-3 max-w-md text-sm leading-7 text-muted-foreground">
-                            Vos univers favoris, vos prochaines trouvailles,
-                            votre passion. Retrouvez tout ce qui vous anime dans
-                            un même espace.
+                            {t('account.dashboard.welcome-description')}
                         </p>
                         <Button asChild className="mt-6 h-11 rounded-xl px-5">
                             <a href="#jeux">
-                                Trouver mon univers
+                                {t('account.dashboard.find-my-world')}
                                 <ArrowRight
                                     className="size-4"
                                     aria-hidden="true"
@@ -132,20 +131,24 @@ export default function Dashboard({ games }: { games: PublicGame[] }) {
                                         className="size-5 text-brand-highlight"
                                         aria-hidden="true"
                                     />
-                                    Ma collection
+                                    {t('account.dashboard.my-collection')}
                                 </h2>
                                 <Badge
                                     variant="secondary"
                                     className="rounded-full px-3 py-1 text-[0.65rem] font-medium"
                                 >
-                                    Bientôt disponible
+                                    {t('account.dashboard.coming-soon')}
                                 </Badge>
                             </CardHeader>
                             <CardContent className="px-5 py-5 sm:px-6">
                                 <EmptyState
                                     icon={BookOpen}
-                                    title="Une place pour chaque carte"
-                                    description="Votre espace de collection se prépare. Vous pourrez bientôt y réunir vos cartes et suivre les séries qui vous tiennent à cœur."
+                                    title={t(
+                                        'account.dashboard.collection-title',
+                                    )}
+                                    description={t(
+                                        'account.dashboard.collection-description',
+                                    )}
                                     className="border-0 bg-background/60 py-9"
                                 />
                             </CardContent>
@@ -177,10 +180,12 @@ export default function Dashboard({ games }: { games: PublicGame[] }) {
                                     id="account-title"
                                     className="font-display text-2xl font-extrabold uppercase"
                                 >
-                                    À votre image
+                                    {t('account.dashboard.made-for-you')}
                                 </h2>
                                 <p className="text-xs leading-5 text-muted-foreground">
-                                    Les essentiels de votre compte.
+                                    {t(
+                                        'account.dashboard.your-account-essentials',
+                                    )}
                                 </p>
                             </CardHeader>
                             <CardContent className="px-3">
@@ -223,10 +228,10 @@ export default function Dashboard({ games }: { games: PublicGame[] }) {
                             </CardContent>
                         </Card>
                         <p className="px-5 pt-5 text-xs leading-6 text-muted-foreground">
-                            Un univers ne suffit jamais.
+                            {t('account.dashboard.games-tagline')}
                             <br />
                             <span className="text-foreground">
-                                Une même passion les rassemble.
+                                {t('account.dashboard.games-subtitle')}
                             </span>
                         </p>
                     </aside>
@@ -240,17 +245,17 @@ export default function Dashboard({ games }: { games: PublicGame[] }) {
                     <div className="mb-5 flex flex-wrap items-end justify-between gap-3">
                         <div>
                             <p className="mb-2 text-[0.65rem] font-semibold tracking-[0.18em] text-brand-highlight uppercase">
-                                D’un univers à l’autre
+                                {t('account.dashboard.games-eyebrow')}
                             </p>
                             <h2
                                 id="games-title"
                                 className="font-display text-3xl font-extrabold uppercase"
                             >
-                                Les jeux à explorer
+                                {t('account.dashboard.games-to-explore')}
                             </h2>
                         </div>
                         <p className="text-sm text-muted-foreground">
-                            Retrouvez les TCG qui vous passionnent.
+                            {t('account.dashboard.games-description')}
                         </p>
                     </div>
                     <GameGrid
@@ -259,8 +264,8 @@ export default function Dashboard({ games }: { games: PublicGame[] }) {
                     />
                 </section>
                 <footer className="border-t border-border pt-5 text-xs text-muted-foreground">
-                    GameStackr TCG <span aria-hidden="true">/</span> Vos cartes,
-                    vos collections, votre espace.
+                    GameStackr TCG <span aria-hidden="true">/</span>
+                    {t('account.dashboard.footer-tagline')}
                 </footer>
             </div>
         </>
@@ -268,5 +273,5 @@ export default function Dashboard({ games }: { games: PublicGame[] }) {
 }
 
 Dashboard.layout = {
-    breadcrumbs: [{ title: 'Mon espace', href: dashboard() }],
+    breadcrumbs: [{ title: 'account.dashboard.my-space', route: 'dashboard' }],
 };

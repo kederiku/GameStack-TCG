@@ -1,3 +1,4 @@
+import { useLocale } from '@/hooks/use-locale';
 import { useLocalizedRoutes } from '@/hooks/use-localized-routes';
 import { Form, Head } from '@inertiajs/react';
 import InputError from '@/components/input-error';
@@ -13,13 +14,14 @@ type Props = {
 };
 
 export default function Register({ passwordRules }: Props) {
+    const { t } = useLocale();
     const localized = useLocalizedRoutes();
     const login = localized['login'];
     const store = localized['register.store'];
 
     return (
         <>
-            <Head title="Créer un compte" />
+            <Head title={t('auth.register.create-an-account')} />
             <Form
                 {...store.form()}
                 resetOnSuccess={['password', 'password_confirmation']}
@@ -30,7 +32,9 @@ export default function Register({ passwordRules }: Props) {
                     <>
                         <div className="grid gap-6">
                             <div className="grid gap-2">
-                                <Label htmlFor="name">Nom</Label>
+                                <Label htmlFor="name">
+                                    {t('auth.register.name')}
+                                </Label>
                                 <Input
                                     id="name"
                                     aria-invalid={Boolean(errors.name)}
@@ -39,7 +43,7 @@ export default function Register({ passwordRules }: Props) {
                                     autoFocus
                                     autoComplete="name"
                                     name="name"
-                                    placeholder="Votre nom"
+                                    placeholder={t('auth.register.your-name')}
                                 />
                                 <InputError
                                     role="alert"
@@ -49,7 +53,9 @@ export default function Register({ passwordRules }: Props) {
                             </div>
 
                             <div className="grid gap-2">
-                                <Label htmlFor="email">Adresse e-mail</Label>
+                                <Label htmlFor="email">
+                                    {t('auth.register.email-address')}
+                                </Label>
                                 <Input
                                     id="email"
                                     aria-invalid={Boolean(errors.email)}
@@ -57,7 +63,9 @@ export default function Register({ passwordRules }: Props) {
                                     required
                                     autoComplete="email"
                                     name="email"
-                                    placeholder="vous@exemple.fr"
+                                    placeholder={t(
+                                        'auth.register.youexamplecom',
+                                    )}
                                 />
                                 <InputError
                                     role="alert"
@@ -66,16 +74,20 @@ export default function Register({ passwordRules }: Props) {
                             </div>
 
                             <div className="grid gap-2">
-                                <Label htmlFor="password">Mot de passe</Label>
+                                <Label htmlFor="password">
+                                    {t('auth.register.password')}
+                                </Label>
                                 <PasswordInput
-                                    showLabel="Afficher le mot de passe"
-                                    hideLabel="Masquer le mot de passe"
+                                    showLabel={t('auth.register.show-password')}
+                                    hideLabel={t('auth.register.hide-password')}
                                     id="password"
                                     aria-invalid={Boolean(errors.password)}
                                     required
                                     autoComplete="new-password"
                                     name="password"
-                                    placeholder="Votre mot de passe"
+                                    placeholder={t(
+                                        'auth.register.your-password',
+                                    )}
                                     passwordrules={passwordRules}
                                 />
                                 <InputError
@@ -86,11 +98,11 @@ export default function Register({ passwordRules }: Props) {
 
                             <div className="grid gap-2">
                                 <Label htmlFor="password_confirmation">
-                                    Confirmer le mot de passe
+                                    {t('auth.register.confirm-password')}
                                 </Label>
                                 <PasswordInput
-                                    showLabel="Afficher le mot de passe"
-                                    hideLabel="Masquer le mot de passe"
+                                    showLabel={t('auth.register.show-password')}
+                                    hideLabel={t('auth.register.hide-password')}
                                     id="password_confirmation"
                                     aria-invalid={Boolean(
                                         errors.password_confirmation,
@@ -98,7 +110,9 @@ export default function Register({ passwordRules }: Props) {
                                     required
                                     autoComplete="new-password"
                                     name="password_confirmation"
-                                    placeholder="Confirmer le mot de passe"
+                                    placeholder={t(
+                                        'auth.register.confirm-password',
+                                    )}
                                     passwordrules={passwordRules}
                                 />
                                 <InputError
@@ -113,13 +127,15 @@ export default function Register({ passwordRules }: Props) {
                                 data-test="register-user-button"
                             >
                                 {processing && <Spinner />}
-                                Créer mon compte
+                                {t('auth.register.create-my-account')}
                             </Button>
                         </div>
 
                         <div className="text-center text-sm text-muted-foreground">
-                            Déjà un compte ?{' '}
-                            <TextLink href={login()}>Se connecter</TextLink>
+                            {t('auth.register.already-have-an-account')}{' '}
+                            <TextLink href={login()}>
+                                {t('auth.register.log-in')}
+                            </TextLink>
                         </div>
                     </>
                 )}
@@ -129,6 +145,6 @@ export default function Register({ passwordRules }: Props) {
 }
 
 Register.layout = {
-    title: 'Créez votre compte',
-    description: 'Rejoignez GameStackr et retrouvez vos univers TCG.',
+    titleKey: 'auth.register.create-your-account',
+    descriptionKey: 'auth.register.description',
 };
