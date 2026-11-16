@@ -1,3 +1,4 @@
+import { useLocalizedRoutes } from '@/hooks/use-localized-routes';
 import { Form } from '@inertiajs/react';
 import { ShieldCheck } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
@@ -7,7 +8,6 @@ import TwoFactorRecoveryCodes from '@/components/two-factor-recovery-codes';
 import TwoFactorSetupModal from '@/components/two-factor-setup-modal';
 import { Button } from '@/components/ui/button';
 import { useTwoFactorAuth } from '@/hooks/use-two-factor-auth';
-import { disable, enable } from '@/routes/two-factor';
 
 export type Props = {
     canManageTwoFactor?: boolean;
@@ -16,6 +16,10 @@ export type Props = {
 };
 
 export default function ManageTwoFactor(props: Props) {
+    const localized = useLocalizedRoutes();
+    const disable = localized['two-factor.disable'];
+    const enable = localized['two-factor.enable'];
+
     const requiresConfirmation = props.requiresConfirmation ?? false;
     const twoFactorEnabled = props.twoFactorEnabled ?? false;
 

@@ -1,6 +1,6 @@
+import { useLocalizedRoutes } from '@/hooks/use-localized-routes';
 import { router } from '@inertiajs/react';
 import { KeyRound } from 'lucide-react';
-import { destroy } from '@/actions/Laravel/Passkeys/Http/Controllers/PasskeyRegistrationController';
 import SettingsSection from '@/components/settings-section';
 import { EmptyState } from '@/components/empty-state';
 import { Badge } from '@/components/ui/badge';
@@ -14,6 +14,9 @@ export type Props = {
 };
 
 export default function ManagePasskeys(props: Props) {
+    const localized = useLocalizedRoutes();
+    const destroy = localized['passkey.destroy'];
+
     const passkeys = props.passkeys ?? [];
 
     const handleDelete = (id: number, onError: () => void) => {

@@ -1,3 +1,4 @@
+import { useLocalizedRoutes } from '@/hooks/use-localized-routes';
 import { usePasskeyRegister } from '@laravel/passkeys/react';
 import { Plus } from 'lucide-react';
 import { useState } from 'react';
@@ -11,6 +12,7 @@ type Props = {
 };
 
 export default function PasskeyRegistration({ onSuccess }: Props) {
+    const localized = useLocalizedRoutes();
     const [name, setName] = useState(() => {
         const ua = navigator.userAgent;
 
@@ -35,6 +37,10 @@ export default function PasskeyRegistration({ onSuccess }: Props) {
 
     const [showForm, setShowForm] = useState(false);
     const { register, isLoading, error, isSupported } = usePasskeyRegister({
+        routes: {
+            options: localized['passkey.registration-options'].url(),
+            submit: localized['passkey.store'].url(),
+        },
         onSuccess: () => {
             setName('');
             setShowForm(false);

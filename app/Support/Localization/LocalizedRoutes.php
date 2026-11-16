@@ -5,6 +5,7 @@ namespace App\Support\Localization;
 use App\Models\Expansion;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Route;
+use Illuminate\Support\Facades\URL;
 
 final class LocalizedRoutes
 {
@@ -15,6 +16,14 @@ final class LocalizedRoutes
         Locales::definition($locale);
 
         return route('site.'.$locale.'.'.$key, $parameters, $absolute);
+    }
+
+    /** @param array<string, mixed> $parameters */
+    public static function temporarySignedUrl(string $key, \DateTimeInterface $expires, array $parameters, string $locale): string
+    {
+        Locales::definition($locale);
+
+        return URL::temporarySignedRoute('site.'.$locale.'.'.$key, $expires, $parameters);
     }
 
     public static function locale(Request $request): string
@@ -36,12 +45,17 @@ final class LocalizedRoutes
         return is_string($name) && str_starts_with($name, $prefix) ? substr($name, strlen($prefix)) : null;
     }
 
+    public static function isPage(string $key): bool
+    {
+        return in_array($key, ['home', 'dashboard', 'settings', 'profile.edit', 'security.edit', 'appearance.edit', 'games.show', 'games.expansions.show', ...AuthRouteDefinitions::views()], true);
+    }
+
     /** @return array<string, string> */
     public static function alternates(Request $request): array
     {
         $key = self::key($request);
         $route = $request->route();
-        if ($key === null || ! $route instanceof Route || $request->has('signature') || in_array('signed', $route->gatherMiddleware(), true)) {
+        if ($key === null || ! self::isPage($key) || ! $route instanceof Route || $request->has('signature') || in_array('signed', $route->gatherMiddleware(), true)) {
             return [];
         }
         $parameters = $route->parameters();
@@ -65,6 +79,7 @@ final class LocalizedRoutes
                 continue;
             }
             $valid = match ($key) {
+                'email' => $request->routeIs('password.reset', 'site.*.password.reset') && filter_var($value, FILTER_VALIDATE_EMAIL) !== false,
                 'q' => mb_strlen($value) <= 150,
                 'catalog', 'language', 'edition', 'series' => strlen($value) <= 255 && preg_match('/\A(?:[a-zA-Z0-9]+(?:-[a-zA-Z0-9]+)*|\*|)\z/', $value) === 1,
                 'type' => in_array($value, ['all', ...Expansion::TYPES], true),

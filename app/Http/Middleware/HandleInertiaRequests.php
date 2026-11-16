@@ -31,7 +31,7 @@ class HandleInertiaRequests extends Middleware
             Inertia::preserveFragment();
         }
 
-        if (! $request->header(Header::INERTIA) || ! $request->routeIs('login.store', 'two-factor.login.store')) {
+        if (! $request->header(Header::INERTIA) || ! $request->routeIs('login.store', 'two-factor.login.store', 'site.*.login.store', 'site.*.two-factor.login.store')) {
             return parent::handle($request, $next);
         }
 

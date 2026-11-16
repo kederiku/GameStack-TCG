@@ -8,10 +8,12 @@ import {
     SelectValue,
 } from '@/components/ui/select';
 import { switchLocale } from '@/lib/localized-navigation';
+import { useLocalizedRoutes } from '@/hooks/use-localized-routes';
 import { useLocale } from '@/hooks/use-locale';
 
 export function LanguageSwitcher() {
-    const { localizedUrls, availableLocales } = usePage().props;
+    const { localizedUrls, availableLocales, routeKey } = usePage().props;
+    const routes = useLocalizedRoutes();
     const { locale, t } = useLocale();
 
     if (Object.keys(localizedUrls).length === 0) return null;
@@ -25,9 +27,9 @@ export function LanguageSwitcher() {
                     language,
                     window.location.hash,
                     (url) => {
-                        router.get(
-                            url,
-                            {},
+                        router.post(
+                            routes['locale.update'].url(),
+                            { locale: language, route: routeKey, target: url },
                             {
                                 preserveScroll: true,
                                 preserveState: true,

@@ -53,7 +53,7 @@ class SecurityTest extends TestCase
         $response = $this->actingAs($user)
             ->get(route('site.fr.security.edit'));
 
-        $response->assertRedirect(route('password.confirm'));
+        $response->assertRedirect(route('site.fr.password.confirm'));
     }
 
     public function test_security_page_renders_without_two_factor_when_feature_is_disabled()
@@ -139,7 +139,7 @@ class SecurityTest extends TestCase
         ]);
 
         $this->actingAs($owner)->delete(route('passkey.destroy', $passkey))
-            ->assertRedirect(route('password.confirm'));
+            ->assertRedirect(route('site.fr.password.confirm'));
         $this->assertModelExists($passkey);
 
         $this->withSession(['auth.password_confirmed_at' => time()])

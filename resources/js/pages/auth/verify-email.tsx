@@ -1,11 +1,14 @@
+import { useLocalizedRoutes } from '@/hooks/use-localized-routes';
 import { Form, Head } from '@inertiajs/react';
 import TextLink from '@/components/text-link';
 import { Button } from '@/components/ui/button';
 import { Spinner } from '@/components/ui/spinner';
-import { logout } from '@/routes';
-import { send } from '@/routes/verification';
 
 export default function VerifyEmail({ status }: { status?: string }) {
+    const localized = useLocalizedRoutes();
+    const logout = localized['logout'];
+    const send = localized['verification.send'];
+
     return (
         <>
             <Head title="Vérification e-mail" />

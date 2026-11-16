@@ -12,7 +12,6 @@ import { Label } from '@/components/ui/label';
 import { Spinner } from '@/components/ui/spinner';
 import { useInitials } from '@/hooks/use-initials';
 import { edit } from '@/routes/profile';
-import { send } from '@/routes/verification';
 import type { Auth } from '@/types';
 
 export default function Profile({
@@ -125,7 +124,9 @@ export default function Profile({
                                                 encore vérifiée.
                                             </p>
                                             <Link
-                                                href={send()}
+                                                href={routes[
+                                                    'verification.send'
+                                                ]()}
                                                 as="button"
                                                 className="text-left font-medium text-brand-highlight underline underline-offset-4 focus-visible:outline-2 focus-visible:outline-ring"
                                             >

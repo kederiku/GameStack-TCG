@@ -3,7 +3,7 @@
 namespace Tests\Feature\Auth;
 
 use App\Models\User;
-use Illuminate\Auth\Notifications\VerifyEmail;
+use App\Notifications\LocalizedVerifyEmail as VerifyEmail;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Notification;
 use Laravel\Fortify\Features;
@@ -27,8 +27,8 @@ class VerificationNotificationTest extends TestCase
         $user = User::factory()->unverified()->create();
 
         $this->actingAs($user)
-            ->post(route('verification.send'))
-            ->assertRedirect(route('home'));
+            ->post(route('site.fr.verification.send'))
+            ->assertRedirect(route('site.fr.home'));
 
         Notification::assertSentTo($user, VerifyEmail::class);
     }
@@ -40,8 +40,8 @@ class VerificationNotificationTest extends TestCase
         $user = User::factory()->create();
 
         $this->actingAs($user)
-            ->post(route('verification.send'))
-            ->assertRedirect(route('dashboard', absolute: false));
+            ->post(route('site.fr.verification.send'))
+            ->assertRedirect(route('site.fr.dashboard', absolute: false));
 
         Notification::assertNothingSent();
     }

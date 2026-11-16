@@ -17,7 +17,7 @@ class AdminAccessTest extends TestCase
 
     public function test_admin_login_uses_the_react_authentication_flow(): void
     {
-        $this->get('/admin/login')->assertRedirect('/login');
+        $this->get('/admin/login')->assertRedirect('/fr/connexion');
     }
 
     public function test_regular_users_cannot_access_the_admin_panel(): void
@@ -53,7 +53,7 @@ class AdminAccessTest extends TestCase
             'password' => 'UserPassword123!',
             'password_confirmation' => 'UserPassword123!',
             'is_admin' => true,
-        ])->assertRedirect('/dashboard');
+        ])->assertRedirect('/fr/mon-espace');
 
         $this->assertFalse(User::query()->where('email', 'user@example.com')->sole()->is_admin);
         $this->get('/admin')->assertForbidden();
@@ -73,7 +73,7 @@ class AdminAccessTest extends TestCase
         $user->forceFill(['is_admin' => true])->save();
 
         $this->get('/admin')->assertRedirect('/admin/login');
-        $this->get('/admin/login')->assertRedirect('/login');
+        $this->get('/admin/login')->assertRedirect('/fr/connexion');
         $this->post('/login', ['email' => $user->email, 'password' => 'password'])
             ->assertRedirect('/admin');
         $this->get('/admin')->assertOk();
@@ -86,7 +86,7 @@ class AdminAccessTest extends TestCase
         $destination = '/admin/catalogs?page=2';
 
         $this->get($destination)->assertRedirect('/admin/login');
-        $this->get('/admin/login')->assertRedirect('/login');
+        $this->get('/admin/login')->assertRedirect('/fr/connexion');
         $this->post('/login', ['email' => $user->email, 'password' => 'password'], ['X-Inertia' => 'true'])
             ->assertConflict()
             ->assertHeader('X-Inertia-Location', url($destination))
@@ -118,7 +118,7 @@ class AdminAccessTest extends TestCase
 
         $this->get('/admin')->assertRedirect('/admin/login');
         $this->post('/login', ['email' => $user->email, 'password' => 'password'], ['X-Inertia' => 'true'])
-            ->assertRedirect('/two-factor-challenge')
+            ->assertRedirect('/fr/verification-deux-facteurs')
             ->assertHeaderMissing('X-Inertia-Location');
 
         $this->assertGuest();

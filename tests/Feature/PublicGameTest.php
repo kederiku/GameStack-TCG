@@ -89,9 +89,9 @@ class PublicGameTest extends TestCase
 
         $this->get('/fr')->assertInertia(fn (Assert $page) => $page
             ->has('games', 1)->where('games.0.slug', 'pokemon'));
-        $this->get('/login')->assertInertia(fn (Assert $page) => $page->component('auth/login'));
-        $this->get('/register')->assertInertia(fn (Assert $page) => $page->component('auth/register'));
-        $this->get('/fr/mon-espace')->assertRedirect('/login');
+        $this->get('/fr/connexion')->assertInertia(fn (Assert $page) => $page->component('auth/login'));
+        $this->get('/fr/inscription')->assertInertia(fn (Assert $page) => $page->component('auth/register'));
+        $this->get('/fr/mon-espace')->assertRedirect('/fr/connexion');
         $this->get('/admin')->assertRedirect();
         $this->get('/up')->assertOk();
         $this->get('/storage')->assertNotFound();

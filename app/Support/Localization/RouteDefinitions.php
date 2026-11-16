@@ -3,6 +3,7 @@
 namespace App\Support\Localization;
 
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\LocalePreferenceController;
 use App\Http\Controllers\PublicGameController;
 use App\Http\Controllers\Settings\ProfileController;
 use App\Http\Controllers\Settings\SecurityController;
@@ -25,6 +26,8 @@ final class RouteDefinitions
             self::definition('security.edit', 'account.security', ['GET'], [SecurityController::class, 'edit'], ['auth', 'verified', RequirePassword::class]),
             self::definition('user-password.update', 'account.password', ['PUT'], [SecurityController::class, 'update'], ['auth', 'verified', 'throttle:6,1']),
             self::definition('appearance.edit', 'account.appearance', ['GET'], [ProfileController::class, 'appearance'], ['auth', 'verified']),
+            self::definition('locale.update', 'locale', ['POST'], LocalePreferenceController::class),
+            ...array_values(AuthRouteDefinitions::all()),
             self::definition('games.expansions.show', 'games.expansion', ['GET'], [PublicGameController::class, 'expansion'], [], [
                 'game' => GameSlug::routePattern(), 'catalogKey' => GameSlug::routePattern(), 'expansionKey' => GameSlug::routePattern(),
             ]),

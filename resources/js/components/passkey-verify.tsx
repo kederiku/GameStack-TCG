@@ -1,3 +1,4 @@
+import { useLocalizedRoutes } from '@/hooks/use-localized-routes';
 import type { UrlMethodPair } from '@inertiajs/core';
 import { router } from '@inertiajs/react';
 import { usePasskeyVerify } from '@laravel/passkeys/react';
@@ -23,15 +24,15 @@ export default function PasskeyVerify({
     loadingLabel,
     separator,
 }: Props = {}) {
+    const localized = useLocalizedRoutes();
     const { verify, isLoading, error, isSupported } = usePasskeyVerify({
-        ...(routes && {
-            routes: {
-                options: routes.options.url,
-                submit: routes.submit.url,
-            },
-        }),
+        routes: {
+            options:
+                routes?.options.url ?? localized['passkey.login-options'].url(),
+            submit: routes?.submit.url ?? localized['passkey.login'].url(),
+        },
         onSuccess: (response) => {
-            router.visit(response.redirect ?? '/dashboard');
+            router.visit(response.redirect ?? localized.dashboard.url());
         },
     });
 

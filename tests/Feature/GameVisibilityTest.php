@@ -60,7 +60,7 @@ class GameVisibilityTest extends TestCase
 
         app(SaveGame::class)->handle($game, ['name' => $game->name, 'is_visible' => false]);
 
-        foreach (['/fr', '/fr/autre-jeu', '/login'] as $url) {
+        foreach (['/fr', '/fr/autre-jeu', '/fr/connexion'] as $url) {
             $this->get($url)->assertOk()->assertInertia(fn (Assert $page) => $page
                 ->has('games', 1)->where('games.0.id', $other->id));
         }
@@ -96,7 +96,7 @@ class GameVisibilityTest extends TestCase
     {
         Game::factory()->create(['is_visible' => false]);
 
-        foreach (['/fr', '/login'] as $url) {
+        foreach (['/fr', '/fr/connexion'] as $url) {
             $this->get($url)->assertOk()->assertInertia(fn (Assert $page) => $page->has('games', 0));
         }
 

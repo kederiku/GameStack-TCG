@@ -1,3 +1,4 @@
+import { useLocalizedRoutes } from '@/hooks/use-localized-routes';
 import { Form, Head } from '@inertiajs/react';
 import InputError from '@/components/input-error';
 import PasswordInput from '@/components/password-input';
@@ -6,14 +7,16 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Spinner } from '@/components/ui/spinner';
-import { login } from '@/routes';
-import { store } from '@/routes/register';
 
 type Props = {
     passwordRules: string;
 };
 
 export default function Register({ passwordRules }: Props) {
+    const localized = useLocalizedRoutes();
+    const login = localized['login'];
+    const store = localized['register.store'];
+
     return (
         <>
             <Head title="Créer un compte" />

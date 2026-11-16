@@ -19,8 +19,12 @@ class SetSiteLocale
         }
         $requested = $request->query('lang');
         $stored = $request->cookie('site_locale');
+        $preference = $request->user()?->preferred_locale;
+        if (is_string($preference) && ! Locales::supports($preference)) {
+            $preference = Locales::default();
+        }
         $locale = Locales::default();
-        foreach ([$canonical, $requested, $stored] as $candidate) {
+        foreach ([$canonical, $requested, $preference, $stored] as $candidate) {
             if (is_string($candidate) && Locales::supports($candidate)) {
                 $locale = $candidate;
                 break;
@@ -31,7 +35,7 @@ class SetSiteLocale
         app()->setLocale(Locales::definition($locale)['laravelLocale']);
         try {
             $response = $next($request);
-            // Historical query preference remains until the explicit preference endpoint lands.
+            // Historical lang links may retain their cookie behavior, never an account write.
             if ($canonical === null && is_string($requested) && Locales::supports($requested)) {
                 $response->headers->setCookie(cookie('site_locale', $locale, 60 * 24 * 365, sameSite: 'lax'));
             }

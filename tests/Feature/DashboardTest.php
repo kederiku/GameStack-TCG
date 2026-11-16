@@ -15,7 +15,7 @@ class DashboardTest extends TestCase
     public function test_guests_are_redirected_to_the_login_page()
     {
         $response = $this->get(route('site.fr.dashboard'));
-        $response->assertRedirect(route('login'));
+        $response->assertRedirect(route('site.fr.login'));
     }
 
     public function test_authenticated_users_can_visit_the_dashboard()
@@ -30,7 +30,7 @@ class DashboardTest extends TestCase
     public function test_unverified_users_must_verify_their_email(): void
     {
         $this->actingAs(User::factory()->unverified()->create())
-            ->get(route('site.fr.dashboard'))->assertRedirect(route('verification.notice'));
+            ->get(route('site.fr.dashboard'))->assertRedirect(route('site.fr.verification.notice'));
     }
 
     public function test_dashboard_exposes_sorted_public_games_and_preserves_the_account(): void

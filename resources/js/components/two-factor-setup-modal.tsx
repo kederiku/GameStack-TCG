@@ -20,7 +20,7 @@ import {
 import { Spinner } from '@/components/ui/spinner';
 import { useClipboard } from '@/hooks/use-clipboard';
 import { OTP_MAX_LENGTH } from '@/hooks/use-two-factor-auth';
-import { confirm } from '@/routes/two-factor';
+import { useLocalizedRoutes } from '@/hooks/use-localized-routes';
 
 function GridScanIcon() {
     return (
@@ -153,6 +153,7 @@ function TwoFactorVerificationStep({
         }, 0);
     }, []);
 
+    const confirm = useLocalizedRoutes()['two-factor.confirm'];
     return (
         <Form
             {...confirm.form()}

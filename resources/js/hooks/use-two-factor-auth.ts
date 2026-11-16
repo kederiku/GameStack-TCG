@@ -1,6 +1,6 @@
 import { useHttp } from '@inertiajs/react';
 import { useCallback, useState } from 'react';
-import { qrCode, recoveryCodes, secretKey } from '@/routes/two-factor';
+import { useLocalizedRoutes } from '@/hooks/use-localized-routes';
 
 export type UseTwoFactorAuthReturn = {
     qrCodeSvg: string | null;
@@ -20,6 +20,10 @@ export type UseTwoFactorAuthReturn = {
 export const OTP_MAX_LENGTH = 6;
 
 export const useTwoFactorAuth = (): UseTwoFactorAuthReturn => {
+    const routes = useLocalizedRoutes();
+    const qrCode = routes['two-factor.qr-code'];
+    const recoveryCodes = routes['two-factor.recovery-codes'];
+    const secretKey = routes['two-factor.secret-key'];
     const { submit } = useHttp();
 
     const [qrCodeSvg, setQrCodeSvg] = useState<string | null>(null);
@@ -58,7 +62,7 @@ export const useTwoFactorAuth = (): UseTwoFactorAuthReturn => {
             setErrors((prev) => [...prev, 'Impossible de charger le QR code.']);
             setQrCodeSvg(null);
         }
-    }, [submit]);
+    }, [submit, qrCode]);
 
     const fetchSetupKey = useCallback(async (): Promise<void> => {
         try {
@@ -74,7 +78,7 @@ export const useTwoFactorAuth = (): UseTwoFactorAuthReturn => {
             ]);
             setManualSetupKey(null);
         }
-    }, [submit]);
+    }, [submit, secretKey]);
 
     const fetchRecoveryCodes = useCallback(async (): Promise<void> => {
         try {
@@ -88,7 +92,7 @@ export const useTwoFactorAuth = (): UseTwoFactorAuthReturn => {
             ]);
             setRecoveryCodesList([]);
         }
-    }, [submit]);
+    }, [submit, recoveryCodes]);
 
     const fetchSetupData = useCallback(async (): Promise<void> => {
         try {
