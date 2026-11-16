@@ -1,5 +1,7 @@
 <?php
 
+$localization = require __DIR__.'/localization.php';
+
 return [
 
     /*
@@ -73,14 +75,14 @@ return [
     |--------------------------------------------------------------------------
     |
     | The application locale determines the default locale that will be used
-    | by Laravel's translation / localization methods. This option can be
-    | set to any locale for which you plan to have translation strings.
+    | by Laravel's translation / localization methods. The interface locale
+    | registry maps the URL prefixes to their Laravel dictionary names.
     |
     */
 
-    'locale' => env('APP_LOCALE', 'en'),
+    'locale' => $localization['locales'][$localization['default']]['laravelLocale'],
 
-    'fallback_locale' => env('APP_FALLBACK_LOCALE', 'en'),
+    'fallback_locale' => $localization['locales'][$localization['fallback']]['laravelLocale'],
 
     'faker_locale' => env('APP_FAKER_LOCALE', 'en_US'),
 
