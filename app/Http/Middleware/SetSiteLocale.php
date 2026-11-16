@@ -34,13 +34,7 @@ class SetSiteLocale
         $previous = app()->getLocale();
         app()->setLocale(Locales::definition($locale)['laravelLocale']);
         try {
-            $response = $next($request);
-            // Historical lang links may retain their cookie behavior, never an account write.
-            if ($canonical === null && is_string($requested) && Locales::supports($requested)) {
-                $response->headers->setCookie(cookie('site_locale', $locale, 60 * 24 * 365, sameSite: 'lax'));
-            }
-
-            return $response;
+            return $next($request);
         } finally {
             app()->setLocale($previous);
         }

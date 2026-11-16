@@ -13,7 +13,8 @@ class SiteLocaleTest extends TestCase
     public function test_public_locale_defaults_to_french_and_accepts_english(): void
     {
         $this->get('/')->assertRedirect('/fr');
-        $this->get('/?lang=en')->assertCookie('site_locale', 'en')->assertRedirect('/en');
+        $this->get('/?lang=en')->assertCookieMissing('site_locale')->assertRedirect('/en');
+        $this->get('/')->assertRedirect('/fr');
         $this->get('/en')->assertSee('<html lang="en" class="dark">', false)
             ->assertInertia(fn (Assert $page) => $page->where('locale', 'en'));
     }
@@ -24,7 +25,8 @@ class SiteLocaleTest extends TestCase
         foreach (['?lang=invalid', '?lang[]=fr'] as $query) {
             $this->withCookie('site_locale', 'en')->get('/'.$query)->assertRedirect('/en');
         }
-        $this->withCookie('site_locale', 'en')->get('/?lang=fr')->assertCookie('site_locale', 'fr')->assertRedirect('/fr');
+        $this->withCookie('site_locale', 'en')->get('/?lang=fr')->assertCookieMissing('site_locale')->assertRedirect('/fr');
+        $this->get('/')->assertRedirect('/en')->assertCookieMissing('site_locale');
     }
 
     public function test_old_appearance_cookies_cannot_render_the_site_in_light_mode(): void

@@ -53,9 +53,21 @@ class LocalizedPreferencesTest extends TestCase
     {
         $user = User::factory()->create(['preferred_locale' => 'en']);
         $this->actingAs($user)->withCookie('site_locale', 'fr')->get('/')->assertRedirect('/en');
-        $this->get('/?lang=fr')->assertRedirect('/fr');
+        $this->get('/?lang=fr')->assertRedirect('/fr')->assertCookieMissing('site_locale');
         $this->get('/?lang[]=fr')->assertRedirect('/en');
         $this->assertSame('en', $user->fresh()->preferred_locale);
+    }
+
+    public function test_legacy_get_and_head_choose_locale_without_persisting_browser_preference(): void
+    {
+        $this->get('/?lang=en')->assertRedirect('/en')->assertCookieMissing('site_locale');
+        $this->get('/')->assertRedirect('/fr')->assertCookieMissing('site_locale');
+        $this->withCookie('site_locale', 'fr')->get('/login?lang=en')
+            ->assertRedirect('/en/login')->assertCookieMissing('site_locale');
+        $this->head('/?lang=en')->assertRedirect('/en')->assertCookieMissing('site_locale');
+        $this->get('/')->assertRedirect('/fr')->assertCookieMissing('site_locale');
+        $this->post('/fr/preferences/langue', ['locale' => 'en', 'route' => 'home', 'target' => '/en'])
+            ->assertRedirect('/en')->assertCookie('site_locale', 'en');
     }
 
     public function test_switch_rejects_signed_action_and_retains_reset_email_context(): void
