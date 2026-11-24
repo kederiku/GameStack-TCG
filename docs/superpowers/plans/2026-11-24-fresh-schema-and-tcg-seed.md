@@ -114,16 +114,20 @@
 **Interfaces:** utilise les commandes validées des tâches 1–3. La purge vise seulement les deux bases et le bucket locaux vérifiés, jamais une destination fournie implicitement sans contrôle.
 
 - [x] Examiner le diff complet et les nouveaux fichiers. Exécuter `make check`, `make assets`, `make up`, `make test-storage`. Corriger toute régression, sans retirer un garde-fou.
-- [ ] Vérifier installation neuve et rollback/réinstallation sur `gamestackr_testing` ; contrôler séparément que l’installation ordinaire réexécutée ne supprime pas des données existantes.
-- [ ] Réaliser une revue indépendante de la branche. Corriger les défauts importants et faire relire les deltas avant de poursuivre.
-- [ ] Inventorier les destinations locales et les données à effacer sans exposer leurs contenus privés. Vérifier hôtes, noms des deux bases et bucket Garage ; arrêter les écritures et workers avant toute purge.
-- [ ] Purger les anciennes données PostgreSQL, objets d’images Garage et copies locales, résidus de tests, cache/sessions/journaux, messages Mailpit et les deux répertoires d’archives explicitement approuvés. Préserver `.env`, accès Garage et volumes.
-- [ ] Recréer le schéma applicatif et lancer le seed. Vérifier l’absence d’anciens comptes, tables et fichiers ; vérifier une deuxième exécution sans doublon. En cas d’échec, réparer puis relancer avant réouverture.
-- [ ] Vérifier dans le navigateur les catalogues FR/EN, une fiche et ses langues d’édition, puis l’administration avec un compte de QA temporaire. Supprimer ce compte, ses messages et données, et nettoyer les résidus de test avant livraison.
-- [ ] Vérifier le résultat final : catalogue réel visible, aucun compte conservé, seuls médias du seed, base de tests sans données métier résiduelles, services disponibles. Consigner les vérifications réellement faites et leurs limites.
+- [x] Vérifier installation neuve et rollback/réinstallation sur `gamestackr_testing` ; contrôler séparément que l’installation ordinaire réexécutée ne supprime pas des données existantes.
+- [x] Réaliser une revue indépendante de la branche. Corriger les défauts importants et faire relire les deltas avant de poursuivre.
+- [x] Inventorier les destinations locales et les données à effacer sans exposer leurs contenus privés. Vérifier hôtes, noms des deux bases et bucket Garage ; arrêter les écritures et workers avant toute purge.
+- [x] Purger les anciennes données PostgreSQL, objets d’images Garage et copies locales, résidus de tests, cache/sessions/journaux, messages Mailpit et les deux répertoires d’archives explicitement approuvés. Préserver `.env`, accès Garage et volumes.
+- [x] Recréer le schéma applicatif et lancer le seed. Vérifier l’absence d’anciens comptes, tables et fichiers ; vérifier une deuxième exécution sans doublon. En cas d’échec, réparer puis relancer avant réouverture.
+- [x] Vérifier dans le navigateur les catalogues FR/EN, une fiche et ses langues d’édition, puis l’administration avec un compte de QA temporaire. Supprimer ce compte, ses messages et données, et nettoyer les résidus de test avant livraison.
+- [x] Vérifier le résultat final : catalogue réel visible, aucun compte conservé, seuls médias du seed, base de tests sans données métier résiduelles, services disponibles. Consigner les vérifications réellement faites et leurs limites.
 - [ ] Actualiser `origin/main`, intégrer si nécessaire et revérifier. Publier la branche et créer la PR avec le SHA revu, la conclusion indépendante et les contrôles. Attacher la PR au chat.
 - [ ] Attendre `tests / ci` réussi sur la tête finale, contrôler état/discussions/base/SHA, puis fusionner avec `gh pr merge <numero> --squash --match-head-commit <sha-revu>`.
 - [ ] Vérifier `MERGED`, attendre la CI du commit `main`, synchroniser le checkout propre et donner les liens et le résultat à l’utilisateur.
+
+Les trois étapes GitHub ci-dessus sont suivies dans la description de PR et les
+checks distants après ce rapport de validation locale, sans ajouter des commits
+documentaires circulaires pour attester leur propre fusion.
 
 ## Self-review
 
