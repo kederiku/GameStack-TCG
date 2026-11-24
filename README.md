@@ -184,8 +184,10 @@ l’image précédente. Une panne disque ou un arrêt brutal reste une limite à
 l’atomicité entre les fichiers et PostgreSQL ; les erreurs de nettoyage sont
 signalées dans les logs Laravel.
 
-Pour mettre à jour un environnement existant (GD avec AVIF, EXIF et librsvg sont
-fournis par l’image Docker) :
+Pour mettre à jour une installation déjà sur l’historique actuel de migrations,
+exécuter les commandes ci-dessous. L’image Docker fournit GD avec AVIF, EXIF et
+librsvg. Pour une autre installation, suivre les consignes relatives à
+[l’ancien historique de migrations](#installation-utilisant-lancien-historique-de-migrations).
 
 ```sh
 make build
