@@ -7,14 +7,14 @@ use App\Models\Game;
 use App\Models\User;
 use DOMDocument;
 use DOMXPath;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Tests\Concerns\BuildsCatalog;
-use Tests\Concerns\ForwardOnlyRefreshDatabase;
 use Tests\TestCase;
 
 class LocalizedMetadataTest extends TestCase
 {
-    use BuildsCatalog, ForwardOnlyRefreshDatabase;
+    use BuildsCatalog, RefreshDatabase;
 
     public function test_french_page_has_reciprocal_alternate(): void
     {

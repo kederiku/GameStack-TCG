@@ -8,13 +8,12 @@ use App\Models\SeriesImage;
 use App\Services\CatalogImages;
 use App\Services\GameImages;
 use App\Support\PublicGames;
+use Database\Seeders\ContentLanguagesSeeder;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Str;
 use Tests\Concerns\BuildsCatalog;
-use Tests\Concerns\UsesLocalizedSchema;
+use Tests\Concerns\UsesIsolatedSchema;
 use Tests\TestCase;
 
 // Explicit opt-in: php artisan test tests/Integration/GarageStorageTest.php
@@ -22,7 +21,7 @@ use Tests\TestCase;
 class GarageStorageTest extends TestCase
 {
     use BuildsCatalog;
-    use UsesLocalizedSchema;
+    use UsesIsolatedSchema;
 
     /** @var list<string> */
     private array $paths = [];
@@ -30,9 +29,9 @@ class GarageStorageTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->createLocalizedSchema();
+        $this->createIsolatedSchema();
+        $this->artisan('migrate', ['--seed' => true, '--seeder' => ContentLanguagesSeeder::class])->assertSuccessful();
         config(['game-images.disk' => 's3']);
-        Storage::fake('local');
     }
 
     protected function tearDown(): void
@@ -83,23 +82,6 @@ class GarageStorageTest extends TestCase
         $this->assertFalse($disk->exists($renamed));
         $game->delete();
         $this->assertFalse($disk->exists($game->image));
-    }
-
-    public function test_legacy_conversion_works_with_a_real_s3_object(): void
-    {
-        $path = 'games/'.Str::uuid().'/legacy.webp';
-        $this->paths[] = $path;
-        $contents = UploadedFile::fake()->image('legacy.webp', 32, 16)->get();
-        $this->assertTrue(GameImages::disk()->put($path, $contents, 'public'));
-        $game = Game::factory()->create(['image' => $path]);
-
-        $this->artisan('games:convert-images-to-avif')->assertSuccessful();
-
-        $converted = $game->fresh()->image;
-        $this->paths[] = $converted;
-        $this->assertSame('image/avif', GameImages::disk()->mimeType($converted));
-        $this->assertFalse(GameImages::disk()->exists($path));
-        $this->assertSame($contents, Storage::disk('local')->get('game-images-before-avif/'.$path));
     }
 
     public function test_catalog_images_follow_the_database_lifecycle_on_real_storage(): void

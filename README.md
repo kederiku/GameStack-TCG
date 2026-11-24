@@ -18,8 +18,12 @@ make init
 
 Cette commande crée `.env` si nécessaire, construit l’image PHP 8.4/Node 24,
 installe les dépendances verrouillées, génère la clé applicative si elle manque,
-initialise Garage et son interface, migre et finalise une base neuve, compile le frontend
-et démarre tous les services.
+initialise Garage et son interface, applique les migrations Laravel et
+synchronise les langues actives (`fr` et `en`). Elle compile le frontend et
+démarre tous les services sans effacer les données ni les images. Pour charger
+le catalogue de référence, exécuter [`make seed`](#catalogue-tcg-dans-filament).
+Pour créer un compte administrateur, utiliser [`make admin`](#authentification-et-administrateur).
+
 Les lancements suivants utilisent simplement :
 
 ```sh
@@ -28,9 +32,7 @@ make down
 ```
 
 `make down` conserve les données PostgreSQL et les images Garage. `make init`
-peut être relancé après finalisation. Sur une base historique ou une conversion
-en attente, suivre la [procédure de migration et de retour](docs/localization.md)
-avant de relancer l’installation.
+peut être relancé sur une base créée avec l’historique de migrations actuel.
 
 | Service                            | Adresse                              |
 | ---------------------------------- | ------------------------------------ |
@@ -45,6 +47,21 @@ avant de relancer l’installation.
 
 Vite tourne sur le port 5173 et recharge React à chaque modification.
 Ouvrir l’application sur **localhost**, comme configuré pour le rechargement Vite.
+
+### Installation utilisant l’ancien historique de migrations
+
+Le schéma est désormais créé directement par les migrations Laravel. Pour
+adopter cette version sur une autre installation qui utilise l’ancien historique,
+réinitialiser explicitement sa base applicative avant `make init`. Cette remise
+à zéro efface les comptes et le catalogue existants. Si ces données doivent
+être conservées, garder l’installation sur sa version précédente, car aucune
+migration de reprise n’est fournie.
+
+Arrêter les écritures et vérifier la base et les emplacements d’images visés
+avant la remise à zéro. Repartir d’une base vide et retirer les anciens médias
+de l’application stockés sur Garage ou sur le disque `public`. Conserver les
+volumes Docker, `.env`, la clé applicative et la configuration privée de Garage.
+Relancer `make init`, puis utiliser `make seed` et `make admin` selon les besoins.
 
 ## Authentification et administrateur
 
@@ -70,10 +87,9 @@ Créer un administrateur avec une adresse non encore utilisée :
 make admin
 ```
 
-La commande demande nom, e-mail, mot de passe (12 caractères minimum) et
-confirmation. Aucun compte ou mot de passe administrateur n’est préinstallé.
-Le compte créé est vérifié et dispose de `is_admin=true`. Une adresse déjà
-utilisée est refusée : la commande ne promeut pas silencieusement un compte.
+La commande demande un nom, une adresse e-mail, un mot de passe d’au moins
+12 caractères et sa confirmation. Le compte créé est vérifié et dispose de
+`is_admin=true`. La création est interactive et exige une adresse inutilisée.
 
 `/admin/login` redirige vers la connexion React/Fortify. Le panneau Filament
 utilise ensuite la même session, ce qui conserve notamment le parcours 2FA.
@@ -126,16 +142,14 @@ en texte simple sont également éditables. Ces quatre champs sont facultatifs.
 Les années se saisissent seules, sur quatre chiffres ; lorsque les deux sont
 renseignées, la fin ne peut pas précéder la création. Laisser la fin vide pour
 un TCG encore actif ou dont l’année de fin est inconnue. L’éditeur est limité
-à 255 caractères. Appliquer `make migrate` pour ajouter ces champs à une base
-existante.
+à 255 caractères.
 
 L’interrupteur **Afficher sur le site**, activé par défaut, permet de masquer
 un jeu tout en le gardant dans Filament. Un jeu masqué disparaît des listes de
 l’accueil, des menus, du dashboard et des écrans d’authentification ; son URL
 publique renvoie 404. Le réactiver le rend de nouveau accessible. La liste
 Filament indique sa visibilité. Cette option est indépendante de l’année de fin
-et conserve les informations et l’image du jeu. La migration laisse les jeux
-existants visibles.
+et conserve les informations et l’image du jeu.
 
 Les formulaires regroupent les champs en sections **Présentation**, **Historique**,
 **Visuel** et **Publication**. Sur grand écran, l’image et la visibilité occupent
@@ -148,9 +162,9 @@ Les images JPEG, PNG, WebP et AVIF sont acceptées jusqu’à **5 Mio** et **409
 4096 pixels**. Le serveur les réencode en **AVIF** (qualité 85), conserve la
 transparence et corrige l’orientation EXIF des JPEG. Le fichier porte le nom
 normalisé du jeu, par exemple `games/{uuid}/pokemon.avif`, sur le disque choisi
-par `GAME_IMAGES_DISK` : `s3` pour Garage, `public` pour le stockage historique
+par `GAME_IMAGES_DISK` : `s3` pour Garage, `public` pour le stockage local
 dans `storage/app/public`. Le dossier unique évite les collisions et le cache
-d’une ancienne image. Le lien historique `public/storage` reste créé par
+d’une ancienne image. Le lien `public/storage` est créé par
 `make init`. L’aperçu des imports AVIF est également disponible dans Filament.
 
 Les **SVG** sont acceptés jusqu’à **5 Mio**. Leur contenu est nettoyé avec
@@ -170,8 +184,10 @@ l’image précédente. Une panne disque ou un arrêt brutal reste une limite à
 l’atomicité entre les fichiers et PostgreSQL ; les erreurs de nettoyage sont
 signalées dans les logs Laravel.
 
-Pour mettre à jour un environnement existant (GD avec AVIF, EXIF et librsvg sont
-fournis par l’image Docker) :
+Pour mettre à jour une installation déjà sur l’historique actuel de migrations,
+exécuter les commandes ci-dessous. L’image Docker fournit GD avec AVIF, EXIF et
+librsvg. Pour une autre installation, suivre les consignes relatives à
+[l’ancien historique de migrations](#installation-utilisant-lancien-historique-de-migrations).
 
 ```sh
 make build
@@ -179,23 +195,6 @@ make composer ARGS='install --no-interaction'
 make up
 make migrate
 ```
-
-Pour convertir les images de jeux déjà présentes, après reconstruction de Docker :
-
-```sh
-docker compose exec app php artisan games:convert-images-to-avif --dry-run
-docker compose exec app php artisan games:convert-images-to-avif
-```
-
-La simulation ne modifie rien. La conversion conserve les originaux dans
-`storage/app/private/game-images-before-avif/`, avec leur chemin initial
-`games/{uuid}/{nom}.webp` ou `.svg`. Pour restaurer un original, le réimporter
-dans le formulaire du jeu. Chaque jeu est traité dans sa propre transaction ;
-une erreur préserve son image et n’empêche pas le traitement des autres jeux.
-La commande signale ces erreurs avec un code de sortie non nul. Les jeux sans
-image et les images déjà AVIF sont ignorés : relancer la commande est sans effet
-sur les images déjà converties. Les icônes de l’application sont indépendantes
-de ces visuels de jeux.
 
 Côté code, utiliser `App\Actions\Games\SaveGame::handle($game, $data)` pour
 créer/modifier un jeu et son image. `image` accepte un `UploadedFile`, le chemin
@@ -243,8 +242,8 @@ API d’administration restent internes. Le bucket contient uniquement des
 images publiques ; les fichiers privés de Laravel gardent leur disque local.
 Le CORS autorise les lectures depuis `APP_URL`.
 
-Les nouvelles installations choisissent `GAME_IMAGES_DISK=s3`. Une ancienne
-installation sans cette variable reste sur `public` jusqu’à sa migration.
+Le fichier `.env.example` choisit `GAME_IMAGES_DISK=s3`. En l’absence de cette
+variable, l’application utilise `public`.
 Les paramètres Garage locaux proviennent de `storage/app/private/garage/s3.json`.
 Les variables `AWS_*` **non vides** de `.env` ont priorité. Pour utiliser un autre
 service S3, renseigner un ensemble cohérent : clé, secret, région, bucket,
@@ -254,50 +253,12 @@ Garage ne réécrit pas ces variables. Les ports et le nom du bucket local sont
 réglables avec `GARAGE_*` dans `.env`. Après un changement de région, arrêter
 puis redémarrer les services pour recharger la configuration Garage.
 
-### Migrer les images existantes
-
-Installer les dépendances et lancer `make up` avant la migration. Garder
-`GAME_IMAGES_DISK=public` dans `.env` jusqu’à la réussite de la copie. Suspendre
-les écritures pendant toute la copie et la bascule :
-
-```sh
-docker compose exec app php artisan down
-docker compose stop queue
-docker compose exec app php artisan games:copy-images-to-s3 --dry-run
-docker compose exec app php artisan games:copy-images-to-s3
-```
-
-La commande copie toutes les images référencées, y compris celles des jeux
-masqués, avec leurs chemins inchangés. Elle relit chaque objet et compare son
-SHA-256. Une copie identique est ignorée ; une destination différente n’est
-jamais écrasée. Les sources locales, la base et la configuration ne sont pas
-modifiées. Une source manquante, un chemin non géré ou une erreur de stockage
-produit un code de sortie non nul. Corriger la cause avant de relancer.
-
-**Uniquement après une copie réussie**, passer `GAME_IMAGES_DISK=s3` dans `.env`,
-puis :
-
-```sh
-docker compose exec app php artisan config:clear
-docker compose exec app php artisan up
-docker compose restart app queue
-```
-
-En cas d’échec, garder `public`, rétablir le site avec `php artisan up` et
-redémarrer la queue. Pour revenir au disque local immédiatement après la
-bascule, remettre `GAME_IMAGES_DISK=public`, vider le cache et redémarrer les
-services. Si des images ont été ajoutées, remplacées ou renommées depuis,
-les recopier de S3 vers `storage/app/public` aux chemins actuels de la base,
-puis vérifier leur contenu avant ce retour. Les anciennes copies seules
-ne suffisent plus ; aucune synchronisation automatique n’est mise en place.
-
 ### Persistance et vérifications
 
 Sauvegarder ensemble la base PostgreSQL, les volumes Docker `garage-data` et
 `garage-meta`, ainsi que `storage/app/private/garage/`. Faire une sauvegarde
-cohérente services arrêtés. `make down` conserve les volumes ; `down -v` les
-détruit. Les anciennes images locales et les originaux de conversion AVIF
-restent disponibles indépendamment de Garage.
+cohérente services arrêtés. Inclure `storage/app/public` si le disque `public`
+est utilisé. `make down` conserve les volumes.
 
 La configuration utilise un seul nœud et une seule copie des objets : elle
 est destinée au développement. Un serveur de production demandera une
@@ -312,7 +273,7 @@ make test-storage
 ```
 
 Ces tests utilisent `gamestackr_testing`, créent leurs propres chemins UUID et
-les nettoient. Voir [le rapport de validation](docs/superpowers/local-image-storage-verification.md).
+les nettoient. Voir aussi [le rapport historique du stockage](docs/superpowers/local-image-storage-verification.md).
 
 ## Navigation publique
 
@@ -347,10 +308,12 @@ choix indisponible déclenche un repli annoncé. Les logos restent propres aux
 
 Le sélecteur de langue ouvre la même page sous `/fr` ou `/en`, indépendamment
 de la langue des éditions. Le préfixe détermine la langue de la réponse. Le
-paramètre historique `lang` intervient sur les anciennes URL. Une traduction
-absente d’une série ou d’une extension utilise la langue par défaut du catalogue,
-puis le libellé de référence. Les jeux, catalogues et marchés utilisent le
-français comme repli avant leur référence.
+paramètre historique `lang` intervient sur les anciennes URL. Le nom d’affichage
+utilise la langue demandée, puis l’anglais, puis la langue par défaut du catalogue
+pour les séries et extensions ou celle de l’application (le français) pour les
+jeux, catalogues et marchés. Le nom de référence intervient en dernier. Les textes
+descriptifs passent directement de la langue demandée à la langue par défaut du
+catalogue ou de l’application, puis au texte de référence.
 
 Voir [les vérifications de la navigation publique](docs/superpowers/public-navigation-verification.md).
 
@@ -360,34 +323,39 @@ Les administrateurs peuvent gérer les catalogues, séries et extensions dans
 `/admin`. Les fiches d’extension distinguent le nom d’affichage, les éditions
 imprimées et les sorties de chaque édition par marché et canal.
 
-Pour charger l’échantillon réel après avoir démarré l’application :
+Après `make init`, charger le catalogue de référence sur demande :
 
 ```sh
-make migrate
-make artisan ARGS='db:seed --class=TcgCatalogExamplesSeeder'
+make seed
 ```
 
-Ce seeder est facultatif et s’exécute uniquement sur demande. Il ne crée aucun
-compte et ne télécharge rien. Sur une base sans catalogue, le manifeste couvre
-12 jeux et 19 catalogues, avec 29 ensembles, 34 éditions linguistiques et 27
-sorties documentées. L’annonce de Naruto Card Game (Bandai) reste une note
-sourcée tant que les langues d’impression ne sont pas confirmées. Les nouveaux
-jeux et exemples sont masqués de publication par défaut.
+Sur une base neuve, le seed charge 12 jeux, 19 catalogues, 7 séries, 119 fiches
+d’extension, 327 éditions imprimées dont 78 en français, 213 sorties, 10 langues
+de contenu et 9 marchés. Un même titre peut avoir une fiche dans plusieurs
+catalogues régionaux, comme les versions japonaises et internationales de
+ONE PIECE et Yu-Gi-Oh!. Les fiches sont visibles dès le chargement.
+Le seed utilise les fichiers versionnés, sans accès réseau, et ne crée ni compte
+ni relation entre extensions. Les deux visuels officiels servent aux images de
+série et d’édition. Les jeux sans logo affichent leurs initiales.
 
-La commande compte les fiches créées, conservées et recréées. Elle réutilise les
-fiches identifiées sans ambiguïté et conserve leurs champs, y compris les noms,
-visibilités et images modifiés ou laissés vides. Après la première exécution, un
-jeu reste associé à son catalogue même si son slug change. Si une fiche a été
-supprimée, la commande la recrée avec ses valeurs initiales ; masquez-la pour
-la conserver durablement hors publication. En cas de conflit, toute l’opération
-est annulée. Par exemple, si une sortie publiée manquante changerait le statut
-d’une édition existante, vérifiez l’édition et la sortie signalées avant de relancer.
+Le catalogue retient cinq extensions Altered distribuées en boosters d’origine,
+cinq extensions Riftbound et le coffret Premiers pas, deux extensions NARUTO
+Mythos et une extension Cyberpunk. Les produits annoncés et les packs Altered
+imprimés à la demande sont documentés dans le registre de sources. Chaque
+édition correspond à une impression physique attestée et chaque sortie datée
+à un couple marché et canal confirmé. Le libellé d’interface anglais d’un
+booster japonais peut être une traduction éditoriale du produit imprimé en
+japonais. Les langues d’interface disponibles restent le français et l’anglais.
 
-Les [exemples](database/seeders/data/tcg-catalog-examples.php), leurs
-[sources](database/seeders/data/tcg-catalog-sources.php) et les
-[visuels officiels](database/seeders/assets/tcg-catalog/README.md) sont versionnés.
-Une date ou un code peut être absent quand il n’a pas été confirmé ou retenu
-pour cet échantillon.
+**Une réexécution rétablit les valeurs fournies par le manifeste**, y compris
+après une modification manuelle. La commande utilise les identifiants métier,
+dont le slug du jeu, pour retrouver les fiches. Elle recrée une fiche manquante,
+réutilise les médias identiques et conserve les fiches et traductions absentes
+du manifeste. Un jeu dont le slug a été changé reste indépendant du jeu recréé
+sous le slug du manifeste. Les écritures s’effectuent dans une transaction.
+
+La provenance est détaillée dans le [registre de sources](database/seeders/data/tcg-sources.php),
+les [fichiers par jeu](database/seeders/data/tcg/) et le [dossier des visuels](database/seeders/assets/tcg-catalog/README.md).
 
 ## Dashboard et composants partagés
 
@@ -403,10 +371,10 @@ La sidebar se replie sur ordinateur et devient un tiroir sur mobile.
 Les pages **Mon profil** et **Sécurité** prolongent cette identité
 avec des panneaux partagés et une navigation compacte. Les formulaires, fenêtres
 de confirmation, clés d’accès et étapes de double authentification sont en
-français ; les messages fournis par le serveur ou le navigateur conservent leur
-langue. Les anciens liens d’apparence restent accessibles, sans proposer de
-changement de thème. La traduction FR/EN concerne le parcours public ; les
-écrans de compte et d’authentification restent en français.
+français ou en anglais selon le préfixe de l’URL, comme le parcours public et
+l’authentification. Les messages natifs du navigateur suivent sa langue. Les
+anciens liens d’apparence restent accessibles, sans proposer de changement de
+thème.
 
 Pour les nouveaux écrans React, réutiliser :
 
@@ -437,6 +405,7 @@ Voir aussi [les vérifications de l’harmonisation](docs/superpowers/design-har
 | `make logs`                  | Logs en continu ; `ARGS=app` pour un service     |
 | `make admin`                 | Créer un administrateur                          |
 | `make migrate`               | Exécuter les migrations                          |
+| `make seed`                  | Charger ou rétablir le catalogue de référence    |
 | `make test`                  | Suite de tests sur PostgreSQL dédié              |
 | `make check`                 | PHP/Pint, PHPStan, tests, frontend et TypeScript |
 | `make format`                | Formater le code PHP et frontend                 |
@@ -552,4 +521,5 @@ notions distinctes. Les comptages applicatifs sont non négatifs ; FR/EN sont le
 langues actuellement livrées. Le contrôle visuel complet après migration fait
 partie du parcours de livraison.
 
-La [procédure de localisation](docs/localization.md) détaille la bascule, le retour avant réouverture, les alias de compatibilité et l’activation d’une langue.
+Le [guide de localisation](docs/localization.md) détaille la synchronisation
+des langues, la compatibilité des liens et l’activation d’une langue.

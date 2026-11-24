@@ -1,5 +1,8 @@
 # Vérification de la conversion AVIF — 15 novembre 2026
 
+> Archive historique. La commande de conversion des images existantes a été retirée.
+> Voir [les formats d’envoi actuels](../../README.md#jeux).
+
 - Branche : `codex/game-details`, changements AVIF depuis `b5c3e8c`.
 - RED initial : l’upload produisait `.webp` au lieu de `.avif` ; la commande de conversion n’existait pas.
 - Image Docker reconstruite avec GD AVIF, librsvg et util-linux ; services app, vite et queue recréés, PostgreSQL conservé.

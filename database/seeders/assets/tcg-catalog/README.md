@@ -1,20 +1,20 @@
-# Visuels officiels des exemples
+# Visuels officiels du catalogue
 
 Consultation et préparation : 2026-11-15. Logos du JCC Pokémon, extension de base
 Écarlate et Violet / Scarlet & Violet. Deux visuels distincts, vérifiés visuellement.
 
-- Français : [médiathèque officielle Pokémon](https://pokemon.gamespress.com/fr/Pokemon-TCG-Scarlet-Violet), onglet Logos, collection « Scarlet & Violet Logo » (8128), fichier original annoncé `SV01_Logo_FR.png`. L’original est inaccessible sans autorisation ; la fixture utilise l’aperçu JPEG public de 240 × 65 pixels, fond blanc conservé.
+- Français : [médiathèque officielle Pokémon](https://pokemon.gamespress.com/fr/Pokemon-TCG-Scarlet-Violet), onglet Logos, collection « Scarlet & Violet Logo » (8128), fichier original annoncé `SV01_Logo_FR.png`. La fixture utilise l’aperçu JPEG public de 240 × 65 pixels, fond blanc conservé. L’accès à la médiathèque le 24 novembre 2026 a renvoyé HTTP 401. L’empreinte du fichier versionné a été vérifiée à cette date.
 - Anglais : [annonce officielle](https://press.pokemon.com/en/releases/First-Expansion-of-the-Pokemon-Trading-Game-Scarlet-Violet-Series-Comi), logo `Pokemon_TCG_Scarlet_Violet_Logo.png`, aperçu public transparent de 360 × 103 pixels.
 
 Conversion locale dans Docker par GD, AVIF qualité 85, conservation des proportions
-et de la transparence disponible. Aucun visuel généré. Les sources ne sont pas
-contactées à l’exécution du seeder ; ces petites fixtures sont copiées via l’action
-de sauvegarde. Les noms et images appartiennent à leurs ayants droit.
+et de la transparence disponible. Le seeder utilise les fichiers locaux et
+réencode chaque visuel à comparer avec le fichier stocké. L’action de sauvegarde
+remplace les visuels différents et recrée les fichiers manquants. Les noms et
+images appartiennent à leurs ayants droit.
 
-Le seeder peut également utiliser ces logos comme visuels de présentation de la
-série correspondante : il s’agit d’un choix éditorial de l’application, pas d’un
-nouveau logo distinct publié par l’éditeur. Chaque fiche garde sa propre association
-et son propre fichier stocké.
+Le catalogue réutilise aussi ces deux logos pour présenter la série. Chaque
+série ou édition illustrée garde sa propre association et son propre fichier
+stocké.
 
 ## Fichiers sources publics
 

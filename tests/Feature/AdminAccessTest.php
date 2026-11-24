@@ -3,12 +3,12 @@
 namespace Tests\Feature;
 
 use App\Models\User;
-use Tests\Concerns\ForwardOnlyRefreshDatabase;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 class AdminAccessTest extends TestCase
 {
-    use ForwardOnlyRefreshDatabase;
+    use RefreshDatabase;
 
     public function test_guests_are_redirected_to_the_admin_login(): void
     {

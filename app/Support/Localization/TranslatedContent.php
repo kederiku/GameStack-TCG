@@ -11,6 +11,8 @@ use InvalidArgumentException;
 /** @phpstan-type ResolvedText array{value: ?string, locale: ?string, fallback: bool} */
 final class TranslatedContent
 {
+    public const string NAME_FALLBACK_LOCALE = 'en';
+
     /**
      * @param  array<string, ?string>  $translations
      * @param  list<string>  $locales
@@ -38,7 +40,8 @@ final class TranslatedContent
             ? CatalogRules::languageCode($record->catalog->defaultLanguage->code)
             : Locales::default();
         $reference = $attribute === 'display_name' ? $record->getAttribute('name') : $record->getAttribute('reference_'.$attribute);
+        $locales = $attribute === 'display_name' ? [$locale, self::NAME_FALLBACK_LOCALE, $fallback] : [$locale, $fallback];
 
-        return self::resolve($record->getTranslations($attribute), [$locale, $fallback], $reference);
+        return self::resolve($record->getTranslations($attribute), $locales, $reference);
     }
 }

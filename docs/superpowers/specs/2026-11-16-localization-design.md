@@ -1,5 +1,8 @@
 # Multilingue : routes traduites, fichiers de langue et contenus Spatie
 
+> Archive historique. Les procédures de conversion, de finalisation et de retour décrites ici ont été remplacées par un schéma Laravel neuf.
+> Voir [le guide de localisation actuel](../../localization.md).
+
 Date : 16 novembre 2026. Statut : conception validée par l’utilisateur.
 
 ## Intention et décisions utilisateur

@@ -1,5 +1,8 @@
 # Validation du stockage d’images local — 15 novembre 2026
 
+> Archive historique. La commande de copie vers S3 et la conversion des images existantes ont été retirées.
+> Voir [les instructions de stockage actuelles](../../README.md#stockage-s3-local-et-interface).
+
 Branche `codex/local-image-storage`, Garage 2.4.0 et Garage Web UI 1.1.0,
 Docker Desktop sur macOS ARM64. Les deux images Docker ont été vérifiées pour
 ARM64 et AMD64. Cette validation concerne l’environnement de développement.

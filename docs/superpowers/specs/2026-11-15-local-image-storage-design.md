@@ -1,5 +1,8 @@
 # Stockage local des images avec Garage et interface web
 
+> Archive historique. La commande de copie vers S3 et la conversion des images existantes ont été retirées.
+> Voir [les instructions de stockage actuelles](../../../README.md#stockage-s3-local-et-interface).
+
 Statut : approuvé par l’utilisateur le 15 novembre 2026.
 Branche : `codex/local-image-storage`, créée depuis `main`.
 

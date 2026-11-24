@@ -5,17 +5,18 @@ namespace Tests\Feature\Localization;
 use App\Actions\Games\SaveGame;
 use App\Models\Game;
 use App\Models\Language;
+use Database\Seeders\ContentLanguagesSeeder;
 use Illuminate\Support\Facades\DB;
 use PHPUnit\Framework\Attributes\DataProvider;
 use Symfony\Component\Process\Process;
 use Tests\Concerns\BuildsCatalog;
-use Tests\Concerns\UsesLocalizedSchema;
+use Tests\Concerns\UsesIsolatedSchema;
 use Tests\TestCase;
 
 class TranslationConcurrencyTest extends TestCase
 {
     use BuildsCatalog;
-    use UsesLocalizedSchema;
+    use UsesIsolatedSchema;
 
     public static function staleFullMaps(): iterable
     {
@@ -29,7 +30,8 @@ class TranslationConcurrencyTest extends TestCase
     #[DataProvider('staleFullMaps')]
     public function test_stale_full_map_preserves_a_concurrent_french_edit(string $writer, ?string $original, string $submitted): void
     {
-        $this->createLocalizedSchema();
+        $this->createIsolatedSchema();
+        $this->artisan('migrate', ['--seed' => true, '--seeder' => ContentLanguagesSeeder::class])->assertSuccessful();
         $record = $writer === 'catalog action' ? $this->series($this->catalog()) : Game::factory()->create();
         DB::table($record->getTable())->where('id', $record->id)->update(['description' => json_encode(['fr' => $original, 'en' => 'Old'], JSON_THROW_ON_ERROR)]);
         $stale = $record->fresh();
@@ -55,11 +57,12 @@ class TranslationConcurrencyTest extends TestCase
     #[DataProvider('races')]
     public function test_language_delete_and_translation_write_cannot_leave_an_orphan(bool $game, bool $writeWins): void
     {
-        $this->createLocalizedSchema();
+        $this->createIsolatedSchema();
+        $this->artisan('migrate', ['--seed' => true, '--seeder' => ContentLanguagesSeeder::class])->assertSuccessful();
         $record = $game ? Game::factory()->create() : $this->series($this->catalog());
         $language = $this->language('ja', 'Japanese');
         $connection = DB::connection();
-        $process = new Process([PHP_BINARY, base_path('tests/Fixtures/Localization/concurrent-write.php'), $this->localizedSchema, $writeWins ? 'delete' : 'write', $record::class, (string) $record->id, (string) $language->id], base_path(), ['APP_ENV' => 'testing', 'DB_DATABASE' => 'gamestackr_testing']);
+        $process = new Process([PHP_BINARY, base_path('tests/Fixtures/Localization/concurrent-write.php'), $this->isolatedSchema, $writeWins ? 'delete' : 'write', $record::class, (string) $record->id, (string) $language->id], base_path(), ['APP_ENV' => 'testing', 'DB_DATABASE' => 'gamestackr_testing']);
         $process->setTimeout(15);
         $connection->beginTransaction();
         try {

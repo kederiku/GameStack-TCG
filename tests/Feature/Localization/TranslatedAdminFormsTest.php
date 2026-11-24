@@ -19,17 +19,17 @@ use App\Models\User;
 use Filament\Actions\CreateAction;
 use Filament\Actions\EditAction;
 use Filament\Facades\Filament;
+use Illuminate\Foundation\Testing\DatabaseMigrations;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Livewire;
 use Tests\Concerns\BuildsCatalog;
-use Tests\Concerns\ForwardOnlyDatabaseMigrations;
 use Tests\TestCase;
 
 class TranslatedAdminFormsTest extends TestCase
 {
-    use BuildsCatalog, ForwardOnlyDatabaseMigrations;
+    use BuildsCatalog, DatabaseMigrations;
 
     public function test_catalog_controls_display_canonical_casing_for_historical_language_codes(): void
     {
@@ -183,13 +183,29 @@ class TranslatedAdminFormsTest extends TestCase
     {
         Filament::setCurrentPanel(Filament::getPanel('admin-en'));
         $this->actingAs(User::factory()->create(['is_admin' => true]));
-        $catalog = $this->catalog();
-        $first = $this->saveCatalog($this->expansion($catalog, key: 'first'), ['name' => 'A reference', 'display_name' => ['en' => 'Zulu']]);
-        $second = $this->saveCatalog($this->expansion($catalog, key: 'second'), ['name' => 'Z reference', 'display_name' => ['en' => 'Alpha']]);
+        $this->language('fr', 'Français');
+        $catalog = $this->catalog(language: $this->language('ja', 'Japonais'));
+        $first = $this->saveCatalog($this->expansion($catalog, key: 'first'), [
+            'name' => 'A reference', 'display_name' => ['en' => 'Zulu', 'fr' => 'Aile'],
+        ]);
+        $second = $this->saveCatalog($this->expansion($catalog, key: 'second'), [
+            'name' => 'Z reference', 'display_name' => ['en' => 'Alpha', 'ja' => 'A エディション'],
+        ]);
         Livewire::test(ListExpansions::class)->sortTable('name')->assertCanSeeTableRecords([$second, $first], inOrder: true);
         $result = ExpansionResource::getGlobalSearchResults('Zulu')->sole();
         $this->assertSame('Zulu', $result->title);
         $this->assertStringContainsString('/en/admin/', $result->url);
+
+        $native = $this->saveCatalog($this->expansion($catalog, key: 'native'), [
+            'name' => 'Aimant', 'display_name' => ['ja' => '日本語版'],
+        ]);
+        Filament::setCurrentPanel(Filament::getPanel('admin-fr'));
+        app()->setLocale('fr');
+        Livewire::test(ListExpansions::class)->sortTable('name')
+            ->assertCanSeeTableRecords([$first, $second, $native], inOrder: true)
+            ->assertTableColumnStateSet('name', 'Aile', $first)
+            ->assertTableColumnStateSet('name', 'Alpha', $second)
+            ->assertTableColumnStateSet('name', '日本語版', $native);
     }
 
     public function test_saving_only_a_reference_preserves_raw_historical_and_concurrently_changed_text(): void

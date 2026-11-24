@@ -1,5 +1,8 @@
 # Vérification de la localisation FR et EN
 
+> Archive historique. Les procédures de conversion, de finalisation et de retour décrites ici ont été remplacées par un schéma Laravel neuf.
+> Voir [le guide de localisation actuel](../localization.md).
+
 ## Contrôles locaux
 
 La base de comparaison est `c3a57c8029a1063823e9f85f96d1b99cd329a808`.

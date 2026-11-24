@@ -7,15 +7,15 @@ use App\Notifications\LocalizedResetPassword;
 use App\Notifications\LocalizedVerifyEmail;
 use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Auth\Notifications\VerifyEmail;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\URL;
-use Tests\Concerns\ForwardOnlyRefreshDatabase;
 use Tests\TestCase;
 
 class LocalizedNotificationsTest extends TestCase
 {
-    use ForwardOnlyRefreshDatabase;
+    use RefreshDatabase;
 
     public function test_notifications_use_recipient_locale_and_localized_signed_urls(): void
     {

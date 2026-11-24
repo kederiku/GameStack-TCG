@@ -4,18 +4,19 @@ namespace Tests\Feature\Auth;
 
 use App\Models\Game;
 use App\Models\User;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Inertia\Testing\AssertableInertia as Assert;
-use Tests\Concerns\ForwardOnlyRefreshDatabase;
 use Tests\TestCase;
 
 class AuthGamesTest extends TestCase
 {
-    use ForwardOnlyRefreshDatabase;
+    use RefreshDatabase;
 
     public function test_all_guest_auth_pages_receive_the_public_catalogue(): void
     {
+        $pokemonImage = 'games/860c07f9-10f0-4c9c-ad96-21327f4559ed/pokemon.avif';
         Game::factory()->create(['name' => 'Yu-Gi-Oh!', 'slug' => 'yugioh']);
-        Game::factory()->create(['name' => 'Pokémon', 'slug' => 'pokemon', 'image' => 'games/pokemon.svg']);
+        Game::factory()->create(['name' => 'Pokémon', 'slug' => 'pokemon', 'image' => $pokemonImage]);
         Game::factory()->create(['name' => 'Reserved', 'slug' => 'login']);
         Game::factory()->create(['name' => 'Hidden', 'slug' => 'hidden', 'is_visible' => false]);
 
@@ -23,7 +24,7 @@ class AuthGamesTest extends TestCase
             $this->get($url)->assertOk()->assertInertia(fn (Assert $page) => $page
                 ->has('games', 2)
                 ->where('games.0.name', 'Pokémon')
-                ->where('games.0.imageUrl', url('/storage/games/pokemon.svg'))
+                ->where('games.0.imageUrl', url('/storage/'.$pokemonImage))
                 ->where('games.0.url', '/fr/pokemon')
                 ->where('games.1.name', 'Yu-Gi-Oh!')
                 ->where('games.1.imageUrl', null)

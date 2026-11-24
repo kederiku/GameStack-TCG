@@ -6,6 +6,7 @@ use App\Http\Middleware\NormalizeLocalizedRedirects;
 use App\Models\User;
 use App\Notifications\LocalizedResetPassword;
 use App\Support\Localization\AuthRouteDefinitions;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Router;
 use Illuminate\Support\Facades\Notification;
@@ -15,12 +16,11 @@ use Laravel\Fortify\Features;
 use Laravel\Passkeys\Contracts\PasskeyConfirmationResponse;
 use Laravel\Passkeys\Contracts\PasskeyLoginResponse;
 use PHPUnit\Framework\Attributes\DataProvider;
-use Tests\Concerns\ForwardOnlyRefreshDatabase;
 use Tests\TestCase;
 
 class LocalizedAuthTest extends TestCase
 {
-    use ForwardOnlyRefreshDatabase;
+    use RefreshDatabase;
 
     public function test_auth_views_have_canonical_locale_and_legacy_redirects(): void
     {

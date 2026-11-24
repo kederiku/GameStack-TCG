@@ -2,12 +2,12 @@
 
 namespace Tests\Feature;
 
-use Tests\Concerns\ForwardOnlyRefreshDatabase;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 class ExampleTest extends TestCase
 {
-    use ForwardOnlyRefreshDatabase;
+    use RefreshDatabase;
 
     public function test_returns_a_successful_response()
     {

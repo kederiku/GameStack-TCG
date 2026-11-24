@@ -1,5 +1,8 @@
 # Images des jeux en AVIF
 
+> Archive historique. La commande de conversion des images existantes a été retirée.
+> Voir [les formats d’envoi actuels](../../../README.md#jeux).
+
 Tous les visuels des jeux enregistrés via Filament seront stockés en AVIF, y compris les imports AVIF, JPEG, PNG, WebP et SVG. Les dimensions des images matricielles, la transparence et l’orientation EXIF des JPEG sont conservées. Les limites actuelles restent 5 Mio et 4096 × 4096 pixels. Les SVG sont nettoyés puis rendus proportionnellement dans une boîte de 2048 × 2048 pixels, sans fond ajouté.
 
 GD assure l’encodage AVIF (qualité 85) ; librsvg assure le rendu SVG via l’entrée standard, sans chemin de base, avec un délai maximal de 10 secondes. Docker fournit ces dépendances. Livewire doit permettre l’aperçu AVIF avant l’enregistrement. Les erreurs restent affichées sur le champ image et préservent le jeu et son ancien fichier.

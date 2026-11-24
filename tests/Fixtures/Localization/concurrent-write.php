@@ -14,7 +14,7 @@ $app->make(Kernel::class)->bootstrap();
 $connection = DB::connection();
 [$script, $schema, $operation, $class, $recordId, $languageId] = $argv;
 if (! $app->environment('testing') || $connection->getDatabaseName() !== 'gamestackr_testing'
-    || ! preg_match('/\Alocalized_runtime_[a-f0-9]{12}\z/', $schema)
+    || ! preg_match('/\Aisolated_test_[a-f0-9]{12}\z/', $schema)
     || ! in_array($class, [Game::class, Series::class], true)) {
     throw new LogicException('Concurrent localization tests require their owned testing schema.');
 }

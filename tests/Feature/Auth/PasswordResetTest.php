@@ -4,15 +4,15 @@ namespace Tests\Feature\Auth;
 
 use App\Models\User;
 use App\Notifications\LocalizedResetPassword as ResetPassword;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Notification;
 use Laravel\Fortify\Features;
-use Tests\Concerns\ForwardOnlyRefreshDatabase;
 use Tests\TestCase;
 
 class PasswordResetTest extends TestCase
 {
-    use ForwardOnlyRefreshDatabase;
+    use RefreshDatabase;
 
     protected function setUp(): void
     {

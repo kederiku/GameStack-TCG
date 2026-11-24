@@ -9,7 +9,7 @@ RUN := $(DC) run --rm --no-deps app
 EXEC := $(DC) exec app
 ARGS ?=
 
-.PHONY: help env init up down stop restart logs ps admin artisan composer npm shell migrate test test-storage check build assets translations format storage-init storage-password
+.PHONY: help env init up down stop restart logs ps admin artisan composer npm shell migrate seed test test-storage check build assets translations format storage-init storage-password
 
 help: ## Afficher les commandes disponibles
 	@awk 'BEGIN {FS = ":.*## "} /^[a-zA-Z_-]+:.*## / {printf "  %-12s %s\n", $$1, $$2}' $(MAKEFILE_LIST)
@@ -26,7 +26,8 @@ init: env ## Installer le projet puis démarrer tous les services
 	$(RUN) php docker/initialize-key.php
 	$(MAKE) storage-init
 	$(RUN) php artisan localization:check
-	$(RUN) php artisan localization:install
+	$(RUN) php artisan migrate --force
+	$(RUN) php artisan localization:sync-languages
 	$(RUN) sh -c 'test -L public/storage || php artisan storage:link'
 	$(RUN) npm ci
 	$(RUN) npm run build
@@ -80,6 +81,9 @@ shell: ## Ouvrir un shell dans l’application
 
 migrate: ## Exécuter les migrations
 	$(EXEC) php artisan migrate
+
+seed: ## Charger ou rétablir le catalogue TCG de référence
+	$(EXEC) php artisan db:seed
 
 test: ## Exécuter les tests dans une base PostgreSQL dédiée
 	$(RUN) php artisan config:clear

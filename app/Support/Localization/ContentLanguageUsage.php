@@ -45,9 +45,6 @@ final class ContentLanguageUsage
         if (in_array($code, array_map(CatalogRules::languageCode(...), array_keys(Locales::all())), true)) {
             self::reject();
         }
-        if ($language->getConnection()->table('catalog_example_bindings')->where('locale', $code)->exists()) {
-            self::reject();
-        }
         foreach ([Game::class, Catalog::class, Series::class, Expansion::class, Market::class, ExpansionRelease::class] as $model) {
             $record = new $model;
             foreach (TranslationPatch::attributes($record) as $attribute) {

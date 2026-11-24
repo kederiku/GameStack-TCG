@@ -43,6 +43,11 @@ abstract class AvifImages
 
     public function store(UploadedFile $upload, string $name, Connection $connection): string
     {
+        return $this->write($this->encode($upload), $name, $connection);
+    }
+
+    protected function encode(UploadedFile $upload): string
+    {
         if (! (gd_info()['AVIF Support'] ?? false)) {
             throw ValidationException::withMessages(['image' => __('validation.images.avif_unsupported')]);
         }
@@ -82,7 +87,7 @@ abstract class AvifImages
             throw ValidationException::withMessages(['image' => __('validation.images.conversion_failed')]);
         }
 
-        return $this->write($avif, $name, $connection);
+        return $avif;
     }
 
     private function rasterizeSvg(string $contents): string
@@ -144,10 +149,10 @@ abstract class AvifImages
         }
     }
 
-    protected function write(string $contents, string $name, Connection $connection, string $extension = 'avif'): string
+    protected function write(string $contents, string $name, Connection $connection): string
     {
         $filename = substr(Str::slug($name), 0, 180) ?: static::FALLBACK_FILENAME;
-        $path = $this->directory().'/'.Str::uuid().'/'.$filename.'.'.$extension;
+        $path = $this->directory().'/'.Str::uuid().'/'.$filename.'.avif';
 
         // Register before writing: even a partially failed write must be removed.
         $connection->afterRollBack(fn () => rescue(fn () => $this->deleteUnused($path, $connection->getName())));

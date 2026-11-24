@@ -8,6 +8,7 @@ use App\Models\Series;
 use App\Models\SeriesImage;
 use App\Services\CatalogImages;
 use Closure;
+use Database\Seeders\ContentLanguagesSeeder;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -15,18 +16,19 @@ use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use RuntimeException;
 use Tests\Concerns\BuildsCatalog;
-use Tests\Concerns\UsesLocalizedSchema;
+use Tests\Concerns\UsesIsolatedSchema;
 use Tests\TestCase;
 
 class CatalogImagesTest extends TestCase
 {
     use BuildsCatalog;
-    use UsesLocalizedSchema;
+    use UsesIsolatedSchema;
 
     protected function setUp(): void
     {
         parent::setUp();
-        $this->createLocalizedSchema();
+        $this->createIsolatedSchema();
+        $this->artisan('migrate', ['--seed' => true, '--seeder' => ContentLanguagesSeeder::class])->assertSuccessful();
 
         config(['game-images.disk' => 's3']);
         Storage::fake('s3');
@@ -107,7 +109,7 @@ class CatalogImagesTest extends TestCase
         config(['database.connections.catalog_image_test' => config('database.connections.pgsql')]);
         $connection = DB::connection('catalog_image_test');
         $this->assertSame('gamestackr_testing', $connection->getDatabaseName());
-        $connection->statement('SET search_path TO '.$this->localizedSchema);
+        $connection->statement('SET search_path TO '.$this->isolatedSchema);
 
         $connection->beginTransaction();
         try {

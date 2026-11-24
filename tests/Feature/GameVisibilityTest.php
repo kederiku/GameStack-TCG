@@ -5,17 +5,17 @@ namespace Tests\Feature;
 use App\Actions\Games\SaveGame;
 use App\Models\Game;
 use App\Models\User;
+use Illuminate\Foundation\Testing\DatabaseMigrations;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
 use Inertia\Testing\AssertableInertia as Assert;
 use PHPUnit\Framework\Attributes\DataProvider;
-use Tests\Concerns\ForwardOnlyDatabaseMigrations;
 use Tests\TestCase;
 
 class GameVisibilityTest extends TestCase
 {
-    use ForwardOnlyDatabaseMigrations;
+    use DatabaseMigrations;
 
     protected function setUp(): void
     {

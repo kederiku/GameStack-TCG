@@ -1,5 +1,8 @@
 # Catalogue multi-TCG — vérifications du 15 novembre 2026
 
+> Archive historique. Le seeder d’exemples a été remplacé.
+> Voir [le catalogue chargé par `make seed`](../../README.md#catalogue-tcg-dans-filament).
+
 ## Périmètre
 
 Le catalogue sépare jeu, catalogue éditorial, série facultative, ensemble,
