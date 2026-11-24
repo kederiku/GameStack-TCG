@@ -16,6 +16,7 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
+use Filament\Forms\Components\ToggleButtons;
 use Filament\Schemas\Components\Component;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Utilities\Get;
@@ -37,14 +38,29 @@ final class TranslationFields
                 ->options(fn (): array => Language::query()->get()->mapWithKeys(fn (Language $language): array => [
                     CatalogRules::languageCode($language->code) => CatalogLabels::language($language),
                 ])->sort()->all())
-                ->afterStateUpdated(function (?string $state, ?Model $record, Set $set) use ($attributes): void {
-                    $original = self::original($record, $state, $attributes);
-                    $set('original', $original);
-                    $set('edited', []);
-                    $set('remove', false);
-                    foreach ($attributes as $attribute) {
-                        $set($attribute, $original[$attribute] ?? null);
-                        $set('suppress_'.$attribute, false);
+                ->afterStateUpdated(function (?string $state, ?string $old, ?Model $record, Get $get, Set $set) use ($attributes): void {
+                    if ($old !== null && ($get('remove') || self::changes($attributes, $get->array('')) !== [])) {
+                        $set('locale', $old);
+                        $set('pending_switch', ['locale' => $state]);
+                        $set('switch_decision', null);
+
+                        return;
+                    }
+
+                    $set('', self::state($record, $state, $attributes));
+                }),
+            Hidden::make('pending_switch')->dehydrated(false),
+            ToggleButtons::make('switch_decision')->label(fn (Get $get): string => __('admin.translation.switch_question', [
+                'language' => $get('pending_switch.locale') ?? __('admin.translation.no_language'),
+            ]))
+                ->options(['keep' => __('admin.translation.keep'), 'discard' => __('admin.translation.discard')])
+                ->inline()->live()->dehydrated(false)->visible(fn (Get $get): bool => filled($get('pending_switch')))
+                ->afterStateUpdated(function (?string $state, ?Model $record, Get $get, Set $set) use ($attributes): void {
+                    if ($state === 'discard' && is_array($pending = $get('pending_switch'))) {
+                        $set('', self::state($record, $pending['locale'], $attributes));
+                    } else {
+                        $set('pending_switch', null);
+                        $set('switch_decision', null);
                     }
                 }),
             Hidden::make('original'),
@@ -100,26 +116,8 @@ final class TranslationFields
         unset($data['translation']);
         $data = array_diff_key($data, array_flip($attributes));
         $locale = $input['locale'] ?? null;
-        $values = [];
         $remove = (bool) ($input['remove'] ?? false);
-        $before = $input['original'] ?? [];
-        foreach ($attributes as $attribute) {
-            if ($attribute !== 'display_name' && ($input['suppress_'.$attribute] ?? false)) {
-                $values[$attribute] = null;
-
-                continue;
-            }
-            if (! ($input['edited'][$attribute] ?? false) || ! array_key_exists($attribute, $input)) {
-                continue;
-            }
-            $value = $input[$attribute];
-            $trimmed = is_string($value) ? trim($value) : $value;
-            $normalized = $trimmed === '' ? null : $trimmed;
-            if (array_key_exists($attribute, $before) && ($before[$attribute] === $value || $before[$attribute] === $normalized)) {
-                continue;
-            }
-            $values[$attribute] = $value;
-        }
+        $values = self::changes($attributes, $input);
         if ($locale === null || ($values === [] && ! $remove)) {
             return $save($record, $data);
         }
@@ -150,12 +148,55 @@ final class TranslationFields
         });
     }
 
+    /**
+     * @param  list<string>  $attributes
+     * @param  array<string, mixed>  $input
+     * @return array<string, mixed>
+     */
+    private static function changes(array $attributes, array $input): array
+    {
+        $values = [];
+        $before = $input['original'] ?? [];
+        foreach ($attributes as $attribute) {
+            if ($attribute !== 'display_name' && ($input['suppress_'.$attribute] ?? false)) {
+                $values[$attribute] = null;
+
+                continue;
+            }
+            if (! array_key_exists($attribute, $input)) {
+                continue;
+            }
+            $value = $input[$attribute];
+            $trimmed = is_string($value) ? trim($value) : $value;
+            $normalized = $trimmed === '' ? null : $trimmed;
+            $original = $before[$attribute] ?? null;
+            if ($original === $value || $original === $normalized) {
+                continue;
+            }
+            // Preserve historical padding or empty strings through Filament's form normalization.
+            if (! ($input['edited'][$attribute] ?? false) && is_string($original) && trim($original) === ($normalized ?? '')) {
+                continue;
+            }
+            $values[$attribute] = $value;
+        }
+
+        return $values;
+    }
+
     /** @return array<string, mixed> */
     public static function savedState(Model $record, string $locale): array
     {
-        $attributes = TranslationPatch::attributes($record);
+        return self::state($record, $locale, TranslationPatch::attributes($record));
+    }
+
+    /**
+     * @param  list<string>  $attributes
+     * @return array<string, mixed>
+     */
+    private static function state(?Model $record, ?string $locale, array $attributes): array
+    {
         $original = self::original($record, $locale, $attributes);
-        $state = ['locale' => $locale, 'original' => $original, 'edited' => [], 'remove' => false];
+        $state = ['locale' => $locale, 'original' => $original, 'edited' => [], 'remove' => false, 'pending_switch' => null, 'switch_decision' => null];
         foreach ($attributes as $attribute) {
             $state[$attribute] = $original[$attribute] ?? null;
             $state['suppress_'.$attribute] = false;

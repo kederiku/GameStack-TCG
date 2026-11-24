@@ -7,6 +7,7 @@ use App\Models\Game;
 use App\Models\Language;
 use App\Models\Series;
 use App\Services\CatalogImages;
+use App\Support\Catalog\CatalogPresentation;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
@@ -80,7 +81,8 @@ class CatalogFields
     {
         return Select::make('catalog_id')->label(__('admin.labels.catalog'))->required()->searchable()->disabledOn('edit')
             ->helperText(__('admin.fields.catalog_help'))
-            ->options(fn (): array => Catalog::query()->with(['game', 'defaultLanguage'])->orderBy('name')->get()
+            ->options(fn (): array => Catalog::query()->with(['game', 'defaultLanguage'])
+                ->orderBy(CatalogPresentation::nameForQuery(new Catalog, CatalogLabels::locale()))->orderBy('id')->get()
                 ->mapWithKeys(fn (Catalog $catalog): array => [$catalog->id => self::catalogueLabel($catalog)])->all());
     }
 

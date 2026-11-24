@@ -10,6 +10,7 @@ use App\Filament\Support\Catalog\CatalogRelationManager;
 use App\Filament\Support\Catalog\CatalogTables;
 use App\Models\Expansion;
 use App\Models\ExpansionRelation;
+use App\Support\Catalog\CatalogPresentation;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Schemas\Schema;
@@ -89,7 +90,7 @@ class RelationsRelationManager extends CatalogRelationManager
                 ->where(fn (Builder $names) => CatalogLabels::searchName($names, $search))
                 ->orWhereLike('key', "%{$search}%")
                 ->orWhereRelation('catalog', fn (Builder $catalog) => CatalogLabels::searchName($catalog, $search)))
-            ->orderBy('name')->limit(50)->get()
+            ->orderBy(CatalogPresentation::nameForQuery($owner, CatalogLabels::locale()))->orderBy('id')->limit(50)->get()
             ->mapWithKeys(fn (Expansion $expansion): array => [$expansion->id => $this->label($expansion)])->all();
     }
 

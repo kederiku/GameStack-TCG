@@ -6,6 +6,9 @@ use App\Actions\Catalog\SaveTranslations;
 use App\Actions\Catalog\SeedCatalogExamples;
 use App\Models\CatalogExampleBinding;
 use App\Models\Series;
+use Illuminate\Database\Events\QueryExecuted;
+use Illuminate\Database\QueryException;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Tests\Concerns\ForwardOnlyDatabaseMigrations;
 use Tests\TestCase;
@@ -43,6 +46,49 @@ class TranslatedExamplesTest extends TestCase
         $this->assertSame($path, $series->imageForLocale('en')->image);
         $this->assertSame($files, Storage::disk('s3')->allFiles());
         $this->assertFalse($series->is_visible);
+    }
+
+    public function test_seed_locks_content_languages_in_the_form_order_before_binding_records(): void
+    {
+        Storage::fake('s3');
+        config(['game-images.disk' => 's3']);
+        $seed = app(SeedCatalogExamples::class);
+        $seed->handle();
+
+        $probe = DB::build(config('database.connections.pgsql'));
+        $this->assertSame('gamestackr_testing', $probe->getDatabaseName());
+        $this->assertSame($this->localizedSchema, $probe->selectOne('select current_schema() as name')->name);
+        $this->assertNotSame(DB::selectOne('select pg_backend_pid() as pid')->pid, $probe->selectOne('select pg_backend_pid() as pid')->pid);
+        $locked = [];
+        $atFirstBinding = null;
+        DB::listen(function (QueryExecuted $event) use ($probe, &$locked, &$atFirstBinding): void {
+            if ($event->connection !== DB::connection() || ! str_contains($event->sql, 'for update')) {
+                return;
+            }
+            foreach (['zh-Hans', 'zh-Hant'] as $code) {
+                if (in_array($code, $locked, true)) {
+                    continue;
+                }
+                try {
+                    $probe->table('languages')->where('code', $code)->lock('for update nowait')->sole();
+                } catch (QueryException $error) {
+                    if ($error->getCode() !== '55P03') {
+                        throw $error;
+                    }
+                    $locked[] = $code;
+                }
+            }
+            if ($atFirstBinding === null && str_contains($event->sql, 'catalog_example_bindings')) {
+                $atFirstBinding = $locked;
+            }
+        });
+        try {
+            $seed->handle();
+            $this->assertSame(['zh-Hans', 'zh-Hant'], $locked);
+            $this->assertSame($locked, $atFirstBinding);
+        } finally {
+            $probe->disconnect();
+        }
     }
 
     public function test_missing_translation_binding_cannot_be_recovered_from_a_mutable_game_slug(): void

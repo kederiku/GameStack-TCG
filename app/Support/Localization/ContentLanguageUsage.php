@@ -16,13 +16,23 @@ use Illuminate\Validation\ValidationException;
 
 final class ContentLanguageUsage
 {
+    /**
+     * @param  list<string>  $codes
+     * @return list<string>
+     */
+    public static function orderedCodes(array $codes): array
+    {
+        $codes = array_values(array_unique(array_map(static fn (string $code): string => strtolower(CatalogRules::languageCode($code)), $codes)));
+        sort($codes);
+
+        return $codes;
+    }
+
     /** @param list<string> $codes */
     public static function lock(array $codes, ?Connection $connection = null): void
     {
         $connection ??= DB::connection();
-        $codes = array_values(array_unique(array_map(static fn (string $code): string => strtolower(CatalogRules::languageCode($code)), $codes)));
-        sort($codes);
-        foreach ($codes as $code) {
+        foreach (self::orderedCodes($codes) as $code) {
             if ($connection->table('languages')->whereRaw('lower(code) = ?', [$code])->lockForUpdate()->first() === null) {
                 throw ValidationException::withMessages(['locale' => __('validation.catalog.exists')]);
             }

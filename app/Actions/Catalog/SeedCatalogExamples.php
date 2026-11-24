@@ -16,6 +16,7 @@ use App\Models\Market;
 use App\Models\Series;
 use App\Models\SeriesImage;
 use App\Support\Catalog\CatalogRules;
+use App\Support\Localization\ContentLanguageUsage;
 use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
@@ -43,6 +44,7 @@ class SeedCatalogExamples
         return DB::transaction(function () use ($manifest, $sources): array {
             // Prevent two explicit seed runs from resolving the same absent binding concurrently.
             DB::select('select pg_advisory_xact_lock(20261115, 150000)');
+            $newLanguages = $this->prepareLanguages($manifest['records']);
             $counts = ['created' => 0, 'preserved' => 0, 'recreated' => 0];
             $resolved = [];
             // Keep the former target while rebinding descendants of a deleted parent.
@@ -77,6 +79,9 @@ class SeedCatalogExamples
                 try {
                     if ($row['locale'] === null) {
                         [$record, $outcome] = $this->resolve($key, $row['type'], $attributes, $row['asset']);
+                        if (isset($newLanguages[$key])) {
+                            $outcome = $originalIds->has($key) ? 'recreated' : 'created';
+                        }
                     } else {
                         $parentKey = $row['references'][$row['type'].'_id'];
                         $record = $resolved[$parentKey];
@@ -97,6 +102,37 @@ class SeedCatalogExamples
 
             return $counts;
         });
+    }
+
+    /**
+     * Lock or create each content language before taking any binding or catalog lock.
+     *
+     * @param  array<string, ExampleRow>  $records
+     * @return array<string, true> Manifest keys created in this transaction.
+     */
+    private function prepareLanguages(array $records): array
+    {
+        $languages = [];
+        foreach ($records as $key => $row) {
+            if ($row['type'] === 'language') {
+                $languages[strtolower(CatalogRules::languageCode((string) $row['attributes']['code']))] = $key;
+            }
+        }
+
+        $new = [];
+        foreach (ContentLanguageUsage::orderedCodes(array_keys($languages)) as $code) {
+            if (Language::query()->whereRaw('lower(code) = ?', [$code])->lockForUpdate()->first() === null) {
+                $key = $languages[$code];
+                try {
+                    $this->saveCatalog->handle(new Language, $records[$key]['attributes']);
+                } catch (UniqueConstraintViolationException|ValidationException $exception) {
+                    throw new RuntimeException('Exemple '.$key.' : '.$exception->getMessage(), previous: $exception);
+                }
+                $new[$key] = true;
+            }
+        }
+
+        return $new;
     }
 
     /**

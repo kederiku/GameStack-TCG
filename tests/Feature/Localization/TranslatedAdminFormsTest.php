@@ -6,11 +6,14 @@ use App\Actions\Catalog\SaveTranslations;
 use App\Filament\Resources\ExpansionEditions\Pages\EditExpansionEdition;
 use App\Filament\Resources\ExpansionEditions\RelationManagers\ReleasesRelationManager;
 use App\Filament\Resources\Expansions\ExpansionResource;
+use App\Filament\Resources\Expansions\Pages\CreateExpansion;
 use App\Filament\Resources\Expansions\Pages\EditExpansion;
 use App\Filament\Resources\Expansions\Pages\ListExpansions;
+use App\Filament\Resources\Expansions\RelationManagers\RelationsRelationManager;
 use App\Filament\Resources\Games\Pages\EditGame;
 use App\Models\Game;
 use App\Models\User;
+use Filament\Actions\CreateAction;
 use Filament\Actions\EditAction;
 use Filament\Facades\Filament;
 use Illuminate\Http\UploadedFile;
@@ -58,6 +61,84 @@ class TranslatedAdminFormsTest extends TestCase
         $page->fillForm(['translation.remove' => true])->call('save')->assertHasNoFormErrors();
         $this->assertSame(['en' => 'English title', 'ja' => '日本語版'], $expansion->refresh()->getTranslations('display_name'));
         $this->assertSame(['en' => 'Fallback'], $expansion->getTranslations('description'));
+    }
+
+    public function test_switching_content_language_requires_confirmation_to_discard_changes(): void
+    {
+        Filament::setCurrentPanel(Filament::getPanel('admin-en'));
+        $this->actingAs(User::factory()->create(['is_admin' => true]));
+        $this->language('ja', 'Japonais');
+        $expansion = $this->expansion($this->catalog());
+        app(SaveTranslations::class)->handle($expansion, 'ja', ['display_name' => '日本語']);
+        $page = Livewire::test(EditExpansion::class, ['record' => $expansion->id])
+            ->set('data.translation.locale', 'ja')->set('data.translation.display_name', 'Draft')
+            ->set('data.translation.suppress_description', true)->set('data.translation.remove', true)
+            ->set('data.translation.locale', 'fr')
+            ->assertSet('data.translation.locale', 'ja')->assertSet('data.translation.display_name', 'Draft')
+            ->assertSet('data.translation.suppress_description', true)->assertSet('data.translation.remove', true)
+            ->set('data.translation.switch_decision', 'keep')->assertSet('data.translation.locale', 'ja')
+            ->set('data.translation.locale', 'fr')->set('data.translation.switch_decision', 'discard')
+            ->assertSet('data.translation.locale', 'fr')->assertSet('data.translation.display_name', null);
+        $this->assertSame(['ja' => '日本語'], $expansion->refresh()->getTranslations('display_name'));
+        $page->set('data.translation.locale', 'ja')->assertSet('data.translation.display_name', '日本語')
+            ->assertSet('data.translation.remove', false)->assertSet('data.translation.suppress_description', false);
+    }
+
+    public function test_reverted_absent_fields_remain_missing_after_livewire_updates(): void
+    {
+        Filament::setCurrentPanel(Filament::getPanel('admin-en'));
+        $this->actingAs(User::factory()->create(['is_admin' => true]));
+        $expansion = $this->expansion($this->catalog());
+        Livewire::test(EditExpansion::class, ['record' => $expansion->id])
+            ->set('data.translation.locale', 'en')
+            ->set('data.translation.description', 'Temporary')->set('data.translation.description', '')
+            ->set('data.translation.display_name', 'Temporary')->set('data.translation.display_name', '   ')
+            ->call('save')->assertHasNoFormErrors();
+        $this->assertSame([], $expansion->refresh()->getTranslations('display_name'));
+        $this->assertSame([], $expansion->getTranslations('description'));
+    }
+
+    public function test_release_modal_keeps_pending_work_and_reverted_absent_periods(): void
+    {
+        Filament::setCurrentPanel(Filament::getPanel('admin-en'));
+        $this->actingAs(User::factory()->create(['is_admin' => true]));
+        $edition = $this->edition($this->expansion($this->catalog()));
+        $release = $this->release($edition);
+        $path = 'mountedActions.0.data.translation.';
+        Livewire::test(ReleasesRelationManager::class, ['ownerRecord' => $edition, 'pageClass' => EditExpansionEdition::class])
+            ->mountTableAction(EditAction::class, $release)
+            ->set($path.'locale', 'en')->set($path.'announced_period', 'Draft')
+            ->set($path.'locale', 'fr')->assertSet($path.'locale', 'en')->assertSet($path.'announced_period', 'Draft')
+            ->set($path.'switch_decision', 'keep')->set($path.'announced_period', '')
+            ->callMountedTableAction()->assertHasNoActionErrors();
+        $this->assertSame([], $release->refresh()->getTranslations('announced_period'));
+    }
+
+    public function test_parent_options_are_ordered_before_the_fifty_record_limit(): void
+    {
+        Filament::setCurrentPanel(Filament::getPanel('admin-en'));
+        $this->actingAs(User::factory()->create(['is_admin' => true]));
+        $game = Game::factory()->create();
+        $catalogIds = $expansionIds = [];
+        foreach (range(51, 1) as $i) {
+            $name = sprintf('Shown %02d', $i);
+            $reference = sprintf('Reference %02d', 52 - $i);
+            $catalog = $this->saveCatalog($this->catalog($game, key: 'catalog-'.$i), ['name' => $reference, 'display_name' => ['en' => $name]]);
+            $expansion = $this->saveCatalog($this->expansion($catalog), ['name' => $reference, 'display_name' => ['en' => $name]]);
+            $catalogIds[$i] = $catalog->id;
+            $expansionIds[$i] = $expansion->id;
+        }
+        ksort($catalogIds);
+        ksort($expansionIds);
+        $owner = $this->expansion($catalog, key: 'owner');
+        $manager = Livewire::test(RelationsRelationManager::class, ['ownerRecord' => $owner, 'pageClass' => EditExpansion::class])->mountTableAction(CreateAction::class);
+        $target = $manager->instance()->getSchema('mountedActionSchema0')->getComponentByStatePath('target_expansion_id');
+        $this->assertSame(array_slice($expansionIds, 0, 50), array_keys($target->getSearchResults('Shown')));
+        $filter = Livewire::test(ListExpansions::class)->instance()->getTableFiltersForm()->getComponentByStatePath('catalog.value');
+        $this->assertSame(array_slice($catalogIds, 0, 50), array_keys($filter->getSearchResults('Shown')));
+        $this->assertSame(array_slice($catalogIds, 0, 50), array_keys($filter->getOptions()));
+        $select = Livewire::test(CreateExpansion::class)->instance()->getSchema('form')->getComponentByStatePath('catalog_id');
+        $this->assertSame(array_values($catalogIds), array_keys($select->getOptions()));
     }
 
     public function test_list_sort_and_global_search_use_translated_names(): void

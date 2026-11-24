@@ -100,13 +100,19 @@ class CatalogTables
     private static function parentFilter(string $key, string $relationship, string $label, Builder $options, Closure $format): SelectFilter
     {
         return SelectFilter::make($key)->label($label)->relationship($relationship, 'name',
-            fn (Builder $query) => $query->with($options->getEagerLoads()))
+            function (Builder $query) use ($options): Builder {
+                CatalogLabels::sortName($query, 'asc');
+
+                return $query->orderBy($query->getModel()->getQualifiedKeyName())->with($options->getEagerLoads());
+            })
             ->getOptionLabelFromRecordUsing($format)
             ->getSearchResultsUsing(function (string $search) use ($options, $format): array {
                 $query = clone $options;
                 CatalogLabels::searchName($query, $search);
 
-                return $query->orderBy('name')->limit(50)->get()->mapWithKeys(fn (Model $record): array => [$record->getKey() => $format($record)])->all();
+                CatalogLabels::sortName($query, 'asc');
+
+                return $query->orderBy($query->getModel()->getQualifiedKeyName())->limit(50)->get()->mapWithKeys(fn (Model $record): array => [$record->getKey() => $format($record)])->all();
             })->searchable()->preload();
     }
 
