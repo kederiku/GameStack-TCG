@@ -6,6 +6,7 @@ use App\Models\ExpansionEdition;
 use App\Models\SeriesImage;
 use Illuminate\Database\Connection;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Validation\ValidationException;
 use RuntimeException;
 
 class CatalogImages extends AvifImages
@@ -20,6 +21,23 @@ class CatalogImages extends AvifImages
         self::validateUpload($upload);
 
         return parent::store($upload, $name, $connection);
+    }
+
+    public function matchesStoredUpload(?string $path, UploadedFile $upload): bool
+    {
+        $disk = self::disk();
+        if ($path === null || ! $this->isManagedPath($path) || ! $disk->fileExists($path)) {
+            return false;
+        }
+
+        $contents = $disk->get($path);
+        if ($contents === null) {
+            throw ValidationException::withMessages(['image' => __('validation.images.read-image')]);
+        }
+
+        self::validateUpload($upload);
+
+        return $contents === $this->encode($upload);
     }
 
     public function deleteUnused(?string $path, ?string $connection = null): void

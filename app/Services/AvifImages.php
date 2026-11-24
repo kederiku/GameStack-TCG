@@ -43,6 +43,11 @@ abstract class AvifImages
 
     public function store(UploadedFile $upload, string $name, Connection $connection): string
     {
+        return $this->write($this->encode($upload), $name, $connection);
+    }
+
+    protected function encode(UploadedFile $upload): string
+    {
         if (! (gd_info()['AVIF Support'] ?? false)) {
             throw ValidationException::withMessages(['image' => __('validation.images.avif_unsupported')]);
         }
@@ -82,7 +87,7 @@ abstract class AvifImages
             throw ValidationException::withMessages(['image' => __('validation.images.conversion_failed')]);
         }
 
-        return $this->write($avif, $name, $connection);
+        return $avif;
     }
 
     private function rasterizeSvg(string $contents): string

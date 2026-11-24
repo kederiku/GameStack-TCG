@@ -62,10 +62,14 @@ class FreshSchemaTest extends TestCase
     {
         $this->assertDatabaseEmpty('languages');
 
-        $this->artisan('localization:sync-languages')->assertSuccessful();
         $this->artisan('db:seed', ['--class' => ContentLanguagesSeeder::class])->assertSuccessful();
 
-        $this->assertSame(['en' => 'English', 'fr' => 'Français'], DB::table('languages')->orderBy('code')->pluck('name', 'code')->all());
+        $languages = DB::table('languages')->orderBy('code')->get();
+        $this->assertSame(['en' => 'English', 'fr' => 'Français'], $languages->pluck('name', 'code')->all());
+
+        $this->artisan('localization:sync-languages')->assertSuccessful();
+
+        $this->assertEquals($languages, DB::table('languages')->orderBy('code')->get());
         $this->assertDatabaseEmpty('users');
         $this->assertDatabaseEmpty('games');
     }
