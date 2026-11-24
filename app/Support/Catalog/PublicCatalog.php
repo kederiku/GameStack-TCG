@@ -79,7 +79,8 @@ class PublicCatalog
         }
         $total = (clone $query)->toBase()->getCountForPagination();
         $lastPage = max(1, (int) ceil($total / 36));
-        $page = min($lastPage, max(1, (int) self::input($request, 'page', '1')));
+        $page = min($lastPage, (int) (LocalizedRoutes::query($request)['page'] ?? 1));
+        $request->attributes->set('public_catalog_page', $page);
         $expansions = $query->orderBy('sort_order')->orderBy('expansions.id')->with($this->relations())->paginate(36, page: $page, total: $total)
             ->appends($filters)
             ->through(fn (Expansion $expansion) => $this->presentation->card($expansion, $filters['language']));

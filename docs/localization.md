@@ -17,6 +17,44 @@ si la finalisation a réussi. Une maintenance préexistante conserve ses options
 Une installation déjà finalisée accepte les migrations suivantes. Sur tout autre
 schéma existant, l’initialisation s’arrête et la procédure ci-dessous s’applique.
 
+### Première installation avec maintenance en cache PostgreSQL
+
+Avec `APP_MAINTENANCE_DRIVER=cache` et un store de type `database`, la lecture
+de l’état de maintenance demande une table de cache existante. Si elle manque,
+`make init` s’arrête avant toute migration. Pour une **base neuve**, garder le
+trafic isolé, les workers, imports et tâches planifiées arrêtés. Le premier
+`make init` a installé les dépendances et démarré PostgreSQL. Les commandes
+suivantes utilisent des conteneurs ponctuels et la configuration réelle du projet.
+
+Pour le store standard, amorcer uniquement les tables du cache. Ensuite activer
+la maintenance dans ce même store, terminer la migration et contrôler la preuve.
+
+```sh
+artisan_init() {
+    make artisan EXEC='docker compose --profile local run --rm --no-deps app' ARGS="$*"
+}
+(
+    set -e
+    artisan_init migrate --force --path=database/migrations/0001_01_01_000001_create_cache_table.php
+    artisan_init down
+    artisan_init migrate --force
+    artisan_init localization:finalize --dry-run
+    artisan_init localization:finalize
+    artisan_init localization:audit
+    make init
+)
+```
+
+Vérifier chaque sortie avant la commande suivante. Le second `make init` reconnaît
+le reçu finalisé et conserve la maintenance pendant le build et le démarrage.
+Après validation, exécuter `artisan_init up` et rétablir le trafic. Si une
+maintenance est déjà active sur le store, garder ses options et omettre `down`
+et `up` jusqu’à la réouverture décidée par son propriétaire. Pour un store sur
+une connexion ou une table personnalisée, provisionner cette table sur sa
+connexion avant `make init`. La migration fournie crée `cache` et `cache_locks`
+sur la connexion applicative. Une base contenant déjà des données suit la
+procédure de bascule ci-dessous.
+
 ## Bascule d’une installation existante
 
 1. Consigner la révision exacte de la dernière version déployable utilisant les
@@ -49,8 +87,11 @@ schéma existant, l’initialisation s’arrête et la procédure ci-dessous s�
     langues actives, migre les liaisons d’exemples et établit les empreintes V1.
     Elle rend les tables historiques accessibles en lecture seule. Jusqu’à la
     finalisation, garder toute écriture du catalogue suspendue, y compris les
-    seeders. L’audit contrôle les références et le schéma. La simulation compare
-    les sources et toutes les cibles aux empreintes initiales. Elle peut s’exécuter
+    seeders. L’audit contrôle les références et le schéma. La simulation exige le
+    schéma converti et le reçu vérifié V1. Elle contrôle les colonnes introduites
+    ou renommées par la conversion, dont le type JSONB des traductions, même pour
+    une table vide. Elle compare les sources, les cibles et tous leurs compteurs
+    aux preuves initiales. Elle peut s’exécuter
     avant la maintenance sur une base déjà convertie et prend des verrous de
     lecture cohérente pouvant attendre les écritures. Elle garde les données,
     la preuve et le stockage intacts.
@@ -135,7 +176,9 @@ maintenance. Préserver les volumes et les données de diagnostic.
 L’accueil, les jeux et les fiches d’extension ont une URL canonique dans la
 langue visitée. Chaque page indexable publie les autres langues pour la même
 ressource et `x-default` en français. Une page de liste conserve `page=2` et
-les pages suivantes. Les filtres, la recherche et le tri actifs, ainsi qu’une
+les pages suivantes. Les zéros initiaux sont normalisés. Une page hors plage prend
+l’identité de la dernière page affichée et une valeur invalide celle de la première.
+Les filtres, la recherche et le tri actifs, ainsi qu’une
 édition explicitement sélectionnée, donnent `noindex,follow` et une canonique
 pour cette sélection normalisée. Les valeurs par défaut et paramètres de suivi
 disparaissent. Les écrans auth/compte, les liens signés et Filament ne publient

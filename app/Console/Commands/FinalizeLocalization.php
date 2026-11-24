@@ -7,6 +7,7 @@ use Illuminate\Console\Command;
 use Illuminate\Contracts\Foundation\MaintenanceMode;
 use Illuminate\Database\Connection;
 use Illuminate\Support\Facades\DB;
+use RuntimeException;
 
 class FinalizeLocalization extends Command
 {
@@ -20,6 +21,18 @@ class FinalizeLocalization extends Command
 
     // Every input covered by the V1 receipt must remain stable until commit.
     private const TARGETS = ['languages', 'games', 'markets', 'catalogs', 'series', 'expansions', 'expansion_editions', 'expansion_releases', 'expansion_relations', 'catalog_example_bindings', 'series_images'];
+
+    // V1 adds or renames these columns. Row digests cannot attest their shape on empty tables.
+    private const CONVERSION_COLUMNS = [
+        'games' => ['display_name' => 'jsonb', 'description' => 'jsonb', 'reference_description' => 'text'],
+        'catalogs' => ['display_name' => 'jsonb', 'description' => 'jsonb', 'reference_description' => 'text'],
+        'series' => ['display_name' => 'jsonb', 'description' => 'jsonb'],
+        'expansions' => ['display_name' => 'jsonb', 'description' => 'jsonb'],
+        'markets' => ['display_name' => 'jsonb'],
+        'expansion_releases' => ['announced_period' => 'jsonb', 'reference_announced_period' => 'varchar'],
+        'catalog_example_bindings' => ['locale' => 'varchar'],
+        'series_images' => ['id' => 'int8', 'series_id' => 'int8', 'language_id' => 'int8', 'image' => 'varchar', 'created_at' => 'timestamp', 'updated_at' => 'timestamp'],
+    ];
 
     public static function isFinalized(Connection $db): bool
     {
@@ -50,7 +63,13 @@ class FinalizeLocalization extends Command
 
                 return self::SUCCESS;
             }
-            if ($db->table(self::RECEIPTS)->where('version', 1)->whereNotNull('finalized_at')->exists()) {
+            $receipt = $db->table(self::RECEIPTS)->where('version', 1)->first();
+            if ($receipt === null || $receipt->verified_at === null) {
+                $this->error('Missing verified V1 conversion receipt.');
+
+                return self::FAILURE;
+            }
+            if ($receipt->finalized_at !== null) {
                 $this->error('Inconsistent finalized receipt. Check the surviving sources and the verified timestamp.');
 
                 return self::FAILURE;
@@ -68,11 +87,22 @@ class FinalizeLocalization extends Command
                 }
             }
             $db->statement('LOCK TABLE '.implode(', ', [...self::TARGETS, ...self::SOURCES]).' IN SHARE MODE');
+            $schemaError = self::conversionSchemaError($db);
+            if ($schemaError !== null) {
+                $this->error($schemaError);
+
+                return self::FAILURE;
+            }
             $proof = (new LocalizedContentV1)->verify($db);
             if (! $proof['ok']) {
                 foreach ($proof['problems'] as $problem) {
                     $this->error($problem);
                 }
+
+                return self::FAILURE;
+            }
+            if (! self::countsMatch($receipt->counts, $proof['counts'])) {
+                $this->error('V1 receipt counts differ from the verified conversion.');
 
                 return self::FAILURE;
             }
@@ -85,10 +115,42 @@ class FinalizeLocalization extends Command
             // RESTRICT (the PostgreSQL default) also refuses remaining external dependencies.
             $db->statement('DROP TABLE '.implode(', ', self::SOURCES));
             $db->statement('DROP FUNCTION localization_v1_read_only()');
-            $db->table(self::RECEIPTS)->where('version', 1)->update(['finalized_at' => now()]);
+            $marked = $db->table(self::RECEIPTS)->where('version', 1)
+                ->whereNotNull('verified_at')->whereNull('finalized_at')->update(['finalized_at' => now()]);
+            if ($marked !== 1) {
+                throw new RuntimeException('V1 receipt update must mark exactly one verified conversion.');
+            }
             $this->info('V1 conversion finalized. Digest receipt retained.');
 
             return self::SUCCESS;
         });
+    }
+
+    private static function conversionSchemaError(Connection $db): ?string
+    {
+        $schema = $db->getSchemaBuilder();
+        foreach (self::CONVERSION_COLUMNS as $table => $columns) {
+            $actual = array_column($schema->getColumns($table), 'type_name', 'name');
+            foreach ($columns as $column => $type) {
+                if (($actual[$column] ?? null) !== $type) {
+                    return "Incomplete V1 target schema: {$table}.{$column} requires PostgreSQL type {$type}.";
+                }
+            }
+        }
+
+        return null;
+    }
+
+    /** @param array<string, int> $actual */
+    private static function countsMatch(string $json, array $actual): bool
+    {
+        $expected = json_decode($json, true, flags: JSON_THROW_ON_ERROR);
+        if (! is_array($expected)) {
+            return false;
+        }
+        ksort($expected);
+        ksort($actual);
+
+        return $expected === $actual;
     }
 }

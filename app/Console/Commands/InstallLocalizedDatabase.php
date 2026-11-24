@@ -27,6 +27,12 @@ class InstallLocalizedDatabase extends Command
 
                 return self::FAILURE;
             }
+            $missingTable = $this->missingMaintenanceCacheTable();
+            if ($missingTable !== null) {
+                $this->error("Missing maintenance cache table [{$missingTable}]. Follow the fresh database-cache procedure in docs/localization.md.");
+
+                return self::FAILURE;
+            }
             $wasDown = $maintenance->active();
             if (! $wasDown) {
                 $maintenance->activate(['status' => 503]);
@@ -44,5 +50,21 @@ class InstallLocalizedDatabase extends Command
         } finally {
             $db->selectOne("select pg_advisory_unlock({$lock})");
         }
+    }
+
+    private function missingMaintenanceCacheTable(): ?string
+    {
+        if (config('app.maintenance.driver') !== 'cache') {
+            return null;
+        }
+        $store = config('app.maintenance.store') ?: config('cache.default');
+        $config = config("cache.stores.{$store}");
+        if (($config['driver'] ?? null) !== 'database') {
+            return null;
+        }
+        $table = $config['table'];
+        $schema = DB::connection($config['connection'] ?? null)->getSchemaBuilder();
+
+        return $schema->hasTable($table) ? null : $table;
     }
 }

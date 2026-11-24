@@ -34,8 +34,8 @@ final class PublicMetadata
             }
         }
         $filtered = $query !== [];
-        $page = LocalizedRoutes::query($request)['page'] ?? '1';
-        if ($key === 'games.show' && $page !== '1') {
+        $page = $request->attributes->getInt('public_catalog_page', 1);
+        if ($key === 'games.show' && $page > 1) {
             $query['page'] = $page;
         }
 

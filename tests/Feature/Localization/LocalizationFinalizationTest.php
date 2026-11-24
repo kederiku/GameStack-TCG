@@ -6,11 +6,14 @@ use Illuminate\Contracts\Foundation\MaintenanceMode;
 use Illuminate\Database\Events\MigrationsEnded;
 use Illuminate\Database\QueryException;
 use Illuminate\Foundation\ArrayMaintenanceMode;
+use Illuminate\Foundation\MaintenanceModeManager;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Storage;
+use PHPUnit\Framework\Attributes\DataProvider;
+use RuntimeException;
 use Tests\TestCase;
 
 class LocalizationFinalizationTest extends TestCase
@@ -75,6 +78,103 @@ class LocalizationFinalizationTest extends TestCase
         $this->artisan('localization:finalize')->assertFailed();
         $this->assertTrue(Schema::hasTable('expansion_localizations'));
         $this->assertTrue(Schema::hasTable('series_localizations'));
+    }
+
+    #[DataProvider('partialRestorations')]
+    public function test_partial_restoration_or_unverified_receipt_preserves_sources(string $alteration, string $receiptState): void
+    {
+        $this->artisan('migrate', ['--force' => true])->assertSuccessful();
+        // Empty target tables have the same row digests even when a column is missing.
+        DB::statement($alteration);
+        $receipts = DB::table('localization_conversion_verifications');
+        if ($receiptState === 'unverified') {
+            $receipts->update(['verified_at' => null]);
+        } elseif ($receiptState === 'missing') {
+            $receipts->delete();
+        }
+        $original = $receipts->first();
+        $this->maintenance->activate([]);
+        foreach ([true, false] as $dryRun) {
+            $this->artisan('localization:finalize', ['--dry-run' => $dryRun])->assertFailed();
+            $this->assertTrue(Schema::hasTable('series_localizations'));
+            $this->assertTrue(Schema::hasTable('expansion_localizations'));
+            $this->assertEquals($original, $receipts->first());
+        }
+    }
+
+    public static function partialRestorations(): array
+    {
+        return [
+            'partial target schema' => ['ALTER TABLE games DROP COLUMN display_name', 'verified'],
+            'missing image target' => ['ALTER TABLE series_images DROP COLUMN image', 'verified'],
+            'wrong translation type' => ['ALTER TABLE markets ALTER COLUMN display_name DROP DEFAULT, ALTER COLUMN display_name TYPE text USING display_name::text', 'verified'],
+            'absent verification' => ['ALTER TABLE games DROP COLUMN display_name', 'unverified'],
+            'absent receipt' => ['ALTER TABLE games DROP COLUMN display_name', 'missing'],
+        ];
+    }
+
+    #[DataProvider('incompleteReceipts')]
+    public function test_incomplete_receipt_counts_cannot_be_finalized(string $countsExpression): void
+    {
+        $this->artisan('migrate', ['--force' => true])->assertSuccessful();
+        $receipt = DB::table('localization_conversion_verifications');
+        $receipt->update(['counts' => DB::raw($countsExpression)]);
+        $original = (array) $receipt->first();
+        $this->maintenance->activate([]);
+        foreach ([true, false] as $dryRun) {
+            $this->artisan('localization:finalize', ['--dry-run' => $dryRun])->assertFailed();
+            $this->assertTrue(Schema::hasTable('series_localizations'));
+            $this->assertTrue(Schema::hasTable('expansion_localizations'));
+            $this->assertSame($original, (array) $receipt->first());
+        }
+    }
+
+    public static function incompleteReceipts(): array
+    {
+        return [
+            'missing counts' => ["'{}'::jsonb"],
+            'changed count' => ["jsonb_set(counts, '{languages}', '0'::jsonb)"],
+            'wrong count type' => ["jsonb_set(counts, '{languages}', to_jsonb('2'::text))"],
+        ];
+    }
+
+    public function test_suppressed_receipt_update_aborts_both_source_drops(): void
+    {
+        $this->artisan('migrate', ['--force' => true])->assertSuccessful();
+        DB::unprepared('CREATE FUNCTION skip_receipt() RETURNS trigger LANGUAGE plpgsql AS $$ BEGIN RETURN NULL; END; $$');
+        DB::statement('CREATE TRIGGER skip_receipt BEFORE UPDATE ON localization_conversion_verifications FOR EACH ROW EXECUTE FUNCTION skip_receipt()');
+        $this->maintenance->activate([]);
+        $error = null;
+        try {
+            $this->artisan('localization:finalize')->run();
+        } catch (RuntimeException $exception) {
+            $error = $exception->getMessage();
+        }
+        $this->assertSame('V1 receipt update must mark exactly one verified conversion.', $error);
+        $this->assertTrue(Schema::hasTable('series_localizations'));
+        $this->assertTrue(Schema::hasTable('expansion_localizations'));
+        $this->assertNull(DB::table('localization_conversion_verifications')->value('finalized_at'));
+    }
+
+    public function test_fresh_install_reports_missing_database_maintenance_cache_before_writing(): void
+    {
+        config(['app.maintenance.driver' => 'cache', 'app.maintenance.store' => 'database']);
+        $this->app->instance(MaintenanceMode::class, app(MaintenanceModeManager::class)->driver('cache'));
+        $this->artisan('localization:install')
+            ->expectsOutputToContain('Missing maintenance cache table [cache]')
+            ->assertFailed();
+        $this->assertFalse(Schema::hasTable('migrations'));
+        $this->assertFalse(Schema::hasTable('cache'));
+        // Exercise the documented bootstrap without touching Laravel's shared down file.
+        $this->artisan('migrate', ['--path' => 'database/migrations/0001_01_01_000001_create_cache_table.php', '--force' => true])->assertSuccessful();
+        $maintenance = app(MaintenanceMode::class);
+        $maintenance->activate(['retry' => 180]);
+        $this->artisan('migrate', ['--force' => true])->assertSuccessful();
+        $this->artisan('localization:finalize', ['--dry-run' => true])->assertSuccessful();
+        $this->artisan('localization:finalize')->assertSuccessful();
+        $this->artisan('localization:install')->assertSuccessful();
+        $this->assertTrue($maintenance->active());
+        $this->assertSame(['retry' => 180], $maintenance->data());
     }
 
     public function test_dependent_trigger_rolls_back_both_drops_without_marking_the_receipt(): void

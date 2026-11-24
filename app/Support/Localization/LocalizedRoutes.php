@@ -84,11 +84,11 @@ final class LocalizedRoutes
                 'catalog', 'language', 'edition', 'series' => strlen($value) <= 255 && preg_match('/\A(?:[a-zA-Z0-9]+(?:-[a-zA-Z0-9]+)*|\*|)\z/', $value) === 1,
                 'type' => in_array($value, ['all', ...Expansion::TYPES], true),
                 'sort' => in_array($value, ['recent', 'oldest', 'name'], true),
-                'page' => preg_match('/\A[1-9][0-9]{0,8}\z/', $value) === 1,
+                'page' => ctype_digit($value) && (int) $value > 0,
                 default => false,
             };
             if ($valid) {
-                $query[$key] = $value;
+                $query[$key] = $key === 'page' ? (string) (int) $value : $value;
             }
         }
 

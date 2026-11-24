@@ -7,6 +7,7 @@ use App\Models\Game;
 use App\Models\User;
 use DOMDocument;
 use DOMXPath;
+use Illuminate\Support\Facades\DB;
 use Tests\Concerns\BuildsCatalog;
 use Tests\Concerns\ForwardOnlyRefreshDatabase;
 use Tests\TestCase;
@@ -31,15 +32,34 @@ class LocalizedMetadataTest extends TestCase
     public function test_catalog_selections_and_pagination_retain_their_identity_after_inertia_visits(): void
     {
         $game = Game::factory()->create(['slug' => 'pokemon']);
-        $edition = $this->edition($this->expansion($this->catalog($game)));
+        $catalog = $this->catalog($game);
+        $base = $this->expansion($catalog);
+        $base->update(['name' => 'Cards 1']);
+        DB::table('expansions')->insert(array_map(fn (int $i): array => [
+            'catalog_id' => $catalog->id, 'key' => 'set-'.$i, 'type' => 'main', 'name' => 'Cards '.$i,
+        ], range(2, 37)));
+        $edition = $this->edition($base);
         $this->assertSame('en', $edition->language->code);
+        $headers = ['X-Inertia' => 'true', 'X-Inertia-Version' => app(HandleInertiaRequests::class)->version(request())];
+        foreach (['02' => 2, '999' => 2, '2bad' => 1] as $input => $page) {
+            $suffix = $page === 1 ? '' : '?page=2';
+            $this->get('/fr/pokemon?page='.$input, $headers)->assertOk()
+                ->assertJsonPath('props.catalogData.expansions.current_page', $page)
+                ->assertJsonPath('props.catalogData.expansions.data.0.key', $page === 2 ? 'set-37' : 'base-set')
+                ->assertJsonPath('props.metadata.canonical', url('/fr/pokemon'.$suffix))
+                ->assertJsonPath('props.metadata.alternates.en', url('/en/pokemon'.$suffix))
+                ->assertJsonPath('props.metadata.alternates.x-default', url('/fr/pokemon'.$suffix));
+        }
+        $this->get('/fr/pokemon?page=02', $headers)->assertJsonPath('props.localizedUrls.en', '/en/pokemon?page=2');
+        $this->get('/pokemon?lang=en&page=02')->assertRedirect('/en/pokemon?page=2');
+        $this->get('/pokemon?lang=en&page=2bad')->assertRedirect('/en/pokemon');
         foreach ([
             ['/fr/pokemon?page=2&utm_medium=mail', '/fr/pokemon?page=2', null],
             ['/fr/pokemon?sort=recent&type=all&language=*&page=1', '/fr/pokemon', null],
             ['/fr/pokemon?utm_source=mail&page=2&q=%20cards%20', '/fr/pokemon?q=cards&page=2', 'noindex,follow'],
             ['/fr/pokemon/international/base-set?edition=EN&tracking=x', '/fr/pokemon/international/base-set?edition=en', 'noindex,follow'],
         ] as [$visit, $canonical, $robots]) {
-            $data = $this->get($visit, ['X-Inertia' => 'true', 'X-Inertia-Version' => app(HandleInertiaRequests::class)->version(request())])->assertOk()->json('props.metadata');
+            $data = $this->get($visit, $headers)->assertOk()->json('props.metadata');
             $this->assertIsArray($data);
             $this->assertSame(url($canonical), $data['canonical']);
             $this->assertSame($robots, $data['robots']);
