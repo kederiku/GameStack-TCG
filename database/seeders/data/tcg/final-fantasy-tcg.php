@@ -90,7 +90,7 @@ return [
                             'language' => 'fr',
                             'asset' => null,
                             'releases' => [],
-                            'sources' => ['name' => 'ff-opus-printed-errata', 'language' => 'ff-opus-printed-errata', 'status' => 'ff-opus-printed-errata'],
+                            'sources' => ['name' => 'ff-dreamlike-oceans-fr-packaging', 'language' => 'ff-opus-printed-errata', 'status' => 'ff-opus-printed-errata'],
                         ],
                         [
                             'attributes' => ['name' => '夢幻の海', 'status' => 'released', 'is_visible' => true],
@@ -106,7 +106,7 @@ return [
                             'sources' => ['name' => 'ff-opus-japan-products', 'language' => 'ff-opus-japan-products', 'status' => 'ff-opus-japan-products'],
                         ],
                     ],
-                    'sources' => ['name' => 'ff-dreamlike', 'display_name.en' => 'ff-dreamlike', 'display_name.fr' => 'ff-opus-printed-errata'],
+                    'sources' => ['name' => 'ff-dreamlike', 'display_name.en' => 'ff-dreamlike', 'display_name.fr' => 'ff-dreamlike-oceans-fr-packaging'],
                 ],
                 [
                     'attributes' => [
@@ -332,7 +332,7 @@ return [
                             'language' => 'fr',
                             'asset' => null,
                             'releases' => [],
-                            'sources' => ['name' => 'ff-tears-of-the-planet-en', 'language' => 'ff-opus-printed-errata', 'status' => 'ff-opus-printed-errata'],
+                            'sources' => ['name' => 'ff-tears-of-the-planet-fr-packaging', 'language' => 'ff-opus-printed-errata', 'status' => 'ff-opus-printed-errata'],
                         ],
                         [
                             'attributes' => ['name' => '星の涙', 'status' => 'released', 'is_visible' => true],
@@ -355,7 +355,7 @@ return [
                             'sources' => ['name' => 'ff-cn-card-catalog', 'language' => 'ff-cn-card-catalog', 'status' => 'ff-cn-card-catalog'],
                         ],
                     ],
-                    'sources' => ['name' => 'ff-tears-of-the-planet-en', 'display_name.en' => 'ff-tears-of-the-planet-en', 'display_name.fr' => 'ff-opus-printed-errata'],
+                    'sources' => ['name' => 'ff-tears-of-the-planet-en', 'display_name.en' => 'ff-tears-of-the-planet-en', 'display_name.fr' => 'ff-tears-of-the-planet-fr-packaging'],
                 ],
                 [
                     'attributes' => [
@@ -386,7 +386,7 @@ return [
                             'language' => 'fr',
                             'asset' => null,
                             'releases' => [],
-                            'sources' => ['name' => 'ff-gunslinger-in-the-abyss-en', 'language' => 'ff-gunslinger-in-the-abyss-fr-card', 'status' => 'ff-gunslinger-in-the-abyss-fr-card'],
+                            'sources' => ['name' => 'ff-gunslinger-in-the-abyss-fr-packaging', 'language' => 'ff-gunslinger-in-the-abyss-fr-card', 'status' => 'ff-gunslinger-in-the-abyss-fr-card'],
                         ],
                         [
                             'attributes' => ['name' => '深淵のガンスリンガー', 'status' => 'released', 'is_visible' => true],
@@ -409,7 +409,7 @@ return [
                             'sources' => ['name' => 'ff-cn-card-catalog', 'language' => 'ff-cn-card-catalog', 'status' => 'ff-cn-card-catalog'],
                         ],
                     ],
-                    'sources' => ['name' => 'ff-gunslinger-in-the-abyss-en', 'display_name.en' => 'ff-gunslinger-in-the-abyss-en', 'display_name.fr' => 'ff-gunslinger-in-the-abyss-fr-card'],
+                    'sources' => ['name' => 'ff-gunslinger-in-the-abyss-en', 'display_name.en' => 'ff-gunslinger-in-the-abyss-en', 'display_name.fr' => 'ff-gunslinger-in-the-abyss-fr-packaging'],
                 ],
                 [
                     'attributes' => [
@@ -440,7 +440,7 @@ return [
                             'language' => 'fr',
                             'asset' => null,
                             'releases' => [],
-                            'sources' => ['name' => 'ff-journey-of-discovery-en', 'language' => 'ff-journey-of-discovery-fr-card', 'status' => 'ff-journey-of-discovery-fr-card'],
+                            'sources' => ['name' => 'ff-journey-of-discovery-fr-packaging', 'language' => 'ff-journey-of-discovery-fr-card', 'status' => 'ff-journey-of-discovery-fr-card'],
                         ],
                         [
                             'attributes' => ['name' => '発見の旅路', 'status' => 'released', 'is_visible' => true],
@@ -463,7 +463,7 @@ return [
                             'sources' => ['name' => 'ff-cn-card-catalog', 'language' => 'ff-cn-card-catalog', 'status' => 'ff-cn-card-catalog'],
                         ],
                     ],
-                    'sources' => ['name' => 'ff-journey-of-discovery-en', 'display_name.en' => 'ff-journey-of-discovery-en', 'display_name.fr' => 'ff-journey-of-discovery-fr-card'],
+                    'sources' => ['name' => 'ff-journey-of-discovery-en', 'display_name.en' => 'ff-journey-of-discovery-en', 'display_name.fr' => 'ff-journey-of-discovery-fr-packaging'],
                 ],
                 [
                     'attributes' => [
@@ -494,7 +494,7 @@ return [
                             'language' => 'fr',
                             'asset' => null,
                             'releases' => [],
-                            'sources' => ['name' => 'ff-blissful-eternity-en', 'language' => 'ff-blissful-eternity-fr-card', 'status' => 'ff-blissful-eternity-fr-card'],
+                            'sources' => ['name' => 'ff-blissful-eternity-fr-packaging', 'language' => 'ff-blissful-eternity-fr-card', 'status' => 'ff-blissful-eternity-fr-card'],
                         ],
                         [
                             'attributes' => ['name' => '至福の永劫', 'status' => 'released', 'is_visible' => true],
@@ -510,7 +510,7 @@ return [
                             'sources' => ['name' => 'ff-opus-japan-products', 'language' => 'ff-opus-japan-products', 'status' => 'ff-opus-japan-products'],
                         ],
                     ],
-                    'sources' => ['name' => 'ff-blissful-eternity-en', 'display_name.en' => 'ff-blissful-eternity-en', 'display_name.fr' => 'ff-blissful-eternity-fr-card'],
+                    'sources' => ['name' => 'ff-blissful-eternity-en', 'display_name.en' => 'ff-blissful-eternity-en', 'display_name.fr' => 'ff-blissful-eternity-fr-packaging'],
                 ],
                 [
                     'attributes' => [
@@ -535,7 +535,7 @@ return [
                             'language' => 'fr',
                             'asset' => null,
                             'releases' => [],
-                            'sources' => ['name' => 'ff-memories-of-life-en', 'language' => 'ff-opus-printed-errata', 'status' => 'ff-opus-printed-errata'],
+                            'sources' => ['name' => 'ff-memories-of-life-fr-packaging', 'language' => 'ff-opus-printed-errata', 'status' => 'ff-opus-printed-errata'],
                         ],
                         [
                             'attributes' => ['name' => '命の記憶', 'status' => 'released', 'is_visible' => true],
@@ -551,7 +551,7 @@ return [
                             'sources' => ['name' => 'ff-opus-japan-products', 'language' => 'ff-opus-japan-products', 'status' => 'ff-opus-japan-products'],
                         ],
                     ],
-                    'sources' => ['name' => 'ff-memories-of-life-en', 'display_name.en' => 'ff-memories-of-life-en', 'display_name.fr' => 'ff-opus-printed-errata'],
+                    'sources' => ['name' => 'ff-memories-of-life-en', 'display_name.en' => 'ff-memories-of-life-en', 'display_name.fr' => 'ff-memories-of-life-fr-packaging'],
                 ],
             ],
             'sources' => ['name' => 'ff-chapter', 'display_name.fr' => 'ff-chapter', 'display_name.en' => 'ff-chapter'],

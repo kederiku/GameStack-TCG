@@ -215,7 +215,7 @@ return [
                         'type' => 'main',
                         'sort_order' => 4,
                         'is_visible' => true,
-                        'display_name' => ['en' => 'Dominaria United', 'fr' => 'Dominaria uni', 'de' => 'Dominarias Bund', 'it' => 'Dominaria Unita', 'ja' => '団結のドミナリア', 'zh-Hans' => '多明纳里亚：众志成', 'pt' => 'Dominária Unida', 'es' => 'Dominaria unida'],
+                        'display_name' => ['en' => 'Dominaria United', 'fr' => 'Dominaria uni', 'de' => 'Dominarias Bund', 'it' => 'Dominaria Unita', 'ja' => '団結のドミナリア', 'zh-Hans' => '多明纳里亚：众志成城', 'pt' => 'Dominária Unida', 'es' => 'Dominaria unida'],
                     ],
                     'series' => null,
                     'editions' => [
@@ -285,7 +285,7 @@ return [
                             'sources' => ['name' => 'magic-dmu-ja', 'language' => 'magic-dmu-print', 'status' => 'magic-dmu-print', 'official_code' => 'magic-dmu-release'],
                         ],
                         [
-                            'attributes' => ['name' => '多明纳里亚：众志成', 'status' => 'released', 'is_visible' => true, 'official_code' => 'DMU'],
+                            'attributes' => ['name' => '多明纳里亚：众志成城', 'status' => 'released', 'is_visible' => true, 'official_code' => 'DMU'],
                             'language' => 'zh-Hans',
                             'asset' => null,
                             'releases' => [

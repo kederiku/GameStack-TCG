@@ -160,6 +160,15 @@ class TcgCatalogSeederTest extends TestCase
             $this->assertSame($languages, $editions->all(), "$game/$catalog/$key");
         }
 
+        $dominaria = Expansion::query()->where('key', 'dominaria-united')
+            ->whereHas('catalog.game', fn ($query) => $query->where('slug', 'magic'))
+            ->sole();
+        $chineseEdition = $dominaria->editions()
+            ->whereHas('language', fn ($query) => $query->where('code', 'zh-Hans'))
+            ->sole();
+        $this->assertSame('多明纳里亚：众志成城', $dominaria->getTranslations('display_name')['zh-Hans']);
+        $this->assertSame('多明纳里亚：众志成城', $chineseEdition->name);
+
         $this->get('/fr/one-piece/international/emperors-in-the-new-world?edition=fr')->assertOk()
             ->assertInertia(fn (Assert $page) => $page
                 ->where('expansion.selectedEdition.name', 'LES NOUVEAUX EMPEREURS')
