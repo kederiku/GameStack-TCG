@@ -39,19 +39,25 @@ class CatalogPresentation
         };
         $name = $table.'.name';
         $names = $table.'.display_name';
-        $locale = CatalogRules::languageCode($locale);
+        $bindings = [CatalogRules::languageCode($locale), TranslatedContent::NAME_FALLBACK_LOCALE];
         if ($record instanceof Series || $record instanceof Expansion) {
             $catalogId = $table.'.catalog_id';
 
             // Historical language rows retain their original casing; JSON keys are canonical.
-            return $query->selectRaw("coalesce($names ->> ?::text,
-                (select translation.value from catalogs
-                    join languages on languages.id = catalogs.default_language_id
-                    cross join jsonb_each_text($names) as translation
-                    where catalogs.id = $catalogId and lower(translation.key) = lower(languages.code)), $name)", [$locale]);
+            $fallback = "(select translation.value from catalogs
+                join languages on languages.id = catalogs.default_language_id
+                cross join jsonb_each($names) as translation
+                where catalogs.id = $catalogId and lower(translation.key) = lower(languages.code))";
+        } else {
+            $fallback = "$names -> ?::text";
+            $bindings[] = Locales::default();
         }
 
-        return $query->selectRaw("coalesce($names ->> ?::text, $names ->> ?::text, $name)", [$locale, Locales::default()]);
+        // Select in JSON before converting to text so an explicit null stops fallback.
+        return $query->selectRaw("coalesce(
+            coalesce($names -> ?::text, $names -> ?::text, $fallback, to_jsonb($name)) #>> '{}',
+            ''
+        )", $bindings);
     }
 
     /** @return array{description: ?string, descriptionLanguage: ?string, descriptionFallback: bool} */

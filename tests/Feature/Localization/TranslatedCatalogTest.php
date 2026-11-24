@@ -26,22 +26,29 @@ class TranslatedCatalogTest extends TestCase
         $ja = $this->language('ja', '日本語');
         $catalog = $this->catalog(Game::factory()->create(['slug' => 'pokemon']), $ja);
         $series = $this->series($catalog);
-        $series->update(['display_name' => ['ja' => 'シリーズ'], 'description' => ['fr' => 'Une série']]);
+        $series->update(['display_name' => ['ja' => 'シリーズ', 'en' => 'English Series'], 'description' => ['fr' => 'Une série']]);
         $expansion = $this->expansion($catalog, $series);
-        $expansion->update(['display_name' => ['ja' => '初版'], 'description' => ['ja' => '説明', 'fr' => null]]);
+        $expansion->update([
+            'display_name' => ['ja' => '初版', 'en' => 'First Edition'],
+            'description' => ['ja' => '説明', 'en' => 'English description', 'fr' => null],
+        ]);
         $fr = $this->edition($expansion, $this->language('fr'));
         DB::table('expansion_editions')->where('id', $fr->id)->update(['image' => 'catalog/fr.avif']);
         $edition = $this->edition($expansion, $ja);
         $path = '/fr/pokemon/international/base-set';
         $this->get($path.'?edition=ja')->assertInertia(fn (Assert $page) => $page
-            ->where('expansion.name', '初版')->where('expansion.nameLanguage', 'ja')->where('expansion.nameFallback', true)
+            ->where('expansion.name', 'First Edition')->where('expansion.nameLanguage', 'en')->where('expansion.nameFallback', true)
             ->where('expansion.description', null)->where('expansion.descriptionLanguage', 'fr')->where('expansion.descriptionFallback', false)
-            ->where('expansion.series.nameLanguage', 'ja')->where('expansion.series.descriptionLanguage', 'fr')
+            ->where('expansion.series.name', 'English Series')->where('expansion.series.nameLanguage', 'en')->where('expansion.series.nameFallback', true)
+            ->where('expansion.series.descriptionLanguage', 'fr')
             ->where('expansion.selectedEdition.language.code', 'ja')->where('expansion.selectedEdition.imageUrl', null)->where('expansion.editionFallback', false));
+        $expansion->setTranslation('display_name', 'fr', 'Première édition')->save();
         $this->get($path.'?edition=fr')->assertInertia(fn (Assert $page) => $page
+            ->where('expansion.name', 'Première édition')->where('expansion.nameLanguage', 'fr')->where('expansion.nameFallback', false)
             ->where('expansion.selectedEdition.id', $fr->id)->where('expansion.selectedEdition.imageUrl', url('/storage/catalog/fr.avif')));
-        $expansion->forgetTranslation('description', 'fr')->save();
+        $expansion->forgetTranslation('display_name', 'fr')->forgetTranslation('display_name', 'en')->forgetTranslation('description', 'fr')->save();
         $this->get($path.'?edition=absent')->assertInertia(fn (Assert $page) => $page
+            ->where('expansion.name', '初版')->where('expansion.nameLanguage', 'ja')->where('expansion.nameFallback', true)
             ->where('expansion.description', '説明')->where('expansion.descriptionLanguage', 'ja')->where('expansion.descriptionFallback', true)
             ->where('expansion.selectedEdition.id', $edition->id)->where('expansion.editionFallback', true));
         $edition->update(['is_visible' => false]);
@@ -119,6 +126,26 @@ class TranslatedCatalogTest extends TestCase
         $addCard(3);
         $this->assertGreaterThan(0, $oneCard);
         $this->assertSame($oneCard, $readQueries());
+    }
+
+    public function test_sort_uses_the_displayed_name_for_a_japanese_catalog(): void
+    {
+        $catalog = $this->catalog(Game::factory()->create(['slug' => 'pokemon']), $this->language('ja', '日本語'));
+        $english = $this->expansion($catalog, key: 'english');
+        $english->update(['display_name' => ['ja' => 'Zulu', 'en' => 'Alpha']]);
+        $japanese = $this->expansion($catalog, key: 'japanese');
+        $japanese->update(['name' => 'Zulu', 'display_name' => ['ja' => 'Bravo']]);
+        $reference = $this->expansion($catalog, key: 'reference');
+        $reference->update(['name' => 'Charlie']);
+        $empty = $this->expansion($catalog, key: 'empty');
+        // Model writes reject blank names, so insert a historical explicit null directly.
+        DB::table('expansions')->where('id', $empty->id)->update(['display_name' => '{"fr":null,"en":"Zulu","ja":"Zulu"}']);
+
+        $this->get('/fr/pokemon?sort=name')->assertInertia(fn (Assert $page) => $page
+            ->where('catalogData.expansions.data.0.id', $empty->id)->where('catalogData.expansions.data.0.name', '')
+            ->where('catalogData.expansions.data.1.id', $english->id)->where('catalogData.expansions.data.1.name', 'Alpha')
+            ->where('catalogData.expansions.data.2.id', $japanese->id)->where('catalogData.expansions.data.2.name', 'Bravo')
+            ->where('catalogData.expansions.data.3.id', $reference->id)->where('catalogData.expansions.data.3.name', 'Charlie'));
     }
 
     public function test_sort_matches_displayed_names_including_historical_language_case_and_stable_ties(): void

@@ -50,10 +50,13 @@ Les commandes Artisan de localisation sont les suivantes.
    génère à la demande les routes Wayfinder, l’adaptateur typé et les dictionnaires
    React. Les fichiers générés sont ignorés par Git.
 4. Les traductions de contenu peuvent ensuite être complétées dans Filament.
-   Une traduction de texte n’ajoute aucune édition imprimée. La langue du catalogue
-   sert de repli aux séries et extensions. Les autres entités utilisent le français
-   puis leur référence. Un texte descriptif explicitement vide peut supprimer le
-   repli de ce champ.
+   Les éditions imprimées se gèrent séparément des traductions de texte. Le nom
+   d’affichage utilise la langue demandée, puis l’anglais, puis la langue par défaut
+   du catalogue pour les séries et extensions ou celle de l’application (le français)
+   pour les autres entités. Le nom de référence intervient en dernier. Les champs
+   descriptifs et les périodes annoncées passent directement de la langue demandée
+   au repli du modèle, puis au texte de référence. Une traduction explicitement
+   vide interrompt le repli du champ.
 
 ## Référencement
 

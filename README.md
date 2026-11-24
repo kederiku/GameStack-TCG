@@ -308,10 +308,12 @@ choix indisponible déclenche un repli annoncé. Les logos restent propres aux
 
 Le sélecteur de langue ouvre la même page sous `/fr` ou `/en`, indépendamment
 de la langue des éditions. Le préfixe détermine la langue de la réponse. Le
-paramètre historique `lang` intervient sur les anciennes URL. Une traduction
-absente d’une série ou d’une extension utilise la langue par défaut du catalogue,
-puis le libellé de référence. Les jeux, catalogues et marchés utilisent le
-français comme repli avant leur référence.
+paramètre historique `lang` intervient sur les anciennes URL. Le nom d’affichage
+utilise la langue demandée, puis l’anglais, puis la langue par défaut du catalogue
+pour les séries et extensions ou celle de l’application (le français) pour les
+jeux, catalogues et marchés. Le nom de référence intervient en dernier. Les textes
+descriptifs passent directement de la langue demandée à la langue par défaut du
+catalogue ou de l’application, puis au texte de référence.
 
 Voir [les vérifications de la navigation publique](docs/superpowers/public-navigation-verification.md).
 

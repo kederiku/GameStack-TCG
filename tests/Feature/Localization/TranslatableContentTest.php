@@ -4,10 +4,9 @@ namespace Tests\Feature\Localization;
 
 use App\Actions\Catalog\SaveTranslations;
 use App\Actions\Games\SaveGame;
-use App\Models\Expansion;
 use App\Models\Game;
 use App\Models\Language;
-use App\Models\Series;
+use App\Support\Catalog\CatalogPresentation;
 use App\Support\Localization\TranslatedContent;
 use App\Support\Localization\TranslationPatch;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -69,7 +68,7 @@ class TranslatableContentTest extends TestCase
         ], TranslationPatch::forRecord($game, ['description' => ['fr' => '  ', 'en' => '  ']]));
     }
 
-    public function test_each_content_model_uses_the_right_fallback_without_persisting_it(): void
+    public function test_each_content_model_prefers_an_english_name_to_its_reference_without_persisting_it(): void
     {
         $catalog = $this->catalog();
         $series = $this->series($catalog);
@@ -78,12 +77,33 @@ class TranslatableContentTest extends TestCase
         foreach ([$catalog->game, $catalog, $series, $expansion, $this->market()] as $record) {
             app(SaveTranslations::class)->handle($record, 'en', ['display_name' => 'English']);
             $record->refresh();
-            $resolved = TranslatedContent::field($record, 'display_name', 'fr');
-            $this->assertSame($record instanceof Series || $record instanceof Expansion ? 'English' : $record->name, $resolved['value']);
-            $this->assertArrayNotHasKey('fr', $record->getTranslations('display_name'));
+            $this->assertSame(['value' => 'English', 'locale' => 'en', 'fallback' => true], TranslatedContent::field($record, 'display_name', 'fr'));
+            $this->assertSame(['en' => 'English'], $record->fresh()->getTranslations('display_name'));
         }
         app(SaveTranslations::class)->handle($release, 'en', ['announced_period' => 'Spring']);
         $this->assertSame(['en' => 'Spring'], $release->fresh()->getTranslations('announced_period'));
+    }
+
+    public function test_english_names_take_precedence_over_the_application_default(): void
+    {
+        $game = Game::factory()->create(['display_name' => ['fr' => 'Jeu']]);
+        $this->assertSame(['value' => 'Jeu', 'locale' => 'fr', 'fallback' => true], TranslatedContent::field($game, 'display_name', 'ja'));
+
+        $game->setTranslation('display_name', 'en', 'Game')->save();
+
+        $this->assertSame(['value' => 'Game', 'locale' => 'en', 'fallback' => true], TranslatedContent::field($game, 'display_name', 'ja'));
+        $this->assertArrayNotHasKey('ja', $game->fresh()->getTranslations('display_name'));
+    }
+
+    public function test_name_sort_uses_english_before_the_application_default_and_reference(): void
+    {
+        $english = Game::factory()->create(['name' => 'Zulu', 'display_name' => ['fr' => 'Zulu', 'en' => 'Alpha']]);
+        $default = Game::factory()->create(['name' => 'Zulu', 'display_name' => ['fr' => 'Bravo']]);
+        $reference = Game::factory()->create(['name' => 'Charlie']);
+        $expectedIds = [$english->id, $default->id, $reference->id];
+
+        $this->assertSame($expectedIds, Game::query()->whereKey($expectedIds)
+            ->orderBy(CatalogPresentation::nameForQuery(new Game, 'ja'))->pluck('id')->all());
     }
 
     public function test_empty_display_name_and_unknown_locale_or_field_are_rejected(): void
