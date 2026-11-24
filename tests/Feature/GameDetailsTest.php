@@ -4,16 +4,16 @@ namespace Tests\Feature;
 
 use App\Actions\Games\SaveGame;
 use App\Models\Game;
-use Illuminate\Foundation\Testing\DatabaseMigrations;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
 use PHPUnit\Framework\Attributes\DataProvider;
+use Tests\Concerns\ForwardOnlyDatabaseMigrations;
 use Tests\TestCase;
 
 class GameDetailsTest extends TestCase
 {
-    use DatabaseMigrations;
+    use ForwardOnlyDatabaseMigrations;
 
     protected function setUp(): void
     {
@@ -25,12 +25,13 @@ class GameDetailsTest extends TestCase
     {
         $game = app(SaveGame::class)->handle(new Game, ['name' => 'Magic']);
 
+        $this->assertSame([], $game->fresh()->getTranslations('description'));
         $this->assertDatabaseHas('games', [
             'id' => $game->id,
             'start_year' => null,
             'end_year' => null,
             'publisher' => null,
-            'description' => null,
+            'reference_description' => null,
         ]);
     }
 
@@ -41,13 +42,13 @@ class GameDetailsTest extends TestCase
             'start_year' => '2024',
             'end_year' => '2026',
             'publisher' => ' Un éditeur ',
-            'description' => " Une description.\nUne seconde ligne. ",
+            'reference_description' => " Une description.\nUne seconde ligne. ",
         ])->fresh();
 
         $this->assertSame(2024, $game->start_year);
         $this->assertSame(2026, $game->end_year);
         $this->assertSame('Un éditeur', $game->publisher);
-        $this->assertSame("Une description.\nUne seconde ligne.", $game->description);
+        $this->assertSame("Une description.\nUne seconde ligne.", $game->reference_description);
     }
 
     public function test_omitted_details_are_preserved_and_blank_details_can_be_cleared(): void
@@ -56,17 +57,18 @@ class GameDetailsTest extends TestCase
             'start_year' => 2024,
             'end_year' => 2026,
             'publisher' => 'Un éditeur',
-            'description' => 'Une description.',
+            'reference_description' => 'Une description.',
         ]);
 
         app(SaveGame::class)->handle($game, ['name' => 'Nouveau nom']);
 
+        $this->assertSame([], $game->fresh()->getTranslations('description'));
         $this->assertDatabaseHas('games', [
             'id' => $game->id,
             'start_year' => 2024,
             'end_year' => 2026,
             'publisher' => 'Un éditeur',
-            'description' => 'Une description.',
+            'reference_description' => 'Une description.',
         ]);
 
         app(SaveGame::class)->handle($game, [
@@ -74,15 +76,16 @@ class GameDetailsTest extends TestCase
             'start_year' => '',
             'end_year' => null,
             'publisher' => '  ',
-            'description' => '',
+            'reference_description' => '',
         ]);
 
+        $this->assertSame([], $game->fresh()->getTranslations('description'));
         $this->assertDatabaseHas('games', [
             'id' => $game->id,
             'start_year' => null,
             'end_year' => null,
             'publisher' => null,
-            'description' => null,
+            'reference_description' => null,
         ]);
     }
 
@@ -141,7 +144,7 @@ class GameDetailsTest extends TestCase
             'end before creation' => [['start_year' => 2024, 'end_year' => 2023], 'end_year'],
             'publisher too long' => [['publisher' => str_repeat('a', 256)], 'publisher'],
             'publisher is not text' => [['publisher' => ['Konami']], 'publisher'],
-            'description is not text' => [['description' => ['Description']], 'description'],
+            'description is not text' => [['reference_description' => ['Description']], 'reference_description'],
         ];
     }
 

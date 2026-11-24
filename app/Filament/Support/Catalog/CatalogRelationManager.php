@@ -25,9 +25,9 @@ abstract class CatalogRelationManager extends RelationManager
         return CreateAction::make()
             ->label($label)
             ->modalHeading($label)
-            ->modalSubmitActionLabel('Créer')
-            ->modalCancelActionLabel('Annuler')
-            ->successNotificationTitle('Fiche créée')
+            ->modalSubmitActionLabel(__('admin.labels.create'))
+            ->modalCancelActionLabel(__('admin.labels.cancel'))
+            ->successNotificationTitle(__('admin.labels.record-created'))
             ->createAnother(false)
             ->using(function (CreateAction $action, array $data) use ($parentField): CatalogRecord {
                 Gate::authorize('update', $this->getOwnerRecord());
@@ -45,11 +45,11 @@ abstract class CatalogRelationManager extends RelationManager
     protected function editCatalogAction(): EditAction
     {
         return EditAction::make()
-            ->label('Modifier')
-            ->modalHeading('Modifier la fiche')
-            ->modalSubmitActionLabel('Enregistrer')
-            ->modalCancelActionLabel('Annuler')
-            ->successNotificationTitle('Fiche enregistrée')
+            ->label(__('admin.labels.edit'))
+            ->modalHeading(__('admin.labels.edit-record'))
+            ->modalSubmitActionLabel(__('admin.labels.save'))
+            ->modalCancelActionLabel(__('admin.labels.cancel'))
+            ->successNotificationTitle(__('admin.labels.record-saved'))
             ->using(function (EditAction $action, CatalogRecord $record, array $data): CatalogRecord {
                 Gate::authorize('update', $this->getOwnerRecord());
 

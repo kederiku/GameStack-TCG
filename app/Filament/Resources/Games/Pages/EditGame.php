@@ -6,6 +6,7 @@ use App\Filament\Resources\Catalogs\CatalogResource;
 use App\Filament\Resources\Games\GameResource;
 use App\Filament\Resources\Games\Pages\Concerns\SavesGame;
 use App\Filament\Support\Catalog\CatalogActions;
+use App\Filament\Support\Catalog\TranslationFields;
 use App\Models\Game;
 use Filament\Actions\Action;
 use Filament\Resources\Pages\EditRecord;
@@ -24,7 +25,7 @@ class EditGame extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
-            Action::make('catalogues')->label('Catalogues du jeu')->icon(Heroicon::OutlinedCircleStack)
+            Action::make('catalogues')->label(__('admin.labels.game-catalogs'))->icon(Heroicon::OutlinedCircleStack)
                 ->visible(fn (): bool => CatalogResource::canAccess())
                 ->url(fn (): string => CatalogResource::getUrl('index', [
                     'filters' => ['game' => ['value' => $this->getRecord()->getKey()]],
@@ -40,6 +41,9 @@ class EditGame extends EditRecord
 
         $saved = $this->saveGame($record, $data);
         $record->setRawAttributes($saved->getAttributes(), sync: true);
+        if (isset($data['translation']['locale'])) {
+            $this->data['translation'] = TranslationFields::savedState($saved, $data['translation']['locale']);
+        }
 
         return $record;
     }

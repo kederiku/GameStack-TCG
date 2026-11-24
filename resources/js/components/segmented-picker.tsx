@@ -10,7 +10,7 @@ export function SegmentedPicker({
     label: string;
     value: string;
     onValueChange: (value: string) => void;
-    options: { value: string; label: string; count?: number }[];
+    options: { value: string; label: string; lang?: string; count?: number }[];
 }) {
     return (
         <ToggleGroup
@@ -28,7 +28,7 @@ export function SegmentedPicker({
                     value={option.value}
                     className="h-11 max-w-full shrink rounded-lg px-4 text-xs font-medium whitespace-normal text-muted-foreground first:rounded-lg last:rounded-lg hover:bg-accent data-[state=on]:bg-primary data-[state=on]:text-primary-foreground"
                 >
-                    {option.label}
+                    <span lang={option.lang}>{option.label}</span>
                     {option.count !== undefined && (
                         <Badge
                             variant="secondary"

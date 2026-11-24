@@ -18,7 +18,7 @@ make init
 
 Cette commande crée `.env` si nécessaire, construit l’image PHP 8.4/Node 24,
 installe les dépendances verrouillées, génère la clé applicative si elle manque,
-initialise Garage et son interface, exécute les migrations, compile le frontend
+initialise Garage et son interface, migre et finalise une base neuve, compile le frontend
 et démarre tous les services.
 Les lancements suivants utilisent simplement :
 
@@ -28,18 +28,20 @@ make down
 ```
 
 `make down` conserve les données PostgreSQL et les images Garage. `make init`
-peut être relancé et ne réinitialise ni les données ni les accès existants.
+peut être relancé après finalisation. Sur une base historique ou une conversion
+en attente, suivre la [procédure de migration et de retour](docs/localization.md)
+avant de relancer l’installation.
 
-| Service                            | Adresse                        |
-| ---------------------------------- | ------------------------------ |
-| Application                        | http://localhost:8000          |
-| Inscription                        | http://localhost:8000/register |
-| Connexion                          | http://localhost:8000/login    |
-| Administration Filament            | http://localhost:8000/admin    |
-| E-mails de développement (Mailpit) | http://localhost:8025          |
-| PostgreSQL depuis l’hôte           | localhost:5432                 |
-| Garage Web UI                      | http://localhost:3909          |
-| API S3 depuis l’hôte               | http://localhost:3900          |
+| Service                            | Adresse                              |
+| ---------------------------------- | ------------------------------------ |
+| Application                        | http://localhost:8000                |
+| Inscription                        | http://localhost:8000/fr/inscription |
+| Connexion                          | http://localhost:8000/fr/connexion   |
+| Administration Filament            | http://localhost:8000/fr/admin       |
+| E-mails de développement (Mailpit) | http://localhost:8025                |
+| PostgreSQL depuis l’hôte           | localhost:5432                       |
+| Garage Web UI                      | http://localhost:3909                |
+| API S3 depuis l’hôte               | http://localhost:3900                |
 
 Vite tourne sur le port 5173 et recharge React à chaque modification.
 Ouvrir l’application sur **localhost**, comme configuré pour le rechargement Vite.
@@ -57,8 +59,8 @@ logo et formulaire dans un panneau à gauche, trois rangées de logos des jeux
 défilant en continu à droite sur ordinateur, formulaire seul sur mobile.
 Les images suivent le catalogue administré ; le défilement peut être mis en pause
 et devient une grille fixe lorsque les animations sont réduites.
-Les libellés sont en français ; les messages de validation
-serveur et du navigateur conservent leur langue d’origine. Passkeys, double
+Les textes applicatifs, la validation serveur et les e-mails sont disponibles en
+français et en anglais. Les messages natifs du navigateur suivent sa langue. Passkeys, double
 authentification et récupération restent disponibles. Les vérifications sont
 consignées dans [le dernier rapport de design](docs/superpowers/auth-game-marquee-verification.md).
 
@@ -314,11 +316,11 @@ les nettoient. Voir [le rapport de validation](docs/superpowers/local-image-stor
 
 ## Navigation publique
 
-`/` présente le projet de gestion de collections multi-TCG et précise que les
-outils de collection sont en préparation. Le menu de la topbar et les tuiles utilisent
-les jeux créés dans Filament ; choisir un jeu ouvre `/{slug}`, par exemple
-`/pokemon` ou `/yu-gi-oh`. Une URL inconnue renvoie 404. Modifier un slug change
-son URL publique, sans redirection depuis l’ancienne.
+`/fr` et `/en` présentent le projet de gestion de collections multi-TCG. Le menu
+et les tuiles utilisent les jeux créés dans Filament. Choisir un jeu ouvre
+`/{locale}/{slug}`, par exemple `/fr/pokemon` ou `/en/yu-gi-oh`. Une URL inconnue
+renvoie 404. Modifier un slug change son URL publique, sans redirection depuis
+l’ancien slug.
 
 Les segments utilisés par l’application (`admin`, `login`, `settings`, etc.)
 sont réservés par `App\Support\GameSlug`, qui inclut aussi les préfixes des
@@ -338,17 +340,17 @@ l’URL ; la pagination affiche 36 extensions à la fois. Les visibilités héri
 du jeu, du catalogue et de la série s’appliquent aussi aux accès directs.
 Un catalogue vide affiche « Le catalogue se prépare ».
 
-Chaque fiche `/{jeu}/{catalogue}/{extension}` présente les éditions visibles et
+Chaque fiche `/{locale}/{jeu}/{catalogue}/{extension}` présente les éditions visibles et
 leurs sorties par marché et canal. `edition=fr` sélectionne une édition ; un
 choix indisponible déclenche un repli annoncé. Les logos restent propres aux
 éditions. Les cartes, collections et prix restent à venir.
 
-La topbar existante propose FR/EN pour le parcours public, indépendamment de
-la langue des éditions. `lang=fr` ou `lang=en` se partage et mémorise une
-préférence en cookie. Les noms administrés utilisent leurs localisations,
-puis la langue du catalogue, puis leur nom de base. Les noms de catalogues et
-de marchés restent ceux saisis dans l’administration. Aucun exemple masqué
-n’est publié automatiquement. Les maquettes temporaires ont été retirées.
+Le sélecteur de langue ouvre la même page sous `/fr` ou `/en`, indépendamment
+de la langue des éditions. Le préfixe détermine la langue de la réponse. Le
+paramètre historique `lang` intervient sur les anciennes URL. Une traduction
+absente d’une série ou d’une extension utilise la langue par défaut du catalogue,
+puis le libellé de référence. Les jeux, catalogues et marchés utilisent le
+français comme repli avant leur référence.
 
 Voir [les vérifications de la navigation publique](docs/superpowers/public-navigation-verification.md).
 
@@ -517,3 +519,37 @@ pour un simple arrêt.
 Starter officiel : [laravel/react-starter-kit](https://github.com/laravel/react-starter-kit),
 commit `012f4248f70e255e32ad93f540aca5fb7e8c96fe` (14 novembre 2026).
 Voir `docs/superpowers/verification.md` pour les vérifications effectuées.
+
+## Traductions de l’interface
+
+Les neuf domaines de `lang/fr` et `lang/en` constituent la source éditable PHP.
+Utiliser des clés sémantiques (`admin.languages.code_help`,
+`validation.catalog.immutable_identity`) et résoudre les textes pendant le rendu,
+jamais dans une propriété statique ou une constante traduite. React consomme
+`useLocale().t(key, replacements)` et `tChoice(key, count, replacements)` ; les
+noms de routes passent par `useLocalizedRoutes`. Les paramètres restent du texte
+échappé par React ou Blade, sans HTML dans les traductions.
+
+`make translations` génère les exports et types frontend ignorés par Git ; seuls
+`common`, `auth`, `account` et `catalog` sont exportés. `make artisan
+ARGS='localization:check'` vérifie les clés, paramètres et pluriels. La compilation
+et les vérifications frontend régénèrent aussi ces exports. Ne pas modifier les
+JSON générés ni créer une seconde source JSON éditable.
+
+Fortify, Passkeys et le résumé de validation Laravel demandent certains messages
+par leur phrase anglaise. `VendorTranslationLoader` adapte uniquement leur espace
+de clés littérales (`*`) à `lang/vendor/{fortify,passkeys,laravel}/{locale}/messages.php`.
+Ces fichiers PHP sont les overrides applicatifs de cette API vendor ; le loader
+délègue les autres domaines et namespaces sans modifier l’authentification. Le
+contrôle de parité couvre aussi ces trois fichiers. Les vues applicatives sous
+`resources/views/vendor` traduisent l’habillage HTML et texte des e-mails.
+
+Pour préparer une autre langue d’interface, fournir les neuf domaines et ces trois
+fichiers vendor, avec les placeholders identiques, puis l’ajouter au registre
+`config/localization.php`, contrôler les traductions et reconstruire les assets.
+Les traductions des contenus et les langues des éditions imprimées restent des
+notions distinctes. Les comptages applicatifs sont non négatifs ; FR/EN sont les
+langues actuellement livrées. Le contrôle visuel complet après migration fait
+partie du parcours de livraison.
+
+La [procédure de localisation](docs/localization.md) détaille la bascule, le retour avant réouverture, les alias de compatibilité et l’activation d’une langue.

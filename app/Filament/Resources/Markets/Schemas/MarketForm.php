@@ -3,6 +3,9 @@
 namespace App\Filament\Resources\Markets\Schemas;
 
 use App\Filament\Support\Catalog\CatalogFields;
+use App\Filament\Support\Catalog\TranslationFields;
+use App\Models\Market;
+use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 
 class MarketForm
@@ -10,7 +13,10 @@ class MarketForm
     public static function configure(Schema $schema): Schema
     {
         return CatalogFields::layout($schema, [
-            CatalogFields::name()->helperText('Nom du territoire de commercialisation, par exemple France, Japon ou Monde.'),
-        ], description: 'Un marché indique où une édition est commercialisée. Une même édition linguistique peut sortir sur plusieurs marchés, à des dates différentes.', advanced: [CatalogFields::key()]);
+            ...TranslationFields::schema(Market::class),
+            Section::make(__('admin.translation.reference'))->columnSpanFull()->schema([
+                CatalogFields::name(__('admin.translation.reference_name')),
+            ]),
+        ], description: __('admin.markets.help'), advanced: [CatalogFields::key()]);
     }
 }

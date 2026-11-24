@@ -1,5 +1,6 @@
-import type { UrlMethodPair } from '@inertiajs/core';
-import { router } from '@inertiajs/react';
+import { passkeyErrorMessage } from '@/lib/passkey-error';
+import { useLocale } from '@/hooks/use-locale';
+import { useLocalizedRoutes } from '@/hooks/use-localized-routes';
 import { usePasskeyVerify } from '@laravel/passkeys/react';
 import { KeyRound } from 'lucide-react';
 import InputError from '@/components/input-error';
@@ -8,9 +9,9 @@ import { Separator } from '@/components/ui/separator';
 import { Spinner } from '@/components/ui/spinner';
 
 type Props = {
-    routes?: {
-        options: UrlMethodPair;
-        submit: UrlMethodPair;
+    routes: {
+        options: string;
+        submit: string;
     };
     label?: string;
     loadingLabel?: string;
@@ -22,18 +23,19 @@ export default function PasskeyVerify({
     label,
     loadingLabel,
     separator,
-}: Props = {}) {
-    const { verify, isLoading, error, isSupported } = usePasskeyVerify({
-        ...(routes && {
-            routes: {
-                options: routes.options.url,
-                submit: routes.submit.url,
-            },
-        }),
+}: Props) {
+    const { t } = useLocale();
+    const localized = useLocalizedRoutes();
+    const { verify, isLoading, errorInstance, isSupported } = usePasskeyVerify({
+        routes,
         onSuccess: (response) => {
-            router.visit(response.redirect ?? '/dashboard');
+            window.location.assign(
+                response.redirect ?? localized.dashboard.url(),
+            );
         },
     });
+
+    const error = passkeyErrorMessage(errorInstance, t);
 
     if (!isSupported) {
         return null;
@@ -51,8 +53,8 @@ export default function PasskeyVerify({
                 >
                     {isLoading ? <Spinner /> : <KeyRound className="h-4 w-4" />}
                     {isLoading
-                        ? (loadingLabel ?? 'Connexion…')
-                        : (label ?? 'Se connecter avec une clé d’accès')}
+                        ? (loadingLabel ?? t('auth.loading'))
+                        : (label ?? t('auth.passkey-verify.login'))}
                 </Button>
                 {error && (
                     <InputError message={error} className="text-center" />
@@ -65,7 +67,7 @@ export default function PasskeyVerify({
                 </div>
                 <div className="relative flex justify-center text-xs uppercase">
                     <span className="bg-card px-2 text-center text-muted-foreground">
-                        {separator ?? 'Ou continuer avec votre e-mail'}
+                        {separator ?? t('auth.passkey-verify.separator')}
                     </span>
                 </div>
             </div>

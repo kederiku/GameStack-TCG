@@ -2,6 +2,8 @@
 
 namespace App\Filament\Resources\Games\Schemas;
 
+use App\Filament\Support\Catalog\TranslationFields;
+use App\Models\Game;
 use App\Services\GameImages;
 use App\Support\GameSlug;
 use Filament\Forms\Components\FileUpload;
@@ -25,13 +27,14 @@ class GameForm
             ->columns(['default' => 1, 'lg' => 1, 'xl' => 3])
             ->components([
                 Group::make([
-                    Section::make('Présentation')
-                        ->description('Les informations qui permettent d’identifier le jeu.')
+                    ...TranslationFields::schema(Game::class),
+                    Section::make(__('admin.translation.reference'))
+                        ->description(__('admin.games.presentation_help'))
                         ->icon(Heroicon::OutlinedIdentification)
                         ->columns(['default' => 1, 'md' => 2])
                         ->schema([
                             TextInput::make('name')
-                                ->label('Nom')
+                                ->label(__('admin.translation.reference_name'))
                                 ->required()
                                 ->maxLength(255)
                                 ->live(onBlur: true)
@@ -41,56 +44,56 @@ class GameForm
                                     }
                                 }),
                             TextInput::make('publisher')
-                                ->label('Éditeur')
+                                ->label(__('admin.labels.publisher'))
                                 ->maxLength(255)
                                 ->placeholder('Wizards of the Coast')
                                 ->columnSpanFull(),
-                            Textarea::make('description')
-                                ->label('Description')
-                                ->placeholder('Présentez l’univers et le principe du jeu en quelques phrases…')
+                            Textarea::make('reference_description')
+                                ->label(__('admin.labels.description'))
+                                ->placeholder(__('admin.games.description_placeholder'))
                                 ->rows(5)
                                 ->columnSpanFull(),
                         ]),
-                    Section::make('Options avancées')
+                    Section::make(__('admin.labels.advanced-options'))
                         ->icon(Heroicon::OutlinedAdjustmentsHorizontal)
                         ->collapsed()
                         ->schema([
                             TextInput::make('slug')
-                                ->label('Identifiant dans l’URL')
+                                ->label(__('admin.labels.url-identifier'))
                                 ->required()
                                 ->maxLength(255)
                                 ->regex('/\A[a-z0-9]+(?:-[a-z0-9]+)*\z/')
                                 ->unique(ignoreRecord: true)
                                 ->rules(fn (): array => [Rule::notIn(GameSlug::reserved())])
-                                ->validationMessages(['not_in' => 'Ce slug est réservé à une page de l’application. Choisissez un autre identifiant.'])
-                                ->helperText('Identifiant de l’URL : minuscules, chiffres et tirets. Conservé si le jeu est renommé.'),
+                                ->validationMessages(['not_in' => __('validation.catalog.reserved_slug')])
+                                ->helperText(__('admin.games.slug_help')),
                         ]),
-                    Section::make('Historique')->collapsed()
-                        ->description('Renseignez uniquement les années connues. Ces champs sont facultatifs.')
+                    Section::make(__('admin.labels.history'))->collapsed()
+                        ->description(__('admin.games.history_help'))
                         ->icon(Heroicon::OutlinedCalendarDays)
                         ->columns(['default' => 1, 'md' => 2])
                         ->schema([
                             TextInput::make('start_year')
-                                ->label('Année de création')
+                                ->label(__('admin.labels.creation-year'))
                                 ->integer()
                                 ->minValue(1000)
                                 ->maxValue(9999)
                                 ->placeholder('1993'),
                             TextInput::make('end_year')
-                                ->label('Année de fin')
+                                ->label(__('admin.labels.end-year'))
                                 ->integer()
                                 ->minValue(1000)
                                 ->maxValue(9999)
-                                ->helperText('À renseigner si le TCG n’existe plus.'),
+                                ->helperText(__('admin.games.end_year_help')),
                         ]),
                 ])->columnSpan(['xl' => 2]),
                 Group::make([
-                    Section::make('Visuel')
-                        ->description('Le logo ou l’image qui représente le jeu.')
+                    Section::make(__('admin.labels.artwork'))
+                        ->description(__('admin.games.artwork_help'))
                         ->icon(Heroicon::OutlinedPhoto)
                         ->schema([
                             FileUpload::make('image')
-                                ->label('Image du jeu')
+                                ->label(__('admin.labels.game-image'))
                                 ->hiddenLabel()
                                 ->image()
                                 ->disk(fn (): string => GameImages::diskName())
@@ -100,16 +103,16 @@ class GameForm
                                 ->rules(['dimensions:max_width=4096,max_height=4096'])
                                 ->preventFilePathTampering()
                                 ->storeFiles(false)
-                                ->helperText('JPEG, PNG, WebP, AVIF ou SVG, convertis en AVIF. 5 Mio maximum ; 4096 × 4096 px maximum hors SVG.'),
+                                ->helperText(__('admin.games.upload_help')),
                         ]),
-                    Section::make('Publication')
-                        ->description('Gérez la présence du jeu sur le site.')
+                    Section::make(__('admin.labels.publication'))
+                        ->description(__('admin.games.publication_help'))
                         ->icon(Heroicon::OutlinedGlobeAlt)
                         ->schema([
                             Toggle::make('is_visible')
-                                ->label('Afficher sur le site')
+                                ->label(__('admin.labels.show-on-site'))
                                 ->default(true)
-                                ->helperText('Un jeu masqué et sa page sont retirés du site. Il reste modifiable ici.'),
+                                ->helperText(__('admin.games.visibility_help')),
                         ]),
                 ])->columnSpan(['xl' => 1]),
             ]);

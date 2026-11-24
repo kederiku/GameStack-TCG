@@ -2,13 +2,13 @@
 
 namespace Tests\Feature\Auth;
 
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Laravel\Fortify\Features;
+use Tests\Concerns\ForwardOnlyRefreshDatabase;
 use Tests\TestCase;
 
 class RegistrationTest extends TestCase
 {
-    use RefreshDatabase;
+    use ForwardOnlyRefreshDatabase;
 
     protected function setUp(): void
     {
@@ -19,14 +19,14 @@ class RegistrationTest extends TestCase
 
     public function test_registration_screen_can_be_rendered()
     {
-        $response = $this->get(route('register'));
+        $response = $this->get(route('site.fr.register'));
 
         $response->assertOk();
     }
 
     public function test_new_users_can_register()
     {
-        $response = $this->post(route('register.store'), [
+        $response = $this->post(route('site.fr.register.store'), [
             'name' => 'Test User',
             'email' => 'test@example.com',
             'password' => 'password',
@@ -34,6 +34,6 @@ class RegistrationTest extends TestCase
         ]);
 
         $this->assertAuthenticated();
-        $response->assertRedirect(route('dashboard', absolute: false));
+        $response->assertRedirect(route('site.fr.dashboard', absolute: false));
     }
 }

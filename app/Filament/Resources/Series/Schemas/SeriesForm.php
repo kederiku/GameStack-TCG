@@ -4,6 +4,9 @@ namespace App\Filament\Resources\Series\Schemas;
 
 use App\Filament\Support\Catalog\CatalogFields;
 use App\Filament\Support\Catalog\CatalogLabels;
+use App\Filament\Support\Catalog\TranslationFields;
+use App\Models\Series;
+use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 
 class SeriesForm
@@ -12,9 +15,12 @@ class SeriesForm
     {
         return CatalogFields::layout($schema, [
             CatalogFields::catalogue(),
-            CatalogFields::enum('type', 'Type', CatalogLabels::SERIES_TYPES)
-                ->helperText('Le terme utilisé par l’éditeur : série ou bloc.'),
-            CatalogFields::name()->helperText('Ex. Écarlate et Violet. Ajoutez les traductions dans « Localisations » après création.'),
-        ], [CatalogFields::visibility()], description: 'Une série ou un bloc regroupe plusieurs extensions d’un même catalogue. Ce niveau est facultatif : tous les TCG ne l’utilisent pas.', advanced: [CatalogFields::key(), CatalogFields::order()]);
+            CatalogFields::enum('type', __('admin.labels.type'), CatalogLabels::seriesTypes())
+                ->helperText(__('admin.series.type_help')),
+            ...TranslationFields::schema(Series::class),
+            Section::make(__('admin.translation.reference'))->columnSpanFull()->schema([
+                CatalogFields::name(__('admin.translation.reference_name')),
+            ]),
+        ], [CatalogFields::visibility()], description: __('admin.series.help'), advanced: [CatalogFields::key(), CatalogFields::order()]);
     }
 }

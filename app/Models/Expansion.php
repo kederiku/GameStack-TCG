@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Support\Localization\HasContentTranslations;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -17,14 +18,18 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property bool $is_visible
  * @property-read Catalog $catalog
  * @property-read ?Series $series
- * @property-read Collection<int, ExpansionLocalization> $localizations
  * @property-read Collection<int, ExpansionEdition> $editions
  * @property-read Collection<int, ExpansionRelation> $relations
  * @property-read Collection<int, ExpansionRelation> $incomingRelations
  */
-#[Fillable(['catalog_id', 'series_id', 'key', 'name', 'type', 'sort_order', 'is_visible'])]
+#[Fillable(['catalog_id', 'series_id', 'key', 'name', 'type', 'sort_order', 'is_visible', 'display_name', 'description'])]
 class Expansion extends CatalogRecord
 {
+    use HasContentTranslations;
+
+    /** @var list<string> */
+    public array $translatable = ['display_name', 'description'];
+
     public const TYPES = ['main', 'special', 'promo', 'deck', 'reprint'];
 
     /** @var array<string, mixed> */
@@ -53,12 +58,6 @@ class Expansion extends CatalogRecord
     public function series(): BelongsTo
     {
         return $this->belongsTo(Series::class);
-    }
-
-    /** @return HasMany<ExpansionLocalization, $this> */
-    public function localizations(): HasMany
-    {
-        return $this->hasMany(ExpansionLocalization::class);
     }
 
     /** @return HasMany<ExpansionEdition, $this> */

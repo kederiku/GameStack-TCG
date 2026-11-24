@@ -11,6 +11,6 @@ class ListLanguages extends ListCatalogRecords
 
     public function getSubheading(): string
     {
-        return 'Les langues sont utilisées pour traduire les fiches et identifier la langue imprimée des éditions. Elles ne désignent pas les marchés : une édition anglaise peut être vendue dans plusieurs pays.';
+        return __('admin.languages.list_help');
     }
 }

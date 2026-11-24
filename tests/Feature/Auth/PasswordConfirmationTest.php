@@ -3,19 +3,19 @@
 namespace Tests\Feature\Auth;
 
 use App\Models\User;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Inertia\Testing\AssertableInertia as Assert;
+use Tests\Concerns\ForwardOnlyRefreshDatabase;
 use Tests\TestCase;
 
 class PasswordConfirmationTest extends TestCase
 {
-    use RefreshDatabase;
+    use ForwardOnlyRefreshDatabase;
 
     public function test_confirm_password_screen_can_be_rendered()
     {
         $user = User::factory()->create();
 
-        $response = $this->actingAs($user)->get(route('password.confirm'));
+        $response = $this->actingAs($user)->get(route('site.fr.password.confirm'));
 
         $response->assertOk();
 
@@ -26,8 +26,8 @@ class PasswordConfirmationTest extends TestCase
 
     public function test_password_confirmation_requires_authentication()
     {
-        $response = $this->get(route('password.confirm'));
+        $response = $this->get(route('site.fr.password.confirm'));
 
-        $response->assertRedirect(route('login'));
+        $response->assertRedirect(route('site.fr.login'));
     }
 }

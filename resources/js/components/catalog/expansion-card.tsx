@@ -7,13 +7,13 @@ import { EditionImage } from './edition-image';
 import { useCatalogLabels } from './use-catalog-labels';
 
 export function ExpansionCard({ expansion }: { expansion: PublicExpansion }) {
-    const { t, localizedUrl, date, languageName } = useLocale();
+    const { t, date, languageName } = useLocale();
     const { types, statuses } = useCatalogLabels();
     const edition = expansion.edition;
     const url = `${expansion.url}${edition ? `?edition=${encodeURIComponent(edition.language.code)}` : ''}`;
     return (
         <Link
-            href={localizedUrl(url)}
+            href={url}
             className="group flex h-full min-w-0 overflow-hidden rounded-xl border border-border bg-card transition-colors hover:border-brand-highlight/70 hover:bg-accent/30 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ring"
         >
             <EditionImage
@@ -25,7 +25,7 @@ export function ExpansionCard({ expansion }: { expansion: PublicExpansion }) {
                     {types[expansion.type]}
                 </span>
                 <h3
-                    lang={expansion.nameLanguage ?? undefined}
+                    lang={expansion.nameLanguage ?? ''}
                     className="mt-1 font-display text-2xl leading-tight font-bold [overflow-wrap:anywhere] sm:text-3xl"
                 >
                     {expansion.name}
@@ -34,7 +34,14 @@ export function ExpansionCard({ expansion }: { expansion: PublicExpansion }) {
                     {expansion.firstRelease ? (
                         <>
                             {date(expansion.firstRelease.releasedOn)} ·{' '}
-                            {expansion.firstRelease.market.name}
+                            <span
+                                lang={
+                                    expansion.firstRelease.market
+                                        .nameLanguage ?? ''
+                                }
+                            >
+                                {expansion.firstRelease.market.name}
+                            </span>
                             {expansion.firstRelease.language !==
                                 edition?.language.code &&
                                 ` · ${languageName(expansion.firstRelease.language)}`}
@@ -42,15 +49,14 @@ export function ExpansionCard({ expansion }: { expansion: PublicExpansion }) {
                     ) : edition ? (
                         statuses[edition.status]
                     ) : (
-                        t('Éditions à venir', 'Editions coming soon')
+                        t('catalog.expansion-card.editions-coming-soon')
                     )}
                 </p>
                 <div className="mt-auto flex items-end justify-between gap-3 pt-4">
                     <span
                         className="flex flex-wrap gap-1.5"
                         aria-label={t(
-                            'Langues disponibles',
-                            'Available languages',
+                            'catalog.expansion-card.available-languages',
                         )}
                     >
                         {expansion.languages.map((language) => (

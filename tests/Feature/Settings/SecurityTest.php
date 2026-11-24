@@ -3,15 +3,15 @@
 namespace Tests\Feature\Settings;
 
 use App\Models\User;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
 use Inertia\Testing\AssertableInertia as Assert;
 use Laravel\Fortify\Features;
+use Tests\Concerns\ForwardOnlyRefreshDatabase;
 use Tests\TestCase;
 
 class SecurityTest extends TestCase
 {
-    use RefreshDatabase;
+    use ForwardOnlyRefreshDatabase;
 
     public function test_security_page_is_displayed()
     {
@@ -29,7 +29,7 @@ class SecurityTest extends TestCase
 
         $this->actingAs($user)
             ->withSession(['auth.password_confirmed_at' => time()])
-            ->get(route('security.edit'))
+            ->get(route('site.fr.security.edit'))
             ->assertInertia(fn (Assert $page) => $page
                 ->component('settings/security')
                 ->where('canManagePasskeys', true)
@@ -51,9 +51,9 @@ class SecurityTest extends TestCase
         ]);
 
         $response = $this->actingAs($user)
-            ->get(route('security.edit'));
+            ->get(route('site.fr.security.edit'));
 
-        $response->assertRedirect(route('password.confirm'));
+        $response->assertRedirect(route('site.fr.password.confirm'));
     }
 
     public function test_security_page_renders_without_two_factor_when_feature_is_disabled()
@@ -66,7 +66,7 @@ class SecurityTest extends TestCase
 
         $this->actingAs($user)
             ->withSession(['auth.password_confirmed_at' => time()])
-            ->get(route('security.edit'))
+            ->get(route('site.fr.security.edit'))
             ->assertOk()
             ->assertInertia(fn (Assert $page) => $page
                 ->component('settings/security')
@@ -84,8 +84,8 @@ class SecurityTest extends TestCase
 
         $response = $this
             ->actingAs($user)
-            ->from(route('security.edit'))
-            ->put(route('user-password.update'), [
+            ->from(route('site.fr.security.edit'))
+            ->put(route('site.fr.user-password.update'), [
                 'current_password' => 'password',
                 'password' => 'new-password',
                 'password_confirmation' => 'new-password',
@@ -93,7 +93,7 @@ class SecurityTest extends TestCase
 
         $response
             ->assertSessionHasNoErrors()
-            ->assertRedirect(route('security.edit'));
+            ->assertRedirect(route('site.fr.security.edit'));
 
         $this->assertTrue(Hash::check('new-password', $user->refresh()->password));
     }
@@ -104,8 +104,8 @@ class SecurityTest extends TestCase
 
         $response = $this
             ->actingAs($user)
-            ->from(route('security.edit'))
-            ->put(route('user-password.update'), [
+            ->from(route('site.fr.security.edit'))
+            ->put(route('site.fr.user-password.update'), [
                 'current_password' => 'wrong-password',
                 'password' => 'new-password',
                 'password_confirmation' => 'new-password',
@@ -113,7 +113,7 @@ class SecurityTest extends TestCase
 
         $response
             ->assertSessionHasErrors('current_password')
-            ->assertRedirect(route('security.edit'));
+            ->assertRedirect(route('site.fr.security.edit'));
     }
 
     public function test_users_cannot_delete_another_accounts_passkey(): void
@@ -139,13 +139,13 @@ class SecurityTest extends TestCase
         ]);
 
         $this->actingAs($owner)->delete(route('passkey.destroy', $passkey))
-            ->assertRedirect(route('password.confirm'));
+            ->assertRedirect(route('site.fr.password.confirm'));
         $this->assertModelExists($passkey);
 
         $this->withSession(['auth.password_confirmed_at' => time()])
-            ->from(route('security.edit'))
+            ->from(route('site.fr.security.edit'))
             ->delete(route('passkey.destroy', $passkey))
-            ->assertRedirect(route('security.edit'));
+            ->assertRedirect(route('site.fr.security.edit'));
         $this->assertModelMissing($passkey);
     }
 
@@ -161,7 +161,7 @@ class SecurityTest extends TestCase
 
         $this->actingAs($owner)
             ->withSession(['auth.password_confirmed_at' => time()])
-            ->get(route('security.edit'))->assertOk()
+            ->get(route('site.fr.security.edit'))->assertOk()
             ->assertInertia(fn (Assert $page) => $page
                 ->has('passkeys', 1)
                 ->where('passkeys.0.id', $passkey->id)

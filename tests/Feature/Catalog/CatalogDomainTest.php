@@ -3,28 +3,27 @@
 namespace Tests\Feature\Catalog;
 
 use App\Models\Expansion;
-use App\Models\ExpansionLocalization;
 use App\Models\ExpansionRelation;
 use App\Models\ExpansionRelease;
 use App\Models\Game;
 use App\Models\Language;
-use App\Models\SeriesLocalization;
+use App\Models\SeriesImage;
 use App\Support\Catalog\CatalogPresentation;
 use Closure;
 use DateTimeImmutable;
 use Illuminate\Database\QueryException;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
 use Tests\Concerns\BuildsCatalog;
+use Tests\Concerns\ForwardOnlyRefreshDatabase;
 use Tests\TestCase;
 
 class CatalogDomainTest extends TestCase
 {
     use BuildsCatalog;
-    use RefreshDatabase;
+    use ForwardOnlyRefreshDatabase;
 
     public function test_games_retain_their_identity_when_catalogs_are_added(): void
     {
@@ -94,10 +93,9 @@ class CatalogDomainTest extends TestCase
     {
         $expansion = $this->expansion($this->catalog());
         $french = $this->language('fr', 'Français');
-        $data = ['expansion_id' => $expansion->id, 'language_id' => $french->id, 'name' => 'Écarlate et Violet'];
-
-        ExpansionLocalization::create($data);
-        $this->assertInvalidField('language_id', fn () => ExpansionLocalization::create($data));
+        $expansion->setTranslation('display_name', 'FR', 'Premier nom')->save();
+        $expansion->setTranslation('display_name', 'fr', 'Écarlate et Violet')->save();
+        $this->assertSame(['fr' => 'Écarlate et Violet'], $expansion->fresh()->getTranslations('display_name'));
         $this->assertSame(0, $expansion->editions()->count());
 
         $edition = $this->edition($expansion, $french);
@@ -214,7 +212,13 @@ class CatalogDomainTest extends TestCase
         $expansion = $this->expansion($catalog, $series);
         $edition = $this->edition($expansion);
         $release = $this->release($edition);
-        $seriesName = $series->localizations()->create(['language_id' => $this->language()->id, 'name' => 'Scarlet & Violet']);
+        $series->setTranslation('display_name', 'en', 'Scarlet & Violet')->save();
+        Storage::fake('public');
+        $seriesImage = $this->saveCatalog(new SeriesImage, [
+            'series_id' => $series->id,
+            'language_id' => $this->language()->id,
+            'image' => UploadedFile::fake()->image('series.png'),
+        ]);
         $this->assertInvalidField('record', fn () => $catalog->game->delete());
         $this->assertInvalidField('record', fn () => $catalog->delete());
         $this->assertInvalidField('record', fn () => $series->delete());
@@ -232,7 +236,8 @@ class CatalogDomainTest extends TestCase
 
         $this->saveCatalog($expansion, ['series_id' => null]);
         $series->delete();
-        $this->assertModelMissing($seriesName);
+        $this->assertModelMissing($series);
+        $this->assertModelMissing($seriesImage);
 
         $expansion->delete();
         $target->delete();
@@ -262,26 +267,25 @@ class CatalogDomainTest extends TestCase
     public function test_localized_presentation_keeps_the_selected_names_language_and_its_own_image(): void
     {
         $english = $this->language();
-        $french = $this->language('fr', 'Français');
         $catalog = $this->catalog(language: $english);
         $series = $this->series($catalog);
         $expansion = $this->expansion($catalog, $series);
         $presentation = app(CatalogPresentation::class);
 
         Storage::fake('public');
-        $englishLocalization = $this->saveCatalog(new SeriesLocalization, [
+        $series->update(['display_name' => ['en' => 'Scarlet & Violet', 'fr' => 'Écarlate et Violet']]);
+        $englishImage = $this->saveCatalog(new SeriesImage, [
             'series_id' => $series->id,
             'language_id' => $english->id,
-            'name' => 'Scarlet & Violet',
             'image' => UploadedFile::fake()->image('series.png'),
         ]);
-        $series->localizations()->create(['language_id' => $french->id, 'name' => 'Écarlate et Violet']);
-        $expansion->localizations()->create(['language_id' => $english->id, 'name' => 'Scarlet & Violet—151']);
+        $expansion->setTranslation('display_name', 'en', 'Scarlet & Violet—151')->save();
 
         $this->assertSame(['name' => 'Scarlet & Violet—151', 'language' => 'en', 'fallback' => true], $presentation->name($expansion, 'fr'));
         $this->assertSame(['name' => 'Écarlate et Violet', 'language' => 'fr', 'fallback' => false], $presentation->name($series, 'fr'));
-        $this->assertNotNull($englishLocalization->image);
-        $this->assertSame($englishLocalization->image, $presentation->seriesImage($series, 'en'));
+        $this->assertNotNull($englishImage->image);
+        $this->assertSame($englishImage->image, $presentation->seriesImage($series, 'en'));
+        $this->assertSame($englishImage->image, $presentation->seriesImage($series, ' EN '));
         $this->assertNull($presentation->seriesImage($series, 'fr'));
         $this->assertSame(['name' => 'Scarlet & Violet', 'language' => 'en', 'fallback' => true], $presentation->name($series, 'de'));
         $this->assertNull($presentation->seriesImage($series, 'de'));
@@ -301,8 +305,8 @@ class CatalogDomainTest extends TestCase
         $this->assertInvalidField('channel', fn () => ExpansionRelease::create([
             'edition_id' => $edition->id, 'market_id' => $this->market()->id, 'channel' => 'print-run', 'status' => 'released',
         ]));
-        $this->assertInvalidField('language_id', fn () => SeriesLocalization::create([
-            'series_id' => $this->series($catalog)->id, 'language_id' => 98765, 'name' => 'Missing language',
+        $this->assertInvalidField('language_id', fn () => SeriesImage::create([
+            'series_id' => $this->series($catalog)->id, 'language_id' => 98765,
         ]));
     }
 

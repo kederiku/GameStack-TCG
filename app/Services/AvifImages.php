@@ -44,7 +44,7 @@ abstract class AvifImages
     public function store(UploadedFile $upload, string $name, Connection $connection): string
     {
         if (! (gd_info()['AVIF Support'] ?? false)) {
-            throw ValidationException::withMessages(['image' => 'Le serveur ne prend pas en charge la conversion AVIF.']);
+            throw ValidationException::withMessages(['image' => __('validation.images.avif_unsupported')]);
         }
 
         $contents = $upload->get();
@@ -56,7 +56,7 @@ abstract class AvifImages
         $image = $contents === false ? false : @imagecreatefromstring($contents);
 
         if ($image === false) {
-            throw ValidationException::withMessages(['image' => 'Cette image est illisible ou non prise en charge.']);
+            throw ValidationException::withMessages(['image' => __('validation.images.unreadable')]);
         }
 
         if ($upload->getMimeType() === 'image/jpeg') {
@@ -79,7 +79,7 @@ abstract class AvifImages
         $dimensions = is_string($avif) && $avif !== '' ? @getimagesizefromstring($avif) : false;
 
         if (! $encoded || ! is_string($avif) || $dimensions === false || $dimensions['mime'] !== 'image/avif') {
-            throw ValidationException::withMessages(['image' => 'La conversion AVIF a échoué.']);
+            throw ValidationException::withMessages(['image' => __('validation.images.conversion_failed')]);
         }
 
         return $this->write($avif, $name, $connection);
@@ -92,7 +92,7 @@ abstract class AvifImages
         $svg = $sanitizer->sanitize($contents);
 
         if ($svg === false || $svg === '') {
-            throw ValidationException::withMessages(['image' => 'Ce fichier SVG est invalide ou ne peut pas être nettoyé.']);
+            throw ValidationException::withMessages(['image' => __('validation.images.invalid_svg')]);
         }
 
         $this->validateEmbeddedImages($svg);
@@ -105,7 +105,7 @@ abstract class AvifImages
         try {
             $process->mustRun();
         } catch (ProcessException) {
-            throw ValidationException::withMessages(['image' => 'Ce SVG ne peut pas être converti en AVIF.']);
+            throw ValidationException::withMessages(['image' => __('validation.images.svg_conversion_failed')]);
         }
 
         return $process->getOutput();
@@ -133,13 +133,13 @@ abstract class AvifImages
             $size = is_string($contents) && $contents !== '' ? @getimagesizefromstring($contents) : false;
 
             if ($size === false || $size[0] < 1 || $size[1] < 1 || $size[0] > 4096 || $size[1] > 4096) {
-                throw ValidationException::withMessages(['image' => 'Les images intégrées au SVG doivent être lisibles et limitées à 4096 × 4096 pixels.']);
+                throw ValidationException::withMessages(['image' => __('validation.images.svg-dimensions')]);
             }
 
             $pixels += $size[0] * $size[1];
 
             if ($pixels > 4096 * 4096) {
-                throw ValidationException::withMessages(['image' => 'Les images intégrées au SVG sont trop volumineuses au total.']);
+                throw ValidationException::withMessages(['image' => __('validation.images.svg-size')]);
             }
         }
     }
@@ -153,7 +153,7 @@ abstract class AvifImages
         $connection->afterRollBack(fn () => rescue(fn () => $this->deleteUnused($path, $connection->getName())));
 
         if (! self::disk()->put($path, $contents, 'public')) {
-            throw ValidationException::withMessages(['image' => 'Impossible d’enregistrer l’image. Veuillez réessayer.']);
+            throw ValidationException::withMessages(['image' => __('validation.images.save-image')]);
         }
 
         return $path;

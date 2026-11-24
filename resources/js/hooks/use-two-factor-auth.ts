@@ -1,6 +1,7 @@
+import { useLocale } from '@/hooks/use-locale';
 import { useHttp } from '@inertiajs/react';
 import { useCallback, useState } from 'react';
-import { qrCode, recoveryCodes, secretKey } from '@/routes/two-factor';
+import { useLocalizedRoutes } from '@/hooks/use-localized-routes';
 
 export type UseTwoFactorAuthReturn = {
     qrCodeSvg: string | null;
@@ -20,6 +21,11 @@ export type UseTwoFactorAuthReturn = {
 export const OTP_MAX_LENGTH = 6;
 
 export const useTwoFactorAuth = (): UseTwoFactorAuthReturn => {
+    const { t } = useLocale();
+    const routes = useLocalizedRoutes();
+    const qrCode = routes['two-factor.qr-code'];
+    const recoveryCodes = routes['two-factor.recovery-codes'];
+    const secretKey = routes['two-factor.secret-key'];
     const { submit } = useHttp();
 
     const [qrCodeSvg, setQrCodeSvg] = useState<string | null>(null);
@@ -55,10 +61,10 @@ export const useTwoFactorAuth = (): UseTwoFactorAuthReturn => {
 
             setQrCodeSvg(svg);
         } catch {
-            setErrors((prev) => [...prev, 'Impossible de charger le QR code.']);
+            setErrors((prev) => [...prev, t('auth.qr-failed')]);
             setQrCodeSvg(null);
         }
-    }, [submit]);
+    }, [submit, qrCode, t]);
 
     const fetchSetupKey = useCallback(async (): Promise<void> => {
         try {
@@ -68,13 +74,10 @@ export const useTwoFactorAuth = (): UseTwoFactorAuthReturn => {
 
             setManualSetupKey(key);
         } catch {
-            setErrors((prev) => [
-                ...prev,
-                'Impossible de charger la clé de configuration.',
-            ]);
+            setErrors((prev) => [...prev, t('auth.setup-key-failed')]);
             setManualSetupKey(null);
         }
-    }, [submit]);
+    }, [submit, secretKey, t]);
 
     const fetchRecoveryCodes = useCallback(async (): Promise<void> => {
         try {
@@ -82,13 +85,10 @@ export const useTwoFactorAuth = (): UseTwoFactorAuthReturn => {
             const codes = (await submit(recoveryCodes())) as string[];
             setRecoveryCodesList(codes);
         } catch {
-            setErrors((prev) => [
-                ...prev,
-                'Impossible de charger les codes de récupération.',
-            ]);
+            setErrors((prev) => [...prev, t('auth.recovery-failed')]);
             setRecoveryCodesList([]);
         }
-    }, [submit]);
+    }, [submit, recoveryCodes, t]);
 
     const fetchSetupData = useCallback(async (): Promise<void> => {
         try {

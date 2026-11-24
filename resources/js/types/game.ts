@@ -1,6 +1,7 @@
-export type PublicGame = {
+import type { TranslatedName } from './catalog';
+
+export type PublicGame = TranslatedName & {
     id: number;
-    name: string;
     slug: string;
     imageUrl: string | null;
     url: string;

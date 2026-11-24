@@ -6,14 +6,13 @@ use App\Models\Catalog;
 use App\Models\CatalogRecord;
 use App\Models\Expansion;
 use App\Models\ExpansionEdition;
-use App\Models\ExpansionLocalization;
 use App\Models\ExpansionRelation;
 use App\Models\ExpansionRelease;
 use App\Models\Game;
 use App\Models\Language;
 use App\Models\Market;
 use App\Models\Series;
-use App\Models\SeriesLocalization;
+use App\Models\SeriesImage;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\Validator;
@@ -47,7 +46,7 @@ class CatalogRules
         );
 
         if ($record instanceof Language && is_string($data['code'] ?? null)) {
-            $data['code'] = self::languageCode($data['code']);
+            $data['code'] = $record->exists && strcasecmp($data['code'], (string) $record->getRawOriginal('code')) === 0 ? $record->getRawOriginal('code') : self::languageCode($data['code']);
         }
 
         // Validate the parent ID before attempting to look up a proposed key in its scope.
@@ -63,39 +62,17 @@ class CatalogRules
         }
 
         $data = Validator::make($data, $rules, [
-            'required' => 'Le champ « :attribute » est obligatoire.',
-            'string' => 'Le champ « :attribute » doit être un texte.',
-            'integer' => 'Le champ « :attribute » doit être un entier.',
-            'boolean' => 'Le champ « :attribute » doit être vrai ou faux.',
-            'exists' => 'Le champ « :attribute » doit désigner une fiche existante.',
-            'in' => 'La valeur sélectionnée pour « :attribute » est invalide.',
-            'regex' => 'Le format du champ « :attribute » est invalide.',
-            'max.string' => 'Le champ « :attribute » ne doit pas dépasser :max caractères.',
-            'between.numeric' => 'Le champ « :attribute » doit être compris entre :min et :max.',
-            'date_format' => 'Le champ « :attribute » doit être une date valide au format AAAA-MM-JJ.',
-            'url' => 'Le champ « :attribute » doit être une URL HTTP ou HTTPS.',
-        ], [
-            'name' => 'nom',
-            'key' => 'clé',
-            'code' => 'code de langue',
-            'game_id' => 'jeu',
-            'default_language_id' => 'langue par défaut',
-            'catalog_id' => 'catalogue',
-            'series_id' => 'série',
-            'expansion_id' => 'extension',
-            'edition_id' => 'édition',
-            'language_id' => 'langue',
-            'market_id' => 'marché',
-            'sort_order' => 'ordre',
-            'is_visible' => 'visibilité',
-            'official_code' => 'code officiel',
-            'channel' => 'canal',
-            'status' => 'état',
-            'released_on' => 'date de sortie',
-            'announced_period' => 'période annoncée',
-            'source_url' => 'URL source',
-            'source_expansion_id' => 'extension source',
-            'target_expansion_id' => 'extension cible',
+            'required' => __('validation.catalog.required'),
+            'string' => __('validation.catalog.string'),
+            'integer' => __('validation.catalog.integer'),
+            'boolean' => __('validation.catalog.boolean'),
+            'exists' => __('validation.catalog.exists'),
+            'in' => __('validation.catalog.in'),
+            'regex' => __('validation.catalog.regex'),
+            'max.string' => __('validation.catalog.max_string'),
+            'between.numeric' => __('validation.catalog.between_numeric'),
+            'date_format' => __('validation.catalog.date_format'),
+            'url' => __('validation.catalog.url'),
         ])->validate();
 
         if ($proposeKey) {
@@ -106,6 +83,16 @@ class CatalogRules
         self::checkRelationships($record, $data);
         self::checkUniqueness($record, $data);
         $record->forceFill($data);
+    }
+
+    public static function containsPattern(string $literal): string
+    {
+        return '%'.str_replace(['\\', '%', '_'], ['\\\\', '\\%', '\\_'], $literal).'%';
+    }
+
+    public static function validLanguageCode(string $code): bool
+    {
+        return preg_match(self::LANGUAGE_TAG, trim($code)) === 1;
     }
 
     public static function languageCode(string $code): string
@@ -136,17 +123,17 @@ class CatalogRules
     {
         $field = match (true) {
             $record instanceof Language => 'code',
-            $record instanceof SeriesLocalization, $record instanceof ExpansionLocalization, $record instanceof ExpansionEdition => 'language_id',
+            $record instanceof SeriesImage, $record instanceof ExpansionEdition => 'language_id',
             $record instanceof ExpansionRelease => 'channel',
             $record instanceof ExpansionRelation => 'target_expansion_id',
             default => 'key',
         };
         $message = match ($field) {
-            'code' => 'Ce code de langue est déjà utilisé.',
-            'language_id' => 'Une fiche existe déjà dans cette langue pour ce parent.',
-            'channel' => 'Une sortie existe déjà sur ce marché pour ce canal.',
-            'target_expansion_id' => 'Ce rapprochement existe déjà.',
-            default => 'Cette clé est déjà utilisée dans ce périmètre.',
+            'code' => __('validation.catalog.duplicate_language'),
+            'language_id' => __('validation.catalog.duplicate_locale'),
+            'channel' => __('validation.catalog.duplicate_release'),
+            'target_expansion_id' => __('validation.catalog.duplicate_relation'),
+            default => __('validation.catalog.duplicate_key'),
         };
 
         self::reject($field, $message);
@@ -159,13 +146,13 @@ class CatalogRules
         }
 
         $message = match (true) {
-            $record instanceof Game => 'Ce jeu contient des catalogues. Supprimez-les explicitement avant le jeu.',
-            $record instanceof Catalog => 'Ce catalogue contient des séries ou des extensions.',
-            $record instanceof Series => 'Cette série est rattachée à des extensions. Détachez-les avant la suppression.',
-            $record instanceof Expansion => 'Cette extension contient des éditions ou des rapprochements.',
-            $record instanceof Language => 'Cette langue est utilisée par des fiches du catalogue.',
-            $record instanceof Market => 'Ce marché est utilisé par des sorties.',
-            default => 'Cette fiche est référencée et ne peut pas être supprimée.',
+            $record instanceof Game => __('validation.catalog.game_has_catalogs'),
+            $record instanceof Catalog => __('validation.catalog.catalog_has_children'),
+            $record instanceof Series => __('validation.catalog.series_has_expansions'),
+            $record instanceof Expansion => __('validation.catalog.expansion_has_children'),
+            $record instanceof Language => __('validation.catalog.language_in_use'),
+            $record instanceof Market => __('validation.catalog.market_in_use'),
+            default => __('validation.catalog.record_in_use'),
         };
 
         self::reject('record', $message);
@@ -189,23 +176,17 @@ class CatalogRules
             $record instanceof Market => ['key' => $key, 'name' => $text],
             $record instanceof Catalog => [
                 'game_id' => $fk('games'), 'default_language_id' => $fk('languages'),
-                'key' => $key, 'name' => $text, 'description' => $description, 'sort_order' => $order, 'is_visible' => $visibility,
+                'key' => $key, 'name' => $text, 'reference_description' => $description, 'sort_order' => $order, 'is_visible' => $visibility,
             ],
             $record instanceof Series => [
                 'catalog_id' => $fk('catalogs'), 'key' => $key, 'name' => $text,
                 'type' => ['required', 'string', Rule::in(Series::TYPES)], 'sort_order' => $order, 'is_visible' => $visibility,
             ],
-            $record instanceof SeriesLocalization => [
-                'series_id' => $fk('series'), 'language_id' => $fk('languages'),
-                'name' => $text, 'description' => $description,
-            ],
+            $record instanceof SeriesImage => ['series_id' => $fk('series'), 'language_id' => $fk('languages')],
             $record instanceof Expansion => [
                 'catalog_id' => $fk('catalogs'), 'series_id' => ['bail', 'nullable', 'integer', Rule::exists($table.'series', 'id')],
                 'key' => $key, 'name' => $text, 'type' => ['required', 'string', Rule::in(Expansion::TYPES)],
                 'sort_order' => $order, 'is_visible' => $visibility,
-            ],
-            $record instanceof ExpansionLocalization => [
-                'expansion_id' => $fk('expansions'), 'language_id' => $fk('languages'), 'name' => $text, 'description' => $description,
             ],
             $record instanceof ExpansionEdition => [
                 'expansion_id' => $fk('expansions'), 'language_id' => $fk('languages'),
@@ -215,7 +196,7 @@ class CatalogRules
             $record instanceof ExpansionRelease => [
                 'edition_id' => $fk('expansion_editions'), 'market_id' => $fk('markets'),
                 'channel' => ['required', 'string', Rule::in(ExpansionRelease::CHANNELS)],
-                'released_on' => ['nullable', 'string', 'date_format:Y-m-d'], 'announced_period' => $optionalText,
+                'released_on' => ['nullable', 'string', 'date_format:Y-m-d'], 'reference_announced_period' => $optionalText,
                 'status' => ['required', 'string', Rule::in(ExpansionRelease::STATUSES)], 'source_url' => ['nullable', ...$url],
             ],
             $record instanceof ExpansionRelation => [
@@ -223,7 +204,7 @@ class CatalogRules
                 'type' => ['required', 'string', Rule::in(ExpansionRelation::TYPES)],
                 'notes' => ['required', 'string'], 'source_url' => ['required', ...$url],
             ],
-            default => throw new \LogicException('Type de fiche du catalogue inconnu.'),
+            default => throw new \LogicException(__('validation.catalog.unknown_type')),
         };
     }
 
@@ -237,8 +218,8 @@ class CatalogRules
         $identity = match (true) {
             $record instanceof Catalog => ['game_id', 'key'],
             $record instanceof Series, $record instanceof Expansion => ['catalog_id', 'key'],
-            $record instanceof SeriesLocalization => ['series_id', 'language_id'],
-            $record instanceof ExpansionLocalization, $record instanceof ExpansionEdition => ['expansion_id', 'language_id'],
+            $record instanceof SeriesImage => ['series_id', 'language_id'],
+            $record instanceof ExpansionEdition => ['expansion_id', 'language_id'],
             $record instanceof ExpansionRelease => ['edition_id', 'market_id', 'channel'],
             $record instanceof ExpansionRelation => ['source_expansion_id', 'target_expansion_id', 'type'],
             $record instanceof Language => ['code'],
@@ -250,7 +231,7 @@ class CatalogRules
             $value = $data[$field] ?? $record->getAttributes()[$field] ?? null;
 
             if ((string) $value !== (string) $record->getRawOriginal($field)) {
-                self::reject($field, 'Ce champ fait partie de l’identité de la fiche et ne peut plus être modifié.');
+                self::reject($field, __('validation.catalog.immutable_identity'));
             }
         }
     }
@@ -260,12 +241,12 @@ class CatalogRules
     {
         if ($record instanceof Expansion && ($data['series_id'] ?? null) !== null
             && ! Series::on($record->getConnectionName())->whereKey($data['series_id'])->where('catalog_id', $data['catalog_id'])->exists()) {
-            self::reject('series_id', 'La série doit appartenir au catalogue de cette extension.');
+            self::reject('series_id', __('validation.catalog.series_catalog_mismatch'));
         }
 
         if ($record instanceof ExpansionEdition && $record->exists && $data['status'] !== 'released'
             && $record->releases()->where('status', 'released')->exists()) {
-            self::reject('status', 'Cette édition doit rester publiée tant qu’une de ses sorties est publiée.');
+            self::reject('status', __('validation.catalog.edition_has_releases'));
         }
 
         if ($record instanceof ExpansionRelation) {
@@ -273,7 +254,7 @@ class CatalogRules
             $target = (int) $data['target_expansion_id'];
 
             if ($source === $target) {
-                self::reject('target_expansion_id', 'Une extension ne peut pas être rapprochée d’elle-même.');
+                self::reject('target_expansion_id', __('validation.catalog.self_relationship'));
             }
 
             $gameIds = Expansion::on($record->getConnectionName())
@@ -282,7 +263,7 @@ class CatalogRules
                 ->pluck('catalogs.game_id');
 
             if ($gameIds->count() !== 2 || $gameIds[0] !== $gameIds[1]) {
-                self::reject('target_expansion_id', 'Les deux extensions doivent appartenir au même jeu.');
+                self::reject('target_expansion_id', __('validation.catalog.game_mismatch'));
             }
 
             if ($data['type'] === 'related_to' && $source > $target) {
@@ -297,8 +278,8 @@ class CatalogRules
         $columns = match (true) {
             $record instanceof Catalog => ['game_id', 'key'],
             $record instanceof Series, $record instanceof Expansion => ['catalog_id', 'key'],
-            $record instanceof SeriesLocalization => ['series_id', 'language_id'],
-            $record instanceof ExpansionLocalization, $record instanceof ExpansionEdition => ['expansion_id', 'language_id'],
+            $record instanceof SeriesImage => ['series_id', 'language_id'],
+            $record instanceof ExpansionEdition => ['expansion_id', 'language_id'],
             $record instanceof ExpansionRelease => ['edition_id', 'market_id', 'channel'],
             $record instanceof ExpansionRelation => ['source_expansion_id', 'target_expansion_id', 'type'],
             $record instanceof Market => ['key'],

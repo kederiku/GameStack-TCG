@@ -1,3 +1,4 @@
+import { useLocalizedRoutes } from '@/hooks/use-localized-routes';
 import { Link } from '@inertiajs/react';
 import { Check, ChevronDown, House, Layers2 } from 'lucide-react';
 import { GameImage } from '@/components/games/game-image';
@@ -10,7 +11,6 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { home } from '@/routes';
 import type { PublicGame } from '@/types/game';
 import { useLocale } from '@/hooks/use-locale';
 
@@ -21,7 +21,8 @@ export function GameSelector({
     games: PublicGame[];
     currentGame: PublicGame | null;
 }) {
-    const { t, locale, localizedUrl } = useLocale();
+    const routes = useLocalizedRoutes();
+    const { t, locale } = useLocale();
     return (
         <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -30,13 +31,12 @@ export function GameSelector({
                     disabled={games.length === 0}
                     aria-label={
                         games.length === 0
-                            ? t('Aucun jeu disponible', 'No games available')
+                            ? t('catalog.game-selector.no-games-available')
                             : currentGame
-                              ? t(
-                                    `Changer de jeu : ${currentGame.name}`,
-                                    `Switch game: ${currentGame.name}`,
-                                )
-                              : t('Choisir un jeu', 'Choose a game')
+                              ? t('catalog.change-game', {
+                                    name: currentGame.name,
+                                })
+                              : t('catalog.game-selector.choose-a-game')
                     }
                     className="h-11 w-full min-w-0 justify-between bg-card px-3 font-normal"
                 >
@@ -50,14 +50,18 @@ export function GameSelector({
                         ) : (
                             <Layers2 className="size-4 text-muted-foreground" />
                         )}
-                        <span className="truncate">
+                        <span
+                            className="truncate"
+                            lang={
+                                currentGame && games.length > 0
+                                    ? (currentGame.nameLanguage ?? '')
+                                    : undefined
+                            }
+                        >
                             {games.length === 0
-                                ? t(
-                                      'Aucun jeu disponible',
-                                      'No games available',
-                                  )
+                                ? t('catalog.game-selector.no-games-available')
                                 : (currentGame?.name ??
-                                  t('Choisir un jeu', 'Choose a game'))}
+                                  t('catalog.game-selector.choose-a-game'))}
                         </span>
                     </span>
                     <ChevronDown className="size-4 shrink-0 text-muted-foreground" />
@@ -70,19 +74,22 @@ export function GameSelector({
                 className="max-h-[min(26rem,var(--radix-dropdown-menu-content-available-height))] w-72 max-w-[calc(100vw-2rem)] overflow-y-auto rounded-xl p-1.5"
             >
                 <DropdownMenuLabel className="px-2.5 py-2 text-xs font-medium tracking-widest text-muted-foreground uppercase">
-                    {t('Vos univers', 'Your games')}
+                    {t('catalog.game-selector.your-games')}
                 </DropdownMenuLabel>
                 {games.map((game) => (
                     <DropdownMenuItem key={game.id} asChild>
                         <Link
-                            href={localizedUrl(game.url)}
+                            href={game.url}
                             aria-current={
                                 currentGame?.id === game.id ? 'page' : undefined
                             }
                             className="min-w-0 gap-3 rounded-lg px-2.5 py-2.5"
                         >
                             <GameImage game={game} className="size-9" />
-                            <span className="min-w-0 flex-1 [overflow-wrap:anywhere]">
+                            <span
+                                lang={game.nameLanguage ?? ''}
+                                className="min-w-0 flex-1 [overflow-wrap:anywhere]"
+                            >
                                 {game.name}
                             </span>
                             {currentGame?.id === game.id && (
@@ -94,11 +101,11 @@ export function GameSelector({
                 <DropdownMenuSeparator />
                 <DropdownMenuItem asChild>
                     <Link
-                        href={localizedUrl(home.url())}
+                        href={routes.home.url()}
                         className="gap-3 px-2.5 py-3"
                     >
                         <House className="size-4" />
-                        {t('Tous les jeux', 'All games')}
+                        {t('catalog.game-selector.all-games')}
                     </Link>
                 </DropdownMenuItem>
             </DropdownMenuContent>

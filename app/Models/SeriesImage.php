@@ -10,15 +10,13 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 /**
  * @property int $series_id
  * @property int $language_id
- * @property string $name
- * @property ?string $description
  * @property ?string $image
  * @property-read Series $series
  * @property-read Language $language
  */
-#[Fillable(['series_id', 'language_id', 'name', 'description', 'image'])]
+#[Fillable(['series_id', 'language_id', 'image'])]
 #[ObservedBy([CatalogImageObserver::class])]
-class SeriesLocalization extends CatalogRecord
+class SeriesImage extends CatalogRecord
 {
     public function isEffectivelyVisible(): bool
     {

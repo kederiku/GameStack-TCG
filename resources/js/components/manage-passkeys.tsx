@@ -1,6 +1,7 @@
+import { useLocale } from '@/hooks/use-locale';
+import { useLocalizedRoutes } from '@/hooks/use-localized-routes';
 import { router } from '@inertiajs/react';
 import { KeyRound } from 'lucide-react';
-import { destroy } from '@/actions/Laravel/Passkeys/Http/Controllers/PasskeyRegistrationController';
 import SettingsSection from '@/components/settings-section';
 import { EmptyState } from '@/components/empty-state';
 import { Badge } from '@/components/ui/badge';
@@ -14,6 +15,15 @@ export type Props = {
 };
 
 export default function ManagePasskeys(props: Props) {
+    const { t, tChoice } = useLocale();
+    const localized = useLocalizedRoutes();
+    const destroy = localized['passkey.destroy'];
+
+    const options = localized['passkey.registration-options'];
+    const store = localized['passkey.store'];
+    if (!props.canManagePasskeys || !destroy || !options || !store) {
+        return null;
+    }
     const passkeys = props.passkeys ?? [];
 
     const handleDelete = (id: number, onError: () => void) => {
@@ -27,22 +37,15 @@ export default function ManagePasskeys(props: Props) {
         router.reload();
     };
 
-    if (!(props.canManagePasskeys ?? false)) {
-        return null;
-    }
-
     return (
         <SettingsSection
             id="passkeys"
-            title="Clés d’accès"
-            description="Connectez-vous avec votre appareil, sans saisir de mot de passe."
+            title={t('auth.manage-passkeys.passkeys')}
+            description={t('auth.manage-passkeys.description')}
             icon={KeyRound}
             action={
                 <Badge variant="secondary">
-                    {passkeys.length}{' '}
-                    {passkeys.length > 1
-                        ? 'clés enregistrées'
-                        : 'clé enregistrée'}
+                    {tChoice('auth.passkeys.count', passkeys.length)}
                 </Badge>
             }
         >
@@ -59,14 +62,19 @@ export default function ManagePasskeys(props: Props) {
                     ) : (
                         <EmptyState
                             icon={KeyRound}
-                            title="Votre prochaine clé"
-                            description="Ajoutez une clé d’accès pour retrouver votre espace avec votre empreinte, votre visage ou le verrouillage de votre appareil."
+                            title={t('auth.manage-passkeys.your-next-passkey')}
+                            description={t(
+                                'auth.manage-passkeys.empty-description',
+                            )}
                             className="border-0 bg-transparent py-8"
                         />
                     )}
                 </div>
 
-                <PasskeyRegistration onSuccess={handleRegisterSuccess} />
+                <PasskeyRegistration
+                    routes={{ options: options.url(), submit: store.url() }}
+                    onSuccess={handleRegisterSuccess}
+                />
             </div>
         </SettingsSection>
     );

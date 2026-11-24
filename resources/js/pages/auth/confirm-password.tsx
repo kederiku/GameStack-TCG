@@ -1,43 +1,56 @@
+import { useLocale } from '@/hooks/use-locale';
+import { useLocalizedRoutes } from '@/hooks/use-localized-routes';
 import { Form, Head } from '@inertiajs/react';
 import InputError from '@/components/input-error';
 import PasswordInput from '@/components/password-input';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Spinner } from '@/components/ui/spinner';
-import { store } from '@/routes/password/confirm';
-import {
-    index as confirmOptions,
-    store as confirmStore,
-} from '@/actions/Laravel/Passkeys/Http/Controllers/PasskeyConfirmationController';
 import PasskeyVerify from '@/components/passkey-verify';
 
 export default function ConfirmPassword() {
+    const { t } = useLocale();
+    const localized = useLocalizedRoutes();
+    const store = localized['password.confirm.store'];
+    const confirmOptions = localized['passkey.confirm-options'];
+    const confirmStore = localized['passkey.confirm'];
+
     return (
         <>
-            <Head title="Confirmer votre identité" />
+            <Head title={t('auth.confirm-password.confirm-your-identity')} />
 
-            <PasskeyVerify
-                routes={{
-                    options: confirmOptions(),
-                    submit: confirmStore(),
-                }}
-                label="Confirmer avec une clé d’accès"
-                loadingLabel="Vérification en cours…"
-                separator="Ou avec votre mot de passe"
-            />
+            {confirmOptions && confirmStore && (
+                <PasskeyVerify
+                    routes={{
+                        options: confirmOptions.url(),
+                        submit: confirmStore.url(),
+                    }}
+                    label={t('auth.confirm-password.confirm-with-a-passkey')}
+                    loadingLabel={t('auth.confirm-password.verifying')}
+                    separator={t('auth.confirm-password.or-with-your-password')}
+                />
+            )}
 
             <Form {...store.form()} resetOnSuccess={['password']}>
                 {({ processing, errors }) => (
                     <div className="space-y-6">
                         <div className="grid gap-2">
-                            <Label htmlFor="password">Mot de passe</Label>
+                            <Label htmlFor="password">
+                                {t('auth.confirm-password.password')}
+                            </Label>
                             <PasswordInput
-                                showLabel="Afficher le mot de passe"
-                                hideLabel="Masquer le mot de passe"
+                                showLabel={t(
+                                    'auth.confirm-password.show-password',
+                                )}
+                                hideLabel={t(
+                                    'auth.confirm-password.hide-password',
+                                )}
                                 id="password"
                                 aria-invalid={Boolean(errors.password)}
                                 name="password"
-                                placeholder="Votre mot de passe"
+                                placeholder={t(
+                                    'auth.confirm-password.your-password',
+                                )}
                                 autoComplete="current-password"
                                 autoFocus
                             />
@@ -55,7 +68,7 @@ export default function ConfirmPassword() {
                                 data-test="confirm-password-button"
                             >
                                 {processing && <Spinner />}
-                                Confirmer mon identité
+                                {t('auth.confirm-password.confirm-my-identity')}
                             </Button>
                         </div>
                     </div>
@@ -66,7 +79,6 @@ export default function ConfirmPassword() {
 }
 
 ConfirmPassword.layout = {
-    title: 'Confirmez votre identité',
-    description:
-        'Pour accéder à cette page, confirmez votre identité avec votre mot de passe ou une clé d’accès.',
+    titleKey: 'auth.confirm-password.title',
+    descriptionKey: 'auth.confirm-password.description',
 };

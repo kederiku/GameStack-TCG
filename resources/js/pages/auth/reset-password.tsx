@@ -1,3 +1,5 @@
+import { useLocale } from '@/hooks/use-locale';
+import { useLocalizedRoutes } from '@/hooks/use-localized-routes';
 import { Form, Head } from '@inertiajs/react';
 import InputError from '@/components/input-error';
 import PasswordInput from '@/components/password-input';
@@ -5,7 +7,6 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Spinner } from '@/components/ui/spinner';
-import { update } from '@/routes/password';
 
 type Props = {
     token: string;
@@ -14,9 +15,13 @@ type Props = {
 };
 
 export default function ResetPassword({ token, email, passwordRules }: Props) {
+    const { t } = useLocale();
+    const localized = useLocalizedRoutes();
+    const update = localized['password.update'];
+
     return (
         <>
-            <Head title="Nouveau mot de passe" />
+            <Head title={t('auth.reset-password.new-password')} />
 
             <Form
                 {...update.form()}
@@ -26,7 +31,9 @@ export default function ResetPassword({ token, email, passwordRules }: Props) {
                 {({ processing, errors }) => (
                     <div className="grid gap-6">
                         <div className="grid gap-2">
-                            <Label htmlFor="email">Adresse e-mail</Label>
+                            <Label htmlFor="email">
+                                {t('auth.reset-password.email-address')}
+                            </Label>
                             <Input
                                 id="email"
                                 aria-invalid={Boolean(errors.email)}
@@ -46,18 +53,24 @@ export default function ResetPassword({ token, email, passwordRules }: Props) {
 
                         <div className="grid gap-2">
                             <Label htmlFor="password">
-                                Nouveau mot de passe
+                                {t('auth.reset-password.new-password')}
                             </Label>
                             <PasswordInput
-                                showLabel="Afficher le mot de passe"
-                                hideLabel="Masquer le mot de passe"
+                                showLabel={t(
+                                    'auth.reset-password.show-password',
+                                )}
+                                hideLabel={t(
+                                    'auth.reset-password.hide-password',
+                                )}
                                 id="password"
                                 aria-invalid={Boolean(errors.password)}
                                 name="password"
                                 autoComplete="new-password"
                                 className="mt-1 block w-full"
                                 autoFocus
-                                placeholder="Votre mot de passe"
+                                placeholder={t(
+                                    'auth.reset-password.your-password',
+                                )}
                                 passwordrules={passwordRules}
                             />
                             <InputError
@@ -68,11 +81,15 @@ export default function ResetPassword({ token, email, passwordRules }: Props) {
 
                         <div className="grid gap-2">
                             <Label htmlFor="password_confirmation">
-                                Confirmer le mot de passe
+                                {t('auth.reset-password.confirm-password')}
                             </Label>
                             <PasswordInput
-                                showLabel="Afficher le mot de passe"
-                                hideLabel="Masquer le mot de passe"
+                                showLabel={t(
+                                    'auth.reset-password.show-password',
+                                )}
+                                hideLabel={t(
+                                    'auth.reset-password.hide-password',
+                                )}
                                 id="password_confirmation"
                                 aria-invalid={Boolean(
                                     errors.password_confirmation,
@@ -80,7 +97,9 @@ export default function ResetPassword({ token, email, passwordRules }: Props) {
                                 name="password_confirmation"
                                 autoComplete="new-password"
                                 className="mt-1 block w-full"
-                                placeholder="Confirmer le mot de passe"
+                                placeholder={t(
+                                    'auth.reset-password.confirm-password',
+                                )}
                                 passwordrules={passwordRules}
                             />
                             <InputError
@@ -97,7 +116,7 @@ export default function ResetPassword({ token, email, passwordRules }: Props) {
                             data-test="reset-password-button"
                         >
                             {processing && <Spinner />}
-                            Enregistrer le mot de passe
+                            {t('auth.reset-password.save-password')}
                         </Button>
                     </div>
                 )}
@@ -107,7 +126,6 @@ export default function ResetPassword({ token, email, passwordRules }: Props) {
 }
 
 ResetPassword.layout = {
-    title: 'Un nouveau mot de passe',
-    description:
-        'Choisissez votre nouveau mot de passe pour retrouver votre espace.',
+    titleKey: 'auth.reset-password.a-new-password',
+    descriptionKey: 'auth.reset-password.description',
 };

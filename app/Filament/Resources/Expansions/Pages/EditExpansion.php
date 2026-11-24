@@ -21,10 +21,10 @@ class EditExpansion extends EditCatalogRecord
         assert($expansion instanceof Expansion);
 
         return [
-            Action::make('catalog')->label('Retour au catalogue')->color('gray')->icon(Heroicon::OutlinedArrowUturnLeft)
+            Action::make('catalog')->label(__('admin.labels.back-to-catalog'))->color('gray')->icon(Heroicon::OutlinedArrowUturnLeft)
                 ->visible(fn (): bool => CatalogResource::canEdit($expansion->catalog))
                 ->url(CatalogResource::getUrl('edit', ['record' => $expansion->catalog_id])),
-            Action::make('series')->label('Voir la série')->color('gray')->icon(Heroicon::OutlinedBookOpen)
+            Action::make('series')->label(__('admin.labels.view-series-record'))->color('gray')->icon(Heroicon::OutlinedBookOpen)
                 ->visible(fn (): bool => $expansion->series !== null && SeriesResource::canEdit($expansion->series))
                 ->url(fn (): ?string => $expansion->series_id === null ? null : SeriesResource::getUrl('edit', ['record' => $expansion->series_id])),
             ...parent::getHeaderActions(),

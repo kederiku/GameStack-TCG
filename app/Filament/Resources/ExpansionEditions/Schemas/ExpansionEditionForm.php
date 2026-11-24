@@ -13,14 +13,14 @@ class ExpansionEditionForm
     {
         return CatalogFields::layout($schema, [
             CatalogFields::language()->disabledOn('edit')
-                ->helperText('Langue imprimée, définitive après création. Une seule édition par langue.'),
-            CatalogFields::name('Nom de l’édition')->helperText('Nom commercial de l’ensemble dans cette langue, tel qu’il est présenté par l’éditeur.'),
-            TextInput::make('official_code')->label('Code officiel')->maxLength(255)
-                ->helperText('Code de l’éditeur pour cette langue. Laissez vide s’il est inconnu.'),
+                ->helperText(__('admin.editions.language_help')),
+            CatalogFields::name(__('admin.labels.edition-name'))->helperText(__('admin.editions.name_help')),
+            TextInput::make('official_code')->label(__('admin.labels.official-code'))->maxLength(255)
+                ->helperText(__('admin.editions.code_help')),
         ], [
-            CatalogFields::enum('status', 'État', CatalogLabels::STATUSES)->default('announced')
-                ->helperText('Annoncée : à venir ; publiée : sortie ; annulée : abandonnée. Une sortie publiée publie aussi l’édition.'),
+            CatalogFields::enum('status', __('admin.labels.status'), CatalogLabels::statuses())->default('announced')
+                ->helperText(__('admin.editions.status_help')),
             CatalogFields::visibility(),
-        ], CatalogFields::image('Image de l’édition', 'Utilisez le visuel propre à cette langue. Sans image, aucun visuel d’une autre édition n’est repris.'), description: 'Une édition correspond à une version réellement imprimée ou annoncée dans une langue. Ses lieux, canaux et dates de commercialisation se renseignent ensuite dans « Sorties ».');
+        ], CatalogFields::image(__('admin.labels.edition-image'), __('admin.editions.image_help')), description: __('admin.editions.help'));
     }
 }

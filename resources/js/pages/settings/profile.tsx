@@ -1,6 +1,7 @@
+import { useLocale } from '@/hooks/use-locale';
 import { Form, Head, Link, usePage } from '@inertiajs/react';
 import { BadgeCheck, Mail, Save, UserRound } from 'lucide-react';
-import ProfileController from '@/actions/App/Http/Controllers/Settings/ProfileController';
+import { useLocalizedRoutes } from '@/hooks/use-localized-routes';
 import DeleteUser from '@/components/delete-user';
 import InputError from '@/components/input-error';
 import SettingsSection from '@/components/settings-section';
@@ -11,8 +12,6 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Spinner } from '@/components/ui/spinner';
 import { useInitials } from '@/hooks/use-initials';
-import { edit } from '@/routes/profile';
-import { send } from '@/routes/verification';
 import type { Auth } from '@/types';
 
 export default function Profile({
@@ -22,11 +21,13 @@ export default function Profile({
     mustVerifyEmail: boolean;
     status?: string;
 }) {
+    const { t } = useLocale();
+    const routes = useLocalizedRoutes();
     const { auth } = usePage<{ auth: Auth }>().props;
     const getInitials = useInitials();
     return (
         <>
-            <Head title="Mon profil" />
+            <Head title={t('account.profile.my-profile')} />
             <div className="brand-surface flex flex-wrap items-center gap-4 rounded-2xl border border-border p-5 sm:p-6">
                 <Avatar className="size-14 rounded-2xl border border-primary/20">
                     <AvatarFallback className="rounded-2xl bg-primary/10 text-lg font-semibold text-brand-highlight">
@@ -47,18 +48,18 @@ export default function Profile({
                         className="gap-1.5 bg-card/60 text-brand-highlight"
                     >
                         <BadgeCheck aria-hidden="true" />
-                        E-mail vérifié
+                        {t('account.profile.email-verified')}
                     </Badge>
                 )}
             </div>
             <SettingsSection
                 id="profile"
-                title="Informations personnelles"
-                description="Mettez à jour votre nom et votre adresse e-mail."
+                title={t('account.profile.personal-information')}
+                description={t('account.profile.description')}
                 icon={UserRound}
             >
                 <Form
-                    {...ProfileController.update.form()}
+                    {...routes['profile.update'].form()}
                     options={{ preserveScroll: true }}
                     className="space-y-6"
                 >
@@ -66,14 +67,18 @@ export default function Profile({
                         <>
                             <div className="grid gap-5 sm:grid-cols-2">
                                 <div className="grid content-start gap-2">
-                                    <Label htmlFor="name">Nom complet</Label>
+                                    <Label htmlFor="name">
+                                        {t('account.profile.full-name')}
+                                    </Label>
                                     <Input
                                         id="name"
                                         defaultValue={auth.user.name}
                                         name="name"
                                         required
                                         autoComplete="name"
-                                        placeholder="Votre nom"
+                                        placeholder={t(
+                                            'account.profile.your-name',
+                                        )}
                                         aria-invalid={!!errors.name}
                                         aria-describedby={
                                             errors.name
@@ -88,7 +93,7 @@ export default function Profile({
                                 </div>
                                 <div className="grid content-start gap-2">
                                     <Label htmlFor="email">
-                                        Adresse e-mail
+                                        {t('account.profile.email-address')}
                                     </Label>
                                     <Input
                                         id="email"
@@ -97,7 +102,9 @@ export default function Profile({
                                         name="email"
                                         required
                                         autoComplete="username"
-                                        placeholder="vous@exemple.fr"
+                                        placeholder={t(
+                                            'account.profile.youexamplecom',
+                                        )}
                                         aria-invalid={!!errors.email}
                                         aria-describedby={
                                             errors.email
@@ -120,15 +127,20 @@ export default function Profile({
                                         />
                                         <div>
                                             <p className="text-muted-foreground">
-                                                Votre adresse e-mail n’est pas
-                                                encore vérifiée.
+                                                {t(
+                                                    'account.profile.email-unverified',
+                                                )}
                                             </p>
                                             <Link
-                                                href={send()}
+                                                href={routes[
+                                                    'verification.send'
+                                                ]()}
                                                 as="button"
                                                 className="text-left font-medium text-brand-highlight underline underline-offset-4 focus-visible:outline-2 focus-visible:outline-ring"
                                             >
-                                                Renvoyer le lien de vérification
+                                                {t(
+                                                    'account.profile.resend-verification-link',
+                                                )}
                                             </Link>
                                             {status ===
                                                 'verification-link-sent' && (
@@ -136,9 +148,9 @@ export default function Profile({
                                                     role="status"
                                                     className="mt-2"
                                                 >
-                                                    Un nouveau lien de
-                                                    vérification vous a été
-                                                    envoyé.
+                                                    {t(
+                                                        'account.profile.link-sent',
+                                                    )}
                                                 </p>
                                             )}
                                         </div>
@@ -146,7 +158,7 @@ export default function Profile({
                                 )}
                             <div className="flex flex-wrap items-center justify-between gap-4 border-t border-border pt-5">
                                 <p className="text-xs leading-5 text-muted-foreground">
-                                    Ces informations sont liées à votre compte.
+                                    {t('account.profile.account-help')}
                                 </p>
                                 <Button
                                     disabled={processing}
@@ -161,8 +173,8 @@ export default function Profile({
                                         />
                                     )}
                                     {processing
-                                        ? 'Enregistrement…'
-                                        : 'Enregistrer les modifications'}
+                                        ? t('account.profile.saving')
+                                        : t('account.profile.save-changes')}
                                 </Button>
                             </div>
                         </>
@@ -173,4 +185,8 @@ export default function Profile({
         </>
     );
 }
-Profile.layout = { breadcrumbs: [{ title: 'Mon profil', href: edit() }] };
+Profile.layout = {
+    breadcrumbs: [
+        { title: 'account.profile.my-profile', route: 'profile.edit' },
+    ],
+};

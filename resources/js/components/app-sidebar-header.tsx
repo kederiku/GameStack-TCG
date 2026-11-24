@@ -1,3 +1,4 @@
+import { LanguageSwitcher } from '@/components/language-switcher';
 import { Breadcrumbs } from '@/components/breadcrumbs';
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import type { BreadcrumbItem } from '@/types';
@@ -15,6 +16,7 @@ export function AppSidebarHeader({
                     <Breadcrumbs breadcrumbs={breadcrumbs} />
                 </div>
             </div>
+            <LanguageSwitcher />
         </header>
     );
 }

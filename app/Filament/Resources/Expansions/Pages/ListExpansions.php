@@ -14,7 +14,7 @@ class ListExpansions extends ListCatalogRecords
     /** @return list<CreateAction> */
     protected function getHeaderActions(): array
     {
-        return [CreateAction::make()->label('Ajouter une extension')
+        return [CreateAction::make()->label(__('admin.labels.add-an-expansion'))
             ->url(fn (): string => ExpansionResource::getUrl('create', array_filter([
                 'catalog' => CatalogFields::positiveId($this->tableFilters['catalog']['value'] ?? null),
                 'series' => CatalogFields::positiveId($this->tableFilters['series']['value'] ?? null),
@@ -23,6 +23,6 @@ class ListExpansions extends ListCatalogRecords
 
     public function getSubheading(): string
     {
-        return 'Ouvrez une extension pour gérer ses traductions, ses éditions imprimées et leurs sorties.';
+        return __('admin.expansions.list_help');
     }
 }

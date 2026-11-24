@@ -8,25 +8,26 @@ use App\Filament\Resources\Games\Pages\EditGame;
 use App\Filament\Resources\Games\Pages\ListGames;
 use App\Models\Game;
 use App\Models\User;
+use App\Support\Localization\AdminPanels;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Facades\Filament;
-use Illuminate\Foundation\Testing\DatabaseMigrations;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Livewire\Livewire;
+use Tests\Concerns\ForwardOnlyDatabaseMigrations;
 use Tests\TestCase;
 
 class GameResourceTest extends TestCase
 {
-    use DatabaseMigrations;
+    use ForwardOnlyDatabaseMigrations;
 
     protected function setUp(): void
     {
         parent::setUp();
         Storage::fake('public');
-        Filament::setCurrentPanel(Filament::getPanel('admin'));
+        Filament::setCurrentPanel(Filament::getPanel(AdminPanels::id('fr')));
         $user = User::factory()->create();
         $user->forceFill(['is_admin' => true])->save();
         $this->actingAs($user);
@@ -41,7 +42,7 @@ class GameResourceTest extends TestCase
 
         $this->assertDatabaseHas('games', [
             'name' => 'Pokémon', 'slug' => 'pokemon', 'image' => null, 'is_visible' => true,
-            'start_year' => null, 'end_year' => null, 'publisher' => null, 'description' => null,
+            'start_year' => null, 'end_year' => null, 'publisher' => null, 'reference_description' => null,
         ]);
     }
 
@@ -54,7 +55,7 @@ class GameResourceTest extends TestCase
 
         $game = Game::query()->sole();
         $this->assertFalse($game->is_visible);
-        $this->get('/un-jeu')->assertNotFound();
+        $this->get('/fr/un-jeu')->assertNotFound();
 
         Livewire::test(ListGames::class)
             ->assertCanSeeTableRecords([$game])
@@ -66,7 +67,7 @@ class GameResourceTest extends TestCase
             ->call('save')->assertHasNoFormErrors();
 
         $this->assertTrue($game->fresh()->is_visible);
-        $this->get('/un-jeu')->assertOk();
+        $this->get('/fr/un-jeu')->assertOk();
     }
 
     public function test_an_admin_can_hide_a_game_and_edit_it_without_republishing_it(): void
@@ -77,12 +78,12 @@ class GameResourceTest extends TestCase
             ->call('save')->assertHasNoFormErrors();
 
         Livewire::test(EditGame::class, ['record' => $game->id])
-            ->fillForm(['description' => 'Une description.'])
+            ->fillForm(['reference_description' => 'Une description.'])
             ->call('save')->assertHasNoFormErrors();
 
         $this->assertFalse($game->fresh()->is_visible);
-        $this->assertSame('Une description.', $game->fresh()->description);
-        $this->get('/un-jeu')->assertNotFound();
+        $this->assertSame('Une description.', $game->fresh()->reference_description);
+        $this->get('/fr/un-jeu')->assertNotFound();
     }
 
     public function test_an_admin_can_create_edit_and_clear_optional_game_details(): void
@@ -91,7 +92,7 @@ class GameResourceTest extends TestCase
             ->fillForm([
                 'name' => 'Un TCG', 'slug' => 'un-tcg',
                 'start_year' => 2024, 'end_year' => 2026,
-                'publisher' => 'Un éditeur', 'description' => "Un TCG.\nSa description.",
+                'publisher' => 'Un éditeur', 'reference_description' => "Un TCG.\nSa description.",
             ])
             ->call('create')
             ->assertHasNoFormErrors();
@@ -100,32 +101,32 @@ class GameResourceTest extends TestCase
         $this->assertSame(2024, $game->start_year);
         $this->assertSame(2026, $game->end_year);
         $this->assertSame('Un éditeur', $game->publisher);
-        $this->assertSame("Un TCG.\nSa description.", $game->description);
+        $this->assertSame("Un TCG.\nSa description.", $game->reference_description);
 
         $page = Livewire::test(EditGame::class, ['record' => $game->id])
             ->assertFormSet([
                 'start_year' => 2024, 'end_year' => 2026,
-                'publisher' => 'Un éditeur', 'description' => "Un TCG.\nSa description.",
+                'publisher' => 'Un éditeur', 'reference_description' => "Un TCG.\nSa description.",
             ])
             ->fillForm([
                 'start_year' => 2023, 'end_year' => 2025,
-                'publisher' => 'Autre éditeur', 'description' => 'Description révisée.',
+                'publisher' => 'Autre éditeur', 'reference_description' => 'Description révisée.',
             ])
             ->call('save')
             ->assertHasNoFormErrors();
 
         $this->assertDatabaseHas('games', [
             'id' => $game->id, 'start_year' => 2023, 'end_year' => 2025,
-            'publisher' => 'Autre éditeur', 'description' => 'Description révisée.',
+            'publisher' => 'Autre éditeur', 'reference_description' => 'Description révisée.',
         ]);
 
-        $page->fillForm(['start_year' => '', 'end_year' => '', 'publisher' => '', 'description' => ''])
+        $page->fillForm(['start_year' => '', 'end_year' => '', 'publisher' => '', 'reference_description' => ''])
             ->call('save')
             ->assertHasNoFormErrors();
 
         $this->assertDatabaseHas('games', [
             'id' => $game->id, 'start_year' => null, 'end_year' => null,
-            'publisher' => null, 'description' => null,
+            'publisher' => null, 'reference_description' => null,
         ]);
     }
 
@@ -378,18 +379,18 @@ class GameResourceTest extends TestCase
     public function test_only_verified_administrators_can_access_game_pages(): void
     {
         $game = Game::factory()->create();
-        foreach (['/admin/games', '/admin/games/create', '/admin/games/'.$game->id.'/edit'] as $url) {
+        foreach (['/fr/admin/jeux', '/fr/admin/jeux/creer', '/fr/admin/jeux/'.$game->id.'/modifier'] as $url) {
             $this->get($url)->assertOk();
         }
 
         $this->actingAs(User::factory()->create());
         Livewire::test(CreateGame::class)->assertForbidden();
-        $this->get('/admin/games')->assertForbidden();
+        $this->get('/fr/admin/jeux')->assertForbidden();
 
         $unverified = User::factory()->unverified()->create();
         $unverified->forceFill(['is_admin' => true])->save();
         $this->actingAs($unverified);
-        $this->get('/admin/games')->assertForbidden();
+        $this->get('/fr/admin/jeux')->assertForbidden();
     }
 
     private function createWithImage(string $name): Game

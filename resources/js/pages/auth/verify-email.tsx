@@ -1,19 +1,23 @@
+import { useLocale } from '@/hooks/use-locale';
+import { useLocalizedRoutes } from '@/hooks/use-localized-routes';
 import { Form, Head } from '@inertiajs/react';
 import TextLink from '@/components/text-link';
 import { Button } from '@/components/ui/button';
 import { Spinner } from '@/components/ui/spinner';
-import { logout } from '@/routes';
-import { send } from '@/routes/verification';
 
 export default function VerifyEmail({ status }: { status?: string }) {
+    const { t } = useLocale();
+    const localized = useLocalizedRoutes();
+    const logout = localized['logout'];
+    const send = localized['verification.send'];
+
     return (
         <>
-            <Head title="Vérification e-mail" />
+            <Head title={t('auth.verify-email.email-verification')} />
 
             {status === 'verification-link-sent' && (
                 <div role="status" className="auth-status">
-                    Un nouveau lien de vérification a été envoyé à l’adresse
-                    e-mail utilisée lors de votre inscription.
+                    {t('auth.verify-email.link-sent')}
                 </div>
             )}
 
@@ -22,14 +26,14 @@ export default function VerifyEmail({ status }: { status?: string }) {
                     <>
                         <Button disabled={processing} className="w-full">
                             {processing && <Spinner />}
-                            Renvoyer le lien de vérification
+                            {t('auth.verify-email.resend-verification-link')}
                         </Button>
 
                         <TextLink
                             href={logout()}
                             className="mx-auto block text-sm"
                         >
-                            Se déconnecter
+                            {t('auth.verify-email.log-out')}
                         </TextLink>
                     </>
                 )}
@@ -39,7 +43,6 @@ export default function VerifyEmail({ status }: { status?: string }) {
 }
 
 VerifyEmail.layout = {
-    title: 'Vérifiez votre e-mail',
-    description:
-        'Encore une étape : cliquez sur le lien envoyé par e-mail pour activer votre compte.',
+    titleKey: 'auth.verify-email.verify-your-email',
+    descriptionKey: 'auth.verify-email.description',
 };

@@ -3,12 +3,12 @@
 namespace Tests\Feature\Settings;
 
 use App\Models\User;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\Concerns\ForwardOnlyRefreshDatabase;
 use Tests\TestCase;
 
 class ProfileUpdateTest extends TestCase
 {
-    use RefreshDatabase;
+    use ForwardOnlyRefreshDatabase;
 
     public function test_profile_page_is_displayed()
     {
@@ -16,7 +16,7 @@ class ProfileUpdateTest extends TestCase
 
         $response = $this
             ->actingAs($user)
-            ->get(route('profile.edit'));
+            ->get(route('site.fr.profile.edit'));
 
         $response->assertOk();
     }
@@ -27,14 +27,14 @@ class ProfileUpdateTest extends TestCase
 
         $response = $this
             ->actingAs($user)
-            ->patch(route('profile.update'), [
+            ->patch(route('site.fr.profile.update'), [
                 'name' => 'Test User',
                 'email' => 'test@example.com',
             ]);
 
         $response
             ->assertSessionHasNoErrors()
-            ->assertRedirect(route('profile.edit'));
+            ->assertRedirect(route('site.fr.profile.edit'));
 
         $user->refresh();
 
@@ -49,7 +49,7 @@ class ProfileUpdateTest extends TestCase
 
         $this
             ->actingAs($user)
-            ->patch(route('profile.update'), [
+            ->patch(route('site.fr.profile.update'), [
                 'name' => 'Test User',
                 'email' => 'Test@Example.com',
             ])
@@ -75,15 +75,15 @@ class ProfileUpdateTest extends TestCase
 
         $response = $this
             ->actingAs($user)
-            ->from(route('profile.edit'))
-            ->patch(route('profile.update'), [
+            ->from(route('site.fr.profile.edit'))
+            ->patch(route('site.fr.profile.update'), [
                 'name' => 'Test User',
                 'email' => 'Taken@Example.com',
             ]);
 
         $response
             ->assertSessionHasErrors('email')
-            ->assertRedirect(route('profile.edit'));
+            ->assertRedirect(route('site.fr.profile.edit'));
     }
 
     public function test_email_verification_status_is_unchanged_when_the_email_address_is_unchanged()
@@ -92,14 +92,14 @@ class ProfileUpdateTest extends TestCase
 
         $response = $this
             ->actingAs($user)
-            ->patch(route('profile.update'), [
+            ->patch(route('site.fr.profile.update'), [
                 'name' => 'Test User',
                 'email' => $user->email,
             ]);
 
         $response
             ->assertSessionHasNoErrors()
-            ->assertRedirect(route('profile.edit'));
+            ->assertRedirect(route('site.fr.profile.edit'));
 
         $this->assertNotNull($user->refresh()->email_verified_at);
     }
@@ -110,13 +110,13 @@ class ProfileUpdateTest extends TestCase
 
         $response = $this
             ->actingAs($user)
-            ->delete(route('profile.destroy'), [
+            ->delete(route('site.fr.profile.destroy'), [
                 'password' => 'password',
             ]);
 
         $response
             ->assertSessionHasNoErrors()
-            ->assertRedirect(route('home'));
+            ->assertRedirect(route('site.fr.home'));
 
         $this->assertGuest();
         $this->assertNull($user->fresh());
@@ -128,14 +128,14 @@ class ProfileUpdateTest extends TestCase
 
         $response = $this
             ->actingAs($user)
-            ->from(route('profile.edit'))
-            ->delete(route('profile.destroy'), [
+            ->from(route('site.fr.profile.edit'))
+            ->delete(route('site.fr.profile.destroy'), [
                 'password' => 'wrong-password',
             ]);
 
         $response
             ->assertSessionHasErrors('password')
-            ->assertRedirect(route('profile.edit'));
+            ->assertRedirect(route('site.fr.profile.edit'));
 
         $this->assertNotNull($user->fresh());
     }

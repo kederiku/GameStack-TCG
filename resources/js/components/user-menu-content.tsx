@@ -1,3 +1,5 @@
+import { useLocalizedRoutes } from '@/hooks/use-localized-routes';
+import { useLocale } from '@/hooks/use-locale';
 import { Link, router } from '@inertiajs/react';
 import { LogOut, Settings } from 'lucide-react';
 import {
@@ -8,8 +10,6 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { UserInfo } from '@/components/user-info';
 import { useMobileNavigation } from '@/hooks/use-mobile-navigation';
-import { logout } from '@/routes';
-import { edit } from '@/routes/profile';
 import type { User } from '@/types';
 
 type Props = {
@@ -18,6 +18,8 @@ type Props = {
 };
 
 export function UserMenuContent({ user, onNavigate }: Props) {
+    const { t } = useLocale();
+    const routes = useLocalizedRoutes();
     const cleanup = useMobileNavigation();
 
     const handleNavigate = () => {
@@ -42,12 +44,12 @@ export function UserMenuContent({ user, onNavigate }: Props) {
                 <DropdownMenuItem asChild>
                     <Link
                         className="block w-full cursor-pointer"
-                        href={edit()}
+                        href={routes['profile.edit']()}
                         prefetch
                         onClick={handleNavigate}
                     >
                         <Settings className="mr-2" />
-                        Paramètres
+                        {t('common.user-menu-content.settings')}
                     </Link>
                 </DropdownMenuItem>
             </DropdownMenuGroup>
@@ -55,13 +57,13 @@ export function UserMenuContent({ user, onNavigate }: Props) {
             <DropdownMenuItem asChild>
                 <Link
                     className="block w-full cursor-pointer"
-                    href={logout()}
+                    href={routes.logout()}
                     as="button"
                     onClick={handleLogout}
                     data-test="logout-button"
                 >
                     <LogOut className="mr-2" />
-                    Se déconnecter
+                    {t('common.user-menu-content.log-out')}
                 </Link>
             </DropdownMenuItem>
         </>

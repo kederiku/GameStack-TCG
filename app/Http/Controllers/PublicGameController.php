@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Game;
+use App\Support\Catalog\CatalogPresentation;
 use App\Support\Catalog\PublicCatalog;
 use App\Support\GameSlug;
 use App\Support\PublicGames;
@@ -24,7 +25,7 @@ class PublicGameController extends Controller
 
         return Inertia::render('games/show', [
             ...$this->pageProps($game),
-            'gameDetails' => ['publisher' => $game->publisher, 'startYear' => $game->start_year, 'endYear' => $game->end_year, 'description' => $game->description],
+            'gameDetails' => ['publisher' => $game->publisher, 'startYear' => $game->start_year, 'endYear' => $game->end_year, ...CatalogPresentation::description($game)],
             'catalogData' => $catalog->index($game, $request),
         ]);
     }

@@ -1,3 +1,5 @@
+import { useLocalizedRoutes } from '@/hooks/use-localized-routes';
+import { useLocale } from '@/hooks/use-locale';
 import { Link } from '@inertiajs/react';
 import {
     ArrowUpRight,
@@ -20,21 +22,36 @@ import {
     SidebarMenuItem,
     useSidebar,
 } from '@/components/ui/sidebar';
-import { dashboard, home } from '@/routes';
-import { edit as profile } from '@/routes/profile';
-import { edit as security } from '@/routes/security';
 import type { NavItem } from '@/types';
 
-const mainNavItems: NavItem[] = [
-    { title: 'Mon espace', href: dashboard(), icon: LayoutGrid },
-    { title: 'Explorer les jeux', href: `${home.url()}#jeux`, icon: Compass },
-];
-const accountNavItems: NavItem[] = [
-    { title: 'Mon profil', href: profile(), icon: UserRound },
-    { title: 'Sécurité', href: security(), icon: ShieldCheck },
-];
-
 export function AppSidebar() {
+    const { t } = useLocale();
+    const routes = useLocalizedRoutes();
+    const mainNavItems: NavItem[] = [
+        {
+            title: t('common.app-sidebar.my-space'),
+            href: routes.dashboard(),
+            icon: LayoutGrid,
+        },
+        {
+            title: t('common.app-sidebar.explore-games'),
+            href: `${routes.home.url()}#jeux`,
+            icon: Compass,
+        },
+    ];
+    const accountNavItems: NavItem[] = [
+        {
+            title: t('common.app-sidebar.my-profile'),
+            href: routes['profile.edit'](),
+            icon: UserRound,
+        },
+        {
+            title: t('common.app-sidebar.security'),
+            href: routes['security.edit'](),
+            icon: ShieldCheck,
+        },
+    ];
+
     const { setOpenMobile } = useSidebar();
 
     return (
@@ -47,8 +64,10 @@ export function AppSidebar() {
                             className="h-auto py-2 hover:bg-transparent"
                         >
                             <Link
-                                href={home()}
-                                aria-label="GameStackr TCG — accueil"
+                                href={routes.home()}
+                                aria-label={t(
+                                    'common.app-sidebar.gamestackr-tcg-home',
+                                )}
                                 onClick={() => setOpenMobile(false)}
                             >
                                 <BrandLogo className="brand-logo-small group-data-[collapsible=icon]:[&>.brand-logo-name]:hidden" />
@@ -58,23 +77,31 @@ export function AppSidebar() {
                 </SidebarMenu>
             </SidebarHeader>
             <SidebarContent className="gap-7 py-6">
-                <NavMain label="Votre espace" items={mainNavItems} />
-                <NavMain label="Compte" items={accountNavItems} />
+                <NavMain
+                    label={t('common.app-sidebar.your-space')}
+                    items={mainNavItems}
+                />
+                <NavMain
+                    label={t('common.app-sidebar.account')}
+                    items={accountNavItems}
+                />
             </SidebarContent>
             <SidebarFooter className="gap-3 border-t border-sidebar-border p-3 group-data-[collapsible=icon]:p-2">
                 <SidebarMenu>
                     <SidebarMenuItem>
                         <SidebarMenuButton
                             asChild
-                            tooltip="Retour à l’accueil"
+                            tooltip={t('common.app-sidebar.back-to-home')}
                             className="h-11"
                         >
                             <Link
-                                href={home()}
+                                href={routes.home()}
                                 onClick={() => setOpenMobile(false)}
                             >
                                 <House aria-hidden="true" />
-                                <span>Retour à l’accueil</span>
+                                <span>
+                                    {t('common.app-sidebar.back-to-home')}
+                                </span>
                                 <ArrowUpRight
                                     className="ml-auto"
                                     aria-hidden="true"

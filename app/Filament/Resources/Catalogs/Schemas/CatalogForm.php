@@ -3,6 +3,9 @@
 namespace App\Filament\Resources\Catalogs\Schemas;
 
 use App\Filament\Support\Catalog\CatalogFields;
+use App\Filament\Support\Catalog\TranslationFields;
+use App\Models\Catalog;
+use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 
 class CatalogForm
@@ -11,10 +14,13 @@ class CatalogForm
     {
         return CatalogFields::layout($schema, [
             CatalogFields::game(),
-            CatalogFields::language('default_language_id', 'Langue par défaut')
-                ->helperText('Langue des noms sans traduction. Indépendante des langues imprimées.'),
-            CatalogFields::name()->helperText('Un nom qui distingue ce catalogue dans le jeu, par exemple International ou Japonais.'),
-            CatalogFields::description(),
-        ], [CatalogFields::visibility()], description: 'Un catalogue rassemble les extensions d’une même version du jeu : internationale, japonaise, etc. Créez-en un autre si les ensembles diffèrent selon les marchés ; une simple traduction peut rester dans le même catalogue.', advanced: [CatalogFields::key(), CatalogFields::order()]);
+            CatalogFields::language('default_language_id', __('admin.labels.default-language'))
+                ->helperText(__('admin.catalogs.language_help')),
+            ...TranslationFields::schema(Catalog::class),
+            Section::make(__('admin.translation.reference'))->columnSpanFull()->schema([
+                CatalogFields::name(__('admin.translation.reference_name')),
+                CatalogFields::description('reference_description'),
+            ]),
+        ], [CatalogFields::visibility()], description: __('admin.catalogs.help'), advanced: [CatalogFields::key(), CatalogFields::order()]);
     }
 }

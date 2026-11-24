@@ -3,19 +3,19 @@
 namespace Tests\Feature\Auth;
 
 use App\Models\User;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\RateLimiter;
 use Inertia\Testing\AssertableInertia as Assert;
 use Laravel\Fortify\Features;
+use Tests\Concerns\ForwardOnlyRefreshDatabase;
 use Tests\TestCase;
 
 class AuthenticationTest extends TestCase
 {
-    use RefreshDatabase;
+    use ForwardOnlyRefreshDatabase;
 
     public function test_login_screen_can_be_rendered()
     {
-        $response = $this->get(route('login'));
+        $response = $this->get(route('site.fr.login'));
 
         $response->assertOk();
     }
@@ -24,14 +24,14 @@ class AuthenticationTest extends TestCase
     {
         config(['fortify.features' => [Features::registration()]]);
 
-        $this->get(route('login'))->assertInertia(fn (Assert $page) => $page
+        $this->get(route('site.fr.login'))->assertInertia(fn (Assert $page) => $page
             ->component('auth/login')
             ->where('canRegister', true)
         );
 
         config(['fortify.features' => []]);
 
-        $this->get(route('login'))->assertInertia(fn (Assert $page) => $page
+        $this->get(route('site.fr.login'))->assertInertia(fn (Assert $page) => $page
             ->component('auth/login')
             ->where('canRegister', false)
         );
@@ -41,22 +41,22 @@ class AuthenticationTest extends TestCase
     {
         $user = User::factory()->create();
 
-        $response = $this->post(route('login.store'), [
+        $response = $this->post(route('site.fr.login.store'), [
             'email' => $user->email,
             'password' => 'password',
         ]);
 
         $this->assertAuthenticated();
-        $response->assertRedirect(route('dashboard', absolute: false));
+        $response->assertRedirect(route('site.fr.dashboard', absolute: false));
     }
 
     public function test_inertia_login_keeps_ordinary_redirects_to_the_dashboard(): void
     {
         $user = User::factory()->create();
 
-        $this->get('/dashboard')->assertRedirect('/login');
+        $this->get('/fr/mon-espace')->assertRedirect('/fr/connexion');
         $this->post('/login', ['email' => $user->email, 'password' => 'password'], ['X-Inertia' => 'true'])
-            ->assertRedirect('/dashboard')
+            ->assertRedirect('/fr/mon-espace')
             ->assertHeaderMissing('X-Inertia-Location');
     }
 
@@ -71,12 +71,12 @@ class AuthenticationTest extends TestCase
 
         $user = User::factory()->withTwoFactor()->create();
 
-        $response = $this->post(route('login'), [
+        $response = $this->post(route('site.fr.login'), [
             'email' => $user->email,
             'password' => 'password',
         ]);
 
-        $response->assertRedirect(route('two-factor.login'));
+        $response->assertRedirect(route('site.fr.two-factor.login'));
         $response->assertSessionHas('login.id', $user->id);
         $this->assertGuest();
     }
@@ -85,7 +85,7 @@ class AuthenticationTest extends TestCase
     {
         $user = User::factory()->create();
 
-        $this->post(route('login.store'), [
+        $this->post(route('site.fr.login.store'), [
             'email' => $user->email,
             'password' => 'wrong-password',
         ]);
@@ -97,9 +97,9 @@ class AuthenticationTest extends TestCase
     {
         $user = User::factory()->create();
 
-        $response = $this->actingAs($user)->post(route('logout'));
+        $response = $this->actingAs($user)->post(route('site.fr.logout'));
 
-        $response->assertRedirect(route('home'));
+        $response->assertRedirect(route('site.fr.home'));
 
         $this->assertGuest();
     }
@@ -110,7 +110,7 @@ class AuthenticationTest extends TestCase
 
         RateLimiter::increment(md5('login'.implode('|', [$user->email, '127.0.0.1'])), amount: 5);
 
-        $response = $this->post(route('login.store'), [
+        $response = $this->post(route('site.fr.login.store'), [
             'email' => $user->email,
             'password' => 'wrong-password',
         ]);

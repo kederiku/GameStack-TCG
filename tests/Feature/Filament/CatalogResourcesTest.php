@@ -11,7 +11,6 @@ use App\Filament\Resources\Expansions\Pages\CreateExpansion;
 use App\Filament\Resources\Expansions\Pages\EditExpansion;
 use App\Filament\Resources\Expansions\Pages\ListExpansions;
 use App\Filament\Resources\Expansions\RelationManagers\EditionsRelationManager;
-use App\Filament\Resources\Expansions\RelationManagers\ExpansionLocalizationsRelationManager;
 use App\Filament\Resources\Expansions\RelationManagers\RelationsRelationManager;
 use App\Filament\Resources\Games\Pages\EditGame;
 use App\Filament\Resources\Games\Pages\ListGames;
@@ -21,27 +20,28 @@ use App\Filament\Resources\Markets\Pages\CreateMarket;
 use App\Filament\Resources\Markets\Pages\EditMarket;
 use App\Filament\Resources\Series\Pages\CreateSeries;
 use App\Filament\Resources\Series\Pages\EditSeries;
-use App\Filament\Resources\Series\RelationManagers\SeriesLocalizationsRelationManager;
+use App\Filament\Resources\Series\RelationManagers\ImagesRelationManager;
 use App\Models\Catalog;
 use App\Models\ExpansionRelation;
 use App\Models\Game;
 use App\Models\User;
+use App\Support\Localization\AdminPanels;
 use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Facades\Filament;
-use Illuminate\Foundation\Testing\DatabaseMigrations;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Livewire;
 use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\Concerns\BuildsCatalog;
+use Tests\Concerns\ForwardOnlyDatabaseMigrations;
 use Tests\TestCase;
 
 class CatalogResourcesTest extends TestCase
 {
-    use BuildsCatalog, DatabaseMigrations;
+    use BuildsCatalog, ForwardOnlyDatabaseMigrations;
 
     protected function setUp(): void
     {
@@ -49,7 +49,7 @@ class CatalogResourcesTest extends TestCase
 
         Storage::fake('public');
         config(['game-images.disk' => 'public']);
-        Filament::setCurrentPanel(Filament::getPanel('admin'));
+        Filament::setCurrentPanel(Filament::getPanel(AdminPanels::id('fr')));
         $this->actingAs(User::factory()->create(['is_admin' => true]));
     }
 
@@ -129,13 +129,12 @@ class CatalogResourcesTest extends TestCase
     {
         $expansion = $this->expansion($this->catalog());
         $language = $this->language('ja', 'Japonais');
-        Livewire::test(ExpansionLocalizationsRelationManager::class, [
-            'ownerRecord' => $expansion, 'pageClass' => EditExpansion::class,
-        ])->callTableAction(CreateAction::class, data: [
-            'language_id' => $language->id, 'name' => 'ポケモンカード', 'description' => '拡張パック',
-        ])->assertHasNoActionErrors();
-
-        $this->assertDatabaseHas('expansion_localizations', ['language_id' => $language->id, 'name' => 'ポケモンカード', 'expansion_id' => $expansion->id]);
+        Livewire::test(EditExpansion::class, ['record' => $expansion->id])
+            ->set('data.translation.locale', $language->code)
+            ->fillForm(['translation.display_name' => 'ポケモンカード', 'translation.description' => '拡張パック'])
+            ->call('save')->assertHasNoFormErrors();
+        $this->assertSame(['ja' => 'ポケモンカード'], $expansion->refresh()->getTranslations('display_name'));
+        $this->assertSame(['ja' => '拡張パック'], $expansion->getTranslations('description'));
         $this->assertDatabaseCount('expansion_editions', 0);
     }
 
@@ -145,10 +144,10 @@ class CatalogResourcesTest extends TestCase
         $series = $this->series($catalog);
         $expansion = $this->expansion($catalog, $series);
         $language = $this->language();
-        Livewire::test(SeriesLocalizationsRelationManager::class, [
+        Livewire::test(ImagesRelationManager::class, [
             'ownerRecord' => $series, 'pageClass' => EditSeries::class,
         ])->callTableAction(CreateAction::class, data: [
-            'language_id' => $language->id, 'name' => 'Series', 'image' => UploadedFile::fake()->image('series.png'),
+            'language_id' => $language->id, 'image' => UploadedFile::fake()->image('series.png'),
         ])->assertHasNoActionErrors();
         Livewire::test(EditionsRelationManager::class, [
             'ownerRecord' => $expansion, 'pageClass' => EditExpansion::class,
@@ -157,7 +156,7 @@ class CatalogResourcesTest extends TestCase
         ])->assertHasNoActionErrors();
 
         $edition = $expansion->editions()->sole();
-        $seriesImage = $series->localizations()->sole()->image;
+        $seriesImage = $series->images()->sole()->image;
         $this->assertNotNull($seriesImage);
         $this->assertNotNull($edition->image);
         $this->assertNotSame($seriesImage, $edition->image);
@@ -170,8 +169,8 @@ class CatalogResourcesTest extends TestCase
         $expansion = $this->expansion($this->catalog());
         $edition = $this->edition($expansion);
         $market = $this->market();
-        $editionUrl = url('/admin/expansion-editions/'.$edition->id.'/edit');
-        $expansionUrl = url('/admin/expansions/'.$expansion->id.'/edit');
+        $editionUrl = url('/fr/admin/editions/'.$edition->id.'/modifier');
+        $expansionUrl = url('/fr/admin/extensions/'.$expansion->id.'/modifier');
         $this->get($editionUrl)->assertOk()->assertSee('Sorties')->assertSee($expansionUrl);
         Livewire::test(EditionsRelationManager::class, [
             'ownerRecord' => $expansion, 'pageClass' => EditExpansion::class,
@@ -377,21 +376,26 @@ class CatalogResourcesTest extends TestCase
                 ->mountTableBulkAction(DeleteBulkAction::class, [$expansion])
                 ->assertTableBulkActionMounted(DeleteBulkAction::class);
             $edit = Livewire::test(EditCatalog::class, ['record' => $catalog->id])->fillForm(['name' => 'Intrus']);
-            $manager = Livewire::test(ExpansionLocalizationsRelationManager::class, [
+            $translation = Livewire::test(EditExpansion::class, ['record' => $expansion->id])
+                ->set('data.translation.locale', $language->code)
+                ->fillForm(['translation.display_name' => 'Intrus']);
+            $manager = Livewire::test(EditionsRelationManager::class, [
                 'ownerRecord' => $expansion, 'pageClass' => EditExpansion::class,
             ])->mountTableAction(CreateAction::class)->assertTableActionMounted(CreateAction::class)
-                ->setTableActionData(['language_id' => $language->id, 'name' => 'Intrus']);
+                ->setTableActionData(['language_id' => $language->id, 'name' => 'Intrus', 'status' => 'announced']);
 
             $this->actingAs($deniedUser);
-            $this->get('/admin/catalogs')->assertForbidden();
+            $this->get('/fr/admin/catalogues')->assertForbidden();
             Livewire::test(CreateCatalog::class)->assertForbidden();
             $edit->call('save')->assertForbidden();
             $list->call('callMountedAction')->assertForbidden();
             $manager->call('callMountedAction')->assertForbidden();
+            $translation->call('save')->assertForbidden();
 
             $this->assertSame('International', $catalog->refresh()->name);
             $this->assertModelExists($expansion);
-            $this->assertDatabaseCount('expansion_localizations', 0);
+            $this->assertSame([], $expansion->refresh()->getTranslations('display_name'));
+            $this->assertDatabaseCount('expansion_editions', 0);
         }
     }
 }

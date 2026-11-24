@@ -1,8 +1,10 @@
+import { LanguageSwitcher } from '@/components/language-switcher';
+import { useLocalizedRoutes } from '@/hooks/use-localized-routes';
+import { useLocale } from '@/hooks/use-locale';
 import { Link, usePage } from '@inertiajs/react';
 import { ArrowLeft } from 'lucide-react';
 import { AuthGameMarquee } from '@/components/auth-game-marquee';
 import { BrandLogo } from '@/components/brand-logo';
-import { home } from '@/routes';
 import type { AuthLayoutProps } from '@/types';
 import type { PublicGame } from '@/types/game';
 
@@ -11,18 +13,17 @@ export default function AuthImmersiveLayout({
     title,
     description,
 }: AuthLayoutProps) {
+    const { t } = useLocale();
+    const routes = useLocalizedRoutes();
     const { games } = usePage<{ games: PublicGame[] }>().props;
 
     return (
-        <div
-            lang="fr"
-            className="flex min-h-svh flex-col justify-center bg-background p-4 text-foreground sm:p-6 lg:p-8"
-        >
+        <div className="flex min-h-svh flex-col justify-center bg-background p-4 text-foreground sm:p-6 lg:p-8">
             <a
                 href="#auth-content"
                 className="sr-only z-50 rounded-md bg-primary px-4 py-3 text-primary-foreground focus:not-sr-only focus:absolute focus:top-2 focus:left-2"
             >
-                Aller au formulaire
+                {t('auth.auth-immersive-layout.skip-to-form')}
             </a>
             <main
                 id="auth-content"
@@ -35,8 +36,10 @@ export default function AuthImmersiveLayout({
                     <div className="w-full max-w-sm min-w-0">
                         <div className="mb-8 flex justify-center sm:mb-10">
                             <Link
-                                href={home()}
-                                aria-label="GameStackr TCG — accueil"
+                                href={routes.home()}
+                                aria-label={t(
+                                    'auth.auth-immersive-layout.gamestackr-tcg-home',
+                                )}
                                 className="auth-brand rounded-sm focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ring"
                             >
                                 <BrandLogo />
@@ -53,17 +56,18 @@ export default function AuthImmersiveLayout({
                                 {description}
                             </p>
                         </div>
+                        <LanguageSwitcher />
                         {children}
                         <footer className="mt-8 border-t border-border pt-6 text-center">
                             <Link
-                                href={home()}
+                                href={routes.home()}
                                 className="inline-flex min-h-11 items-center justify-center gap-2 rounded-sm text-sm text-muted-foreground focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ring"
                             >
                                 <ArrowLeft className="size-4" />
-                                Retour à l’accueil
+                                {t('auth.auth-immersive-layout.back-to-home')}
                             </Link>
                             <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
-                                Vos cartes, vos collections, votre espace.
+                                {t('auth.auth-immersive-layout.tagline')}
                             </p>
                         </footer>
                     </div>

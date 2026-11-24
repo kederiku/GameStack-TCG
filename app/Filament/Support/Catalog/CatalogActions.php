@@ -25,7 +25,7 @@ class CatalogActions
         }
 
         try {
-            $saved = app(SaveCatalogRecord::class)->handle($record, $data);
+            $saved = TranslationFields::save($record, $data, app(SaveCatalogRecord::class)->handle(...));
         } catch (ValidationException $exception) {
             $messages = [];
             foreach ($exception->errors() as $field => $errors) {
@@ -48,13 +48,13 @@ class CatalogActions
     public static function delete(): DeleteAction
     {
         return DeleteAction::make()
-            ->label('Supprimer')
+            ->label(__('admin.labels.delete'))
             ->color('gray')
             ->outlined()
-            ->modalHeading('Supprimer cette fiche ?')
-            ->modalSubmitActionLabel('Supprimer')
-            ->modalCancelActionLabel('Annuler')
-            ->successNotificationTitle('Fiche supprimée')
+            ->modalHeading(__('admin.labels.delete-this-record'))
+            ->modalSubmitActionLabel(__('admin.labels.delete'))
+            ->modalCancelActionLabel(__('admin.labels.cancel'))
+            ->successNotificationTitle(__('admin.labels.record-deleted'))
             ->using(static function (CatalogRecord|Game $record): ?bool {
                 Gate::authorize('delete', $record);
 
@@ -75,12 +75,12 @@ class CatalogActions
     public static function deleteBulk(): DeleteBulkAction
     {
         return DeleteBulkAction::make()
-            ->label('Supprimer la sélection')
-            ->modalHeading('Supprimer les fiches sélectionnées ?')
-            ->modalSubmitActionLabel('Supprimer')
-            ->modalCancelActionLabel('Annuler')
-            ->successNotificationTitle('Sélection supprimée')
-            ->failureNotificationTitle('Certaines fiches n’ont pas pu être supprimées')
+            ->label(__('admin.labels.delete-selection'))
+            ->modalHeading(__('admin.records.delete_selection_confirm'))
+            ->modalSubmitActionLabel(__('admin.labels.delete'))
+            ->modalCancelActionLabel(__('admin.labels.cancel'))
+            ->successNotificationTitle(__('admin.labels.selection-deleted'))
+            ->failureNotificationTitle(__('admin.records.partial_delete_failure'))
             ->authorizeIndividualRecords('delete')
             ->using(static function (DeleteBulkAction $action, Collection $records): void {
                 Gate::authorize('deleteAny', $action->getModel());

@@ -1,3 +1,5 @@
+import type { LocaleDefinition } from '@/i18n/generated/types';
+import type { LocaleCode } from '@/i18n/types';
 import type { Auth } from '@/types/auth';
 
 declare module 'react' {
@@ -10,7 +12,16 @@ declare module '@inertiajs/core' {
     export interface InertiaConfig {
         sharedPageProps: {
             name: string;
-            locale: 'fr' | 'en';
+            locale: LocaleCode;
+            availableLocales: LocaleDefinition[];
+            localizedUrls: Partial<Record<LocaleCode, string>>;
+            direction: 'ltr' | 'rtl';
+            metadata: {
+                canonical: string | null;
+                alternates: Record<string, string>;
+                robots: string | null;
+            };
+            routeKey: string | null;
             auth: Auth;
             sidebarOpen: boolean;
             [key: string]: unknown;

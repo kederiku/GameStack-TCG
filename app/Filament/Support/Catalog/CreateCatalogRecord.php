@@ -30,27 +30,27 @@ abstract class CreateCatalogRecord extends CreateRecord
 
     public function getTitle(): string
     {
-        return 'Créer · '.static::getResource()::getTitleCaseModelLabel();
+        return __('admin.record_titles.create', ['resource' => static::getResource()::getTitleCaseModelLabel()]);
     }
 
     public function getBreadcrumb(): string
     {
-        return 'Créer';
+        return __('admin.labels.create');
     }
 
     protected function getCreateFormAction(): Action
     {
-        return parent::getCreateFormAction()->label('Créer');
+        return parent::getCreateFormAction()->label(__('admin.labels.create'));
     }
 
     protected function getCancelFormAction(): Action
     {
-        return parent::getCancelFormAction()->label('Annuler');
+        return parent::getCancelFormAction()->label(__('admin.labels.cancel'));
     }
 
     protected function getCreatedNotificationTitle(): string
     {
-        return 'Fiche créée';
+        return __('admin.labels.record-created');
     }
 
     public function canCreateAnother(): bool

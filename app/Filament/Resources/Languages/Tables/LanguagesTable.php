@@ -10,7 +10,7 @@ class LanguagesTable
     public static function configure(Table $table): Table
     {
         return CatalogTables::standard($table)->columns([
-            CatalogTables::name('Langue'), CatalogTables::key('code', 'Code'),
+            CatalogTables::name(__('admin.labels.language')), CatalogTables::key('code', __('admin.labels.code')),
         ]);
     }
 }

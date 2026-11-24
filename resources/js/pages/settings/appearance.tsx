@@ -1,25 +1,28 @@
+import { useLocale } from '@/hooks/use-locale';
 import { Head } from '@inertiajs/react';
 import { Palette } from 'lucide-react';
 import SettingsSection from '@/components/settings-section';
-import { edit as editAppearance } from '@/routes/appearance';
 
 export default function Appearance() {
+    const { t } = useLocale();
     return (
         <>
-            <Head title="Apparence" />
+            <Head title={t('account.appearance.appearance')} />
             <SettingsSection
                 id="appearance"
-                title="L’apparence GameStackr"
-                description="Un thème sombre commun à tout votre espace."
+                title={t('account.appearance.the-gamestackr-appearance')}
+                description={t('account.appearance.description')}
                 icon={Palette}
             >
                 <p className="mt-6 border-t border-border pt-5 text-xs leading-6 text-muted-foreground">
-                    Le mode sombre est activé sur l’ensemble du site.
+                    {t('account.appearance.dark-mode')}
                 </p>
             </SettingsSection>
         </>
     );
 }
 Appearance.layout = {
-    breadcrumbs: [{ title: 'Apparence', href: editAppearance() }],
+    breadcrumbs: [
+        { title: 'account.appearance.appearance', route: 'appearance.edit' },
+    ],
 };

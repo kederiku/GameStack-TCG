@@ -4,13 +4,13 @@
 // de visibilité sont éditoriaux. Les champs factuels indiqués dans "facts" pointent
 // vers tcg-catalog-sources.php. Les clés du manifeste survivent aux renommages.
 $records = [];
-$add = function (string $type, string $key, array $attributes, array $references = [], array $facts = [], ?string $asset = null) use (&$records): string {
-    $manifestKey = $type.':'.$key;
+$add = function (string $type, string $key, array $attributes, array $references = [], array $facts = [], ?string $asset = null, ?string $locale = null) use (&$records): string {
+    $manifestKey = $type.($locale === null ? '' : '-localization').':'.$key;
     if (isset($records[$manifestKey])) {
         throw new LogicException('Clé d’exemple dupliquée : '.$manifestKey);
     }
 
-    $records[$manifestKey] = compact('type', 'attributes', 'references', 'facts', 'asset');
+    $records[$manifestKey] = compact('type', 'attributes', 'references', 'facts', 'asset', 'locale');
 
     return $manifestKey;
 };
@@ -47,7 +47,7 @@ $series = function (string $catalog, string $key, string $name, string $type, ar
         if ($assetSource !== null) {
             $facts['image'] = $assetSource;
         }
-        $add('series-localization', "$catalog/$key/$language", ['name' => $localizedName], ['series_id' => $id, 'language_id' => 'language:'.$language], $facts, $asset);
+        $add('series', "$catalog/$key/$language", ['display_name' => $localizedName], ['series_id' => $id, 'language_id' => 'language:'.$language], $facts, $asset, $language);
     }
 };
 
@@ -73,7 +73,7 @@ $set = function (string $catalog, string $key, array $editions, ?string $series 
         $name = $edition['name'];
         $references = ['expansion_id' => $id, 'language_id' => 'language:'.$language];
         if (count($editions) > 1) {
-            $add('expansion-localization', "$path/$language", ['name' => $name], $references, ['name' => $edition['facts']['name']]);
+            $add('expansion', "$path/$language", ['display_name' => $name], $references, ['name' => $edition['facts']['name']], locale: $language);
         }
 
         $editionId = $add(
@@ -128,10 +128,10 @@ $set('pokemon/traditional-chinese', '151', ['zh-Hant' => $edition('寶可夢卡�
 $set('pokemon/traditional-chinese', 'set-b', ['zh-Hant' => $edition('眾星雲集組合篇 SET B', 'P9')], 'sun-moon', 'special');
 $set('pokemon/simplified-chinese', '151-jing', ['zh-Hans' => $edition('收集啦151 惊', 'P10', [$release('mainland-china', '2025-07-18', 'P10')])], 'scarlet-violet', 'special');
 $set('pokemon/simplified-chinese', '151-ju', ['zh-Hans' => $edition('收集啦151 聚', 'P10', [$release('mainland-china', '2025-10-17', 'P10')])], 'scarlet-violet', 'special');
-$add('expansion-localization', 'pokemon/japanese/151/fr', [
-    'name' => 'Pokémon 151 (Japon)',
+$add('expansion', 'pokemon/japanese/151/fr', [
+    'display_name' => 'Pokémon 151 (Japon)',
     'description' => 'Présentation française rédigée pour le site. Cet ensemble japonais ne désigne pas une édition imprimée en français.',
-], ['expansion_id' => 'expansion:pokemon/japanese/151', 'language_id' => 'language:fr'], ['ensemble décrit' => 'P6']);
+], ['expansion_id' => 'expansion:pokemon/japanese/151', 'language_id' => 'language:fr'], ['ensemble décrit' => 'P6'], locale: 'fr');
 
 $add('game', 'magic', ['slug' => 'magic', 'name' => 'Magic: The Gathering', 'is_visible' => false], facts: ['name' => 'M2']);
 $catalog('magic', 'international', 'International', 'en');

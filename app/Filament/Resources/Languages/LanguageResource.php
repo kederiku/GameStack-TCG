@@ -2,11 +2,13 @@
 
 namespace App\Filament\Resources\Languages;
 
+use App\Filament\Concerns\HasLocalizedRoutes;
 use App\Filament\Resources\Languages\Pages\CreateLanguage;
 use App\Filament\Resources\Languages\Pages\EditLanguage;
 use App\Filament\Resources\Languages\Pages\ListLanguages;
 use App\Filament\Resources\Languages\Schemas\LanguageForm;
 use App\Filament\Resources\Languages\Tables\LanguagesTable;
+use App\Filament\Support\LocalizedPageRegistration;
 use App\Models\Language;
 use BackedEnum;
 use Filament\Resources\Pages\PageRegistration;
@@ -14,22 +16,17 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
-use UnitEnum;
 
 /** @extends resource<Language> */
 class LanguageResource extends Resource
 {
+    use HasLocalizedRoutes;
+
+    protected static string $localizationKey = 'languages';
+
     protected static ?string $model = Language::class;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedLanguage;
-
-    protected static ?string $modelLabel = 'langue';
-
-    protected static ?string $pluralModelLabel = 'langues';
-
-    protected static ?string $navigationLabel = 'Langues';
-
-    protected static string|UnitEnum|null $navigationGroup = 'Référentiels';
 
     protected static ?int $navigationSort = 10;
 
@@ -49,9 +46,9 @@ class LanguageResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => ListLanguages::route('/'),
-            'create' => CreateLanguage::route('/create'),
-            'edit' => EditLanguage::route('/{record}/edit'),
+            'index' => LocalizedPageRegistration::make(ListLanguages::class, 'index'),
+            'create' => LocalizedPageRegistration::make(CreateLanguage::class, 'create'),
+            'edit' => LocalizedPageRegistration::make(EditLanguage::class, 'edit'),
         ];
     }
 }

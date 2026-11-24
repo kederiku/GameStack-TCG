@@ -10,6 +10,6 @@ abstract class ListCatalogRecords extends ListRecords
     /** @return list<CreateAction> */
     protected function getHeaderActions(): array
     {
-        return [CreateAction::make()->label('Créer')];
+        return [CreateAction::make()->label(__('admin.labels.create'))];
     }
 }

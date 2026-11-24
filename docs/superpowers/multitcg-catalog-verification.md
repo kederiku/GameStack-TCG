@@ -87,7 +87,7 @@ et le conteneur temporaire arrêté après le parcours.
   « Cette série est rattachée à des extensions. Détachez-les avant la suppression. »
 
 Les libellés et actions ajoutés sont français. Les textes génériques de
-Filament suivent `APP_LOCALE`, actuellement anglais, comme le panneau existant.
+Filament suivaient alors la langue anglaise du panneau. Le registre des langues du site configure désormais les panneaux localisés.
 
 Le parcours a révélé un état de formulaire périmé après publication d’une
 sortie : l’édition est publiée en base mais son sélecteur affichait encore

@@ -1,3 +1,5 @@
+import { useLocale } from '@/hooks/use-locale';
+import { useLocalizedRoutes } from '@/hooks/use-localized-routes';
 import { Form } from '@inertiajs/react';
 import { Eye, EyeOff, LockKeyhole, RefreshCw } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
@@ -10,7 +12,6 @@ import {
     CardHeader,
     CardTitle,
 } from '@/components/ui/card';
-import { regenerateRecoveryCodes } from '@/routes/two-factor';
 
 type Props = {
     recoveryCodesList: string[];
@@ -23,6 +24,11 @@ export default function TwoFactorRecoveryCodes({
     fetchRecoveryCodes,
     errors,
 }: Props) {
+    const { t } = useLocale();
+    const localized = useLocalizedRoutes();
+    const regenerateRecoveryCodes =
+        localized['two-factor.regenerate-recovery-codes'];
+
     const [codesAreVisible, setCodesAreVisible] = useState<boolean>(false);
     const codesSectionRef = useRef<HTMLDivElement | null>(null);
     const canRegenerateCodes = recoveryCodesList.length > 0 && codesAreVisible;
@@ -61,11 +67,10 @@ export default function TwoFactorRecoveryCodes({
             <CardHeader>
                 <CardTitle className="flex items-center gap-3 text-xl">
                     <LockKeyhole className="size-4" aria-hidden="true" />
-                    Codes de récupération
+                    {t('auth.two-factor-recovery-codes.recovery-codes')}
                 </CardTitle>
                 <CardDescription>
-                    Ces codes permettent de retrouver votre compte si vous
-                    perdez votre appareil. Conservez-les dans un endroit sûr.
+                    {t('auth.two-factor-recovery-codes.description')}
                 </CardDescription>
             </CardHeader>
             <CardContent>
@@ -81,8 +86,8 @@ export default function TwoFactorRecoveryCodes({
                             aria-hidden="true"
                         />
                         {codesAreVisible
-                            ? 'Masquer les codes'
-                            : 'Afficher les codes'}
+                            ? t('auth.two-factor-recovery-codes.hide-codes')
+                            : t('auth.two-factor-recovery-codes.show-codes')}
                     </Button>
 
                     {canRegenerateCodes && (
@@ -98,7 +103,10 @@ export default function TwoFactorRecoveryCodes({
                                     disabled={processing}
                                     aria-describedby="regenerate-warning"
                                 >
-                                    <RefreshCw /> Régénérer les codes
+                                    <RefreshCw />
+                                    {t(
+                                        'auth.two-factor-recovery-codes.regenerate-codes',
+                                    )}
                                 </Button>
                             )}
                         </Form>
@@ -118,7 +126,9 @@ export default function TwoFactorRecoveryCodes({
                                     ref={codesSectionRef}
                                     className="grid gap-2 rounded-xl border border-border bg-card p-4 font-mono text-sm sm:grid-cols-2"
                                     role="list"
-                                    aria-label="Codes de récupération"
+                                    aria-label={t(
+                                        'auth.two-factor-recovery-codes.recovery-codes',
+                                    )}
                                 >
                                     {recoveryCodesList.length ? (
                                         recoveryCodesList.map((code, index) => (
@@ -133,7 +143,9 @@ export default function TwoFactorRecoveryCodes({
                                     ) : (
                                         <div
                                             className="space-y-2"
-                                            aria-label="Chargement des codes de récupération"
+                                            aria-label={t(
+                                                'auth.two-factor-recovery-codes.loading-recovery-codes',
+                                            )}
                                         >
                                             {Array.from(
                                                 { length: 8 },
@@ -151,10 +163,9 @@ export default function TwoFactorRecoveryCodes({
 
                                 <div className="text-xs text-muted-foreground select-none">
                                     <p id="regenerate-warning">
-                                        Chaque code est à usage unique. En
-                                        régénérant les codes, vous remplacez les
-                                        anciens : pensez à conserver la nouvelle
-                                        liste.
+                                        {t(
+                                            'auth.two-factor-recovery-codes.warning',
+                                        )}
                                     </p>
                                 </div>
                             </>

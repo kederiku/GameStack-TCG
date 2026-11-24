@@ -1,3 +1,4 @@
+import { useLocale } from '@/hooks/use-locale';
 import { Slot } from "@radix-ui/react-slot"
 import { ChevronRight, MoreHorizontal } from "lucide-react"
 import * as React from "react"
@@ -5,7 +6,8 @@ import * as React from "react"
 import { cn } from "@/lib/utils"
 
 function Breadcrumb({ ...props }: React.ComponentProps<"nav">) {
-  return <nav aria-label="Fil d’Ariane" data-slot="breadcrumb" {...props} />
+    const { t } = useLocale();
+  return <nav aria-label={t('common.breadcrumb.breadcrumb')} data-slot="breadcrumb" {...props} />
 }
 
 function BreadcrumbList({ className, ...props }: React.ComponentProps<"ol">) {
@@ -84,6 +86,7 @@ function BreadcrumbEllipsis({
   className,
   ...props
 }: React.ComponentProps<"span">) {
+    const { t } = useLocale();
   return (
     <span
       data-slot="breadcrumb-ellipsis"
@@ -93,7 +96,7 @@ function BreadcrumbEllipsis({
       {...props}
     >
       <MoreHorizontal className="size-4" />
-      <span className="sr-only">Plus</span>
+      <span className="sr-only">{t('common.breadcrumb.more')}</span>
     </span>
   )
 }

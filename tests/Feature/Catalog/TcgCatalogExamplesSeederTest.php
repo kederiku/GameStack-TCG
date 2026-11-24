@@ -10,19 +10,19 @@ use App\Models\ExpansionEdition;
 use App\Models\ExpansionRelease;
 use App\Models\Game;
 use Database\Seeders\TcgCatalogExamplesSeeder;
-use Illuminate\Foundation\Testing\DatabaseMigrations;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
 use RuntimeException;
 use Tests\Concerns\BuildsCatalog;
+use Tests\Concerns\ForwardOnlyDatabaseMigrations;
 use Tests\TestCase;
 
 class TcgCatalogExamplesSeederTest extends TestCase
 {
     use BuildsCatalog;
-    use DatabaseMigrations;
+    use ForwardOnlyDatabaseMigrations;
 
     protected function setUp(): void
     {
@@ -37,7 +37,7 @@ class TcgCatalogExamplesSeederTest extends TestCase
     {
         $this->assertTrue(class_exists(TcgCatalogExamplesSeeder::class), 'The explicit catalog examples seeder must exist.');
         $this->artisan('db:seed', ['--class' => TcgCatalogExamplesSeeder::class])
-            ->expectsOutput('Catalogue TCG : 167 fiches créées, 0 conservées, 0 recréées.')
+            ->expectsOutput('Catalogue TCG : 165 fiches créées, 2 conservées, 0 recréées.')
             ->assertSuccessful();
 
         $this->assertDatabaseCount('users', 0);
@@ -58,7 +58,7 @@ class TcgCatalogExamplesSeederTest extends TestCase
         $this->assertSame('スカーレットex', $scarlet->editions()->sole()->name);
         $this->assertSame('バイオレットex', $violet->editions()->sole()->name);
         $japanese151 = $this->example('pokemon', 'japanese', '151');
-        $this->assertSame('fr', $japanese151->localizations()->sole()->language->code);
+        $this->assertSame(['fr' => 'Pokémon 151 (Japon)'], $japanese151->getTranslations('display_name'));
         $this->assertSame('ja', $japanese151->editions()->sole()->language->code);
 
         $traditional151 = $this->example('pokemon', 'traditional-chinese', '151')->editions()->sole();
@@ -86,8 +86,8 @@ class TcgCatalogExamplesSeederTest extends TestCase
         $series = $this->example('pokemon', 'international', 'scarlet-violet')->series;
         $this->assertNotNull($series);
         $images = [
-            $series->localizations()->whereRelation('language', 'code', 'fr')->sole()->image,
-            $series->localizations()->whereRelation('language', 'code', 'en')->sole()->image,
+            $series->images()->whereRelation('language', 'code', 'fr')->sole()->image,
+            $series->images()->whereRelation('language', 'code', 'en')->sole()->image,
             $this->printedIn($this->example('pokemon', 'international', 'scarlet-violet'), 'fr')->image,
             $this->printedIn($this->example('pokemon', 'international', 'scarlet-violet'), 'en')->image,
         ];
@@ -160,7 +160,7 @@ class TcgCatalogExamplesSeederTest extends TestCase
         $this->assertNotNull($oldPath);
         $edition->delete();
 
-        $this->assertSame(['created' => 0, 'preserved' => $first['created'] - 2, 'recreated' => 2], $this->runSeed());
+        $this->assertSame(['created' => 0, 'preserved' => $first['created'] + $first['preserved'] - 2, 'recreated' => 2], $this->runSeed());
         $replacement = $this->printedIn($expansion, 'fr');
         $this->assertNotSame($edition->id, $replacement->id);
         $this->assertNotSame($oldPath, $replacement->image);
@@ -168,7 +168,7 @@ class TcgCatalogExamplesSeederTest extends TestCase
         $this->assertNotNull($replacement->image);
         Storage::disk('s3')->assertExists($replacement->image);
         Storage::disk('s3')->assertMissing($oldPath);
-        $this->assertSame(['created' => 0, 'preserved' => $first['created'], 'recreated' => 0], $this->runSeed());
+        $this->assertSame(['created' => 0, 'preserved' => $first['created'] + $first['preserved'], 'recreated' => 0], $this->runSeed());
         $this->assertSame($replacement->image, $replacement->fresh()?->image);
     }
 

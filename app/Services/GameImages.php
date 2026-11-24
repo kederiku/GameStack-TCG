@@ -27,7 +27,7 @@ class GameImages extends AvifImages
         $contents = $disk->get($path);
 
         if ($contents === null) {
-            throw ValidationException::withMessages(['image' => 'Impossible de lire l’image existante.']);
+            throw ValidationException::withMessages(['image' => __('validation.images.read-image')]);
         }
 
         return $this->write($contents, $name, $connection, pathinfo($path, PATHINFO_EXTENSION));
@@ -43,7 +43,7 @@ class GameImages extends AvifImages
 
         // Each revision owns its directory. Never delete an arbitrary submitted path.
         if (! $disk->deleteDirectory(dirname($path))) {
-            throw new RuntimeException('Impossible de supprimer l’image du jeu : '.$path);
+            throw new RuntimeException(__('validation.images.delete-game', ['path' => $path]));
         }
     }
 

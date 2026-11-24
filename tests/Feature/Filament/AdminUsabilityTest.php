@@ -11,21 +11,22 @@ use App\Filament\Resources\Series\Pages\EditSeries;
 use App\Filament\Resources\Series\Pages\ListSeries;
 use App\Filament\Widgets\CatalogOverview;
 use App\Models\User;
+use App\Support\Localization\AdminPanels;
 use Filament\Facades\Filament;
-use Illuminate\Foundation\Testing\DatabaseMigrations;
 use Illuminate\Support\Facades\DB;
 use Livewire\Livewire;
 use Tests\Concerns\BuildsCatalog;
+use Tests\Concerns\ForwardOnlyDatabaseMigrations;
 use Tests\TestCase;
 
 class AdminUsabilityTest extends TestCase
 {
-    use BuildsCatalog, DatabaseMigrations;
+    use BuildsCatalog, ForwardOnlyDatabaseMigrations;
 
     protected function setUp(): void
     {
         parent::setUp();
-        Filament::setCurrentPanel(Filament::getPanel('admin'));
+        Filament::setCurrentPanel(Filament::getPanel(AdminPanels::id('fr')));
         $this->actingAs(User::factory()->create(['is_admin' => true]));
     }
 
@@ -33,7 +34,7 @@ class AdminUsabilityTest extends TestCase
     {
         Livewire::test(CatalogOverview::class)
             ->assertViewHas('totals', ['games' => 0, 'catalogs' => 0, 'expansions' => 0, 'editions' => 0])
-            ->assertSee(url('/admin/games/create'), false);
+            ->assertSee(url('/fr/admin/jeux/creer'), false);
 
         $catalog = $this->catalog();
         $this->edition($this->expansion($catalog));
@@ -41,8 +42,8 @@ class AdminUsabilityTest extends TestCase
 
         Livewire::test(CatalogOverview::class)
             ->assertViewHas('totals', ['games' => 1, 'catalogs' => 1, 'expansions' => 2, 'editions' => 1])
-            ->assertSee(url('/admin/expansions'), false);
-        $this->get('/admin')->assertOk()->assertSee(url('/admin/games/create'), false);
+            ->assertSee(url('/fr/admin/extensions'), false);
+        $this->get('/fr/admin')->assertOk()->assertSee(url('/fr/admin/jeux/creer'), false);
     }
 
     public function test_the_overview_rejects_direct_access_and_revoked_permissions(): void
@@ -61,9 +62,10 @@ class AdminUsabilityTest extends TestCase
     {
         $this->withCookie('site_locale', 'en');
         app()->setLocale('en');
-        $this->get('/admin/games')->assertOk()->assertSee('lang="fr"', false)->assertSee('Rechercher');
+        $this->get('/fr/admin/jeux')->assertOk()->assertSee('lang="fr"', false)->assertSee('Rechercher');
         $this->assertSame('en', app()->getLocale());
-        $this->get('/')->assertOk()->assertSee('lang="en"', false);
+        $this->get('/')->assertRedirect('/en');
+        $this->get('/en')->assertOk()->assertSee('lang="en"', false);
     }
 
     public function test_catalogue_shortcuts_show_only_its_series_and_expansions(): void

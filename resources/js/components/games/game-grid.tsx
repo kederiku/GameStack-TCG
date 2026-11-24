@@ -17,14 +17,8 @@ export function GameGrid({
         return (
             <EmptyState
                 icon={Layers2}
-                title={t(
-                    'Les premiers TCG arrivent bientôt',
-                    'The first TCGs are coming soon',
-                )}
-                description={t(
-                    'Les jeux à collectionner rejoindront bientôt cet espace. Votre prochaine collection commence ici.',
-                    'Collectible card games will soon join this space. Your next collection starts here.',
-                )}
+                title={t('catalog.game-grid.empty-title')}
+                description={t('catalog.game-grid.empty-description')}
             />
         );
     }

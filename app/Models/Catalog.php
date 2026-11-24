@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Support\Localization\HasContentTranslations;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -20,9 +21,14 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property-read Collection<int, Series> $series
  * @property-read Collection<int, Expansion> $expansions
  */
-#[Fillable(['game_id', 'default_language_id', 'key', 'name', 'description', 'sort_order', 'is_visible'])]
+#[Fillable(['game_id', 'default_language_id', 'key', 'name', 'description', 'sort_order', 'is_visible', 'display_name', 'reference_description'])]
 class Catalog extends CatalogRecord
 {
+    use HasContentTranslations;
+
+    /** @var list<string> */
+    public array $translatable = ['display_name', 'description'];
+
     /** @var array<string, mixed> */
     protected $attributes = ['is_visible' => true, 'sort_order' => 0];
 

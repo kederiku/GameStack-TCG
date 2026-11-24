@@ -1,29 +1,31 @@
+import { useLocale } from '@/hooks/use-locale';
 import { Link } from '@inertiajs/react';
 import { ShieldCheck, UserRound } from 'lucide-react';
 import type { PropsWithChildren } from 'react';
 import { useCurrentUrl } from '@/hooks/use-current-url';
 import { cn, toUrl } from '@/lib/utils';
-import { edit } from '@/routes/profile';
-import { edit as editSecurity } from '@/routes/security';
-
-const settingsPages = [
-    {
-        label: 'Profil',
-        title: 'Mon profil',
-        description: 'Les informations qui font de cet espace le vôtre.',
-        href: edit(),
-        icon: UserRound,
-    },
-    {
-        label: 'Sécurité',
-        title: 'Sécurité',
-        description: 'Gardez le contrôle sur les accès à votre compte.',
-        href: editSecurity(),
-        icon: ShieldCheck,
-    },
-];
+import { useLocalizedRoutes } from '@/hooks/use-localized-routes';
 
 export default function SettingsLayout({ children }: PropsWithChildren) {
+    const { t } = useLocale();
+    const routes = useLocalizedRoutes();
+    const settingsPages = [
+        {
+            label: t('account.layout.profile'),
+            title: t('account.layout.my-profile'),
+            description: t('account.layout.profile-description'),
+            href: routes['profile.edit'](),
+            icon: UserRound,
+        },
+        {
+            label: t('account.layout.security'),
+            title: t('account.layout.security'),
+            description: t('account.layout.security-description'),
+            href: routes['security.edit'](),
+            icon: ShieldCheck,
+        },
+    ];
+
     const { isCurrentOrParentUrl } = useCurrentUrl();
     const currentPage =
         settingsPages.find((page) => isCurrentOrParentUrl(page.href)) ??
@@ -33,7 +35,7 @@ export default function SettingsLayout({ children }: PropsWithChildren) {
         <div className="mx-auto w-full max-w-7xl px-4 py-7 sm:px-8 sm:py-9">
             <header className="mb-7">
                 <p className="mb-3 text-[0.65rem] font-semibold tracking-[0.18em] text-brand-highlight uppercase">
-                    Votre compte GameStackr
+                    {t('account.layout.your-gamestackr-account')}
                 </p>
                 <h1 className="font-display text-4xl leading-none font-black uppercase sm:text-5xl">
                     {currentPage.title}
@@ -44,7 +46,7 @@ export default function SettingsLayout({ children }: PropsWithChildren) {
                 </p>
             </header>
             <nav
-                aria-label="Réglages du compte"
+                aria-label={t('account.layout.account-settings')}
                 className="mb-7 border-b border-border pb-5"
             >
                 <div className="flex w-fit max-w-full flex-wrap gap-1 rounded-2xl border border-border bg-card p-1.5">
@@ -74,8 +76,8 @@ export default function SettingsLayout({ children }: PropsWithChildren) {
             </nav>
             <div className="max-w-5xl space-y-6">{children}</div>
             <p className="mt-8 text-xs leading-6 text-muted-foreground">
-                GameStackr TCG <span aria-hidden="true">/</span> Un espace à
-                votre image.
+                GameStackr TCG <span aria-hidden="true">/</span>
+                {t('account.layout.tagline')}
             </p>
         </div>
     );

@@ -4,6 +4,9 @@ namespace App\Models;
 
 use App\Observers\GameObserver;
 use App\Support\Catalog\CatalogRules;
+use App\Support\Localization\ContentLanguageUsage;
+use App\Support\Localization\HasContentTranslations;
+use App\Support\Localization\TranslationPatch;
 use Carbon\CarbonInterface;
 use Database\Factories\GameFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
@@ -27,10 +30,15 @@ use Illuminate\Support\Str;
  * @property CarbonInterface|null $created_at
  * @property CarbonInterface|null $updated_at
  */
-#[Fillable(['name', 'slug', 'start_year', 'end_year', 'publisher', 'description', 'is_visible'])]
+#[Fillable(['name', 'slug', 'start_year', 'end_year', 'publisher', 'description', 'is_visible', 'display_name', 'reference_description'])]
 #[ObservedBy([GameObserver::class])]
 class Game extends Model
 {
+    use HasContentTranslations;
+
+    /** @var list<string> */
+    public array $translatable = ['display_name', 'description'];
+
     /** @use HasFactory<GameFactory> */
     use HasFactory;
 
@@ -51,6 +59,29 @@ class Game extends Model
     public function catalogs(): HasMany
     {
         return $this->hasMany(Catalog::class);
+    }
+
+    /** @param array<string, mixed> $options */
+    public function save(array $options = []): bool
+    {
+        $original = $this->getRawOriginal();
+        $pending = array_filter($this->getAttributes(), fn (mixed $value, string $field): bool => ! array_key_exists($field, $original) || $original[$field] !== $value, ARRAY_FILTER_USE_BOTH);
+        $operations = TranslationPatch::forRecord($this, $pending);
+        $pending = array_diff_key($pending, array_flip($this->getTranslatableAttributes()));
+
+        return $this->getConnection()->transaction(function () use ($options, $operations, $pending): bool {
+            ContentLanguageUsage::lock(array_column($operations, 'locale'), $this->getConnection());
+            if ($this->exists) {
+                $current = $this->newQuery()->lockForUpdate()->findOrFail((int) $this->getKey());
+                $this->setRawAttributes($current->getAttributes(), sync: true);
+            } else {
+                $this->setRawAttributes(array_diff_key($this->getAttributes(), array_flip($this->getTranslatableAttributes())));
+            }
+            $this->setRawAttributes(array_replace($this->getAttributes(), $pending));
+            TranslationPatch::apply($this, $operations);
+
+            return parent::save($options);
+        });
     }
 
     public function delete(): ?bool

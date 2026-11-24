@@ -1,3 +1,4 @@
+import { useLocale } from '@/hooks/use-locale';
 import { Layers3, Pause, Play } from 'lucide-react';
 import { useState } from 'react';
 import { GameImage } from '@/components/games/game-image';
@@ -11,7 +12,10 @@ function GameTile({ game }: { game: PublicGame }) {
                 game={game}
                 className="h-16 w-full rounded-none border-0 bg-transparent p-0 text-3xl text-slate-100"
             />
-            <span className="line-clamp-2 text-center text-xs leading-snug [overflow-wrap:anywhere] text-slate-300">
+            <span
+                lang={game.nameLanguage ?? ''}
+                className="line-clamp-2 text-center text-xs leading-snug [overflow-wrap:anywhere] text-slate-300"
+            >
                 {game.name}
             </span>
         </div>
@@ -19,18 +23,19 @@ function GameTile({ game }: { game: PublicGame }) {
 }
 
 export function AuthGameMarquee({ games }: { games: PublicGame[] }) {
+    const { t } = useLocale();
     const [paused, setPaused] = useState(false);
     // A full group must cover the panel, even with only two or three games.
     const itemCount = games.length * Math.ceil(4 / Math.max(1, games.length));
 
     return (
         <aside
-            aria-label="Les univers GameStackr"
+            aria-label={t('common.auth-game-marquee.the-gamestackr-worlds')}
             className="auth-game-panel sticky top-8 hidden h-[calc(100svh-4rem)] max-h-[56rem] min-h-[48rem] min-w-0 flex-col overflow-hidden rounded-3xl border border-white/10 text-white lg:flex"
         >
             <div className="flex min-h-24 items-center justify-between gap-3 px-7 py-6">
                 <p className="text-xs font-medium tracking-[0.18em] text-slate-300 uppercase">
-                    Tous vos univers TCG
+                    {t('common.auth-game-marquee.all-your-tcg-worlds')}
                 </p>
                 {games.length > 1 && (
                     <Button
@@ -39,8 +44,8 @@ export function AuthGameMarquee({ games }: { games: PublicGame[] }) {
                         size="icon"
                         aria-label={
                             paused
-                                ? 'Reprendre le défilement'
-                                : 'Mettre le défilement en pause'
+                                ? t('common.auth-game-marquee.resume-scrolling')
+                                : t('common.auth-game-marquee.pause-scrolling')
                         }
                         onClick={() => setPaused(!paused)}
                         className="size-10 shrink-0 rounded-full border-white/20 bg-white/5 text-white hover:bg-white/10 hover:text-white focus-visible:ring-white/60 motion-reduce:hidden"
@@ -52,8 +57,16 @@ export function AuthGameMarquee({ games }: { games: PublicGame[] }) {
 
             {games.length > 0 && (
                 <p className="sr-only">
-                    Jeux disponibles :{' '}
-                    {games.map((game) => game.name).join(', ')}.
+                    {t('common.auth-game-marquee.available-games')}{' '}
+                    {games.map((game, index) => (
+                        <span key={game.id}>
+                            {index > 0 && ', '}
+                            <span lang={game.nameLanguage ?? ''}>
+                                {game.name}
+                            </span>
+                        </span>
+                    ))}
+                    .
                 </p>
             )}
 
@@ -136,10 +149,10 @@ export function AuthGameMarquee({ games }: { games: PublicGame[] }) {
 
             <div className="px-8 pt-8 pb-10 text-center">
                 <p className="font-display text-4xl font-extrabold uppercase xl:text-5xl">
-                    Chaque carte a sa place.
+                    {t('common.auth-game-marquee.tagline')}
                 </p>
                 <p className="mt-3 text-sm text-slate-300">
-                    Vos collections, d’un TCG à l’autre.
+                    {t('common.auth-game-marquee.your-collections-across-tcgs')}
                 </p>
             </div>
         </aside>

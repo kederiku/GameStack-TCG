@@ -4,16 +4,16 @@ namespace Tests\Feature;
 
 use App\Actions\Games\SaveGame;
 use App\Models\Game;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
+use Tests\Concerns\ForwardOnlyRefreshDatabase;
 use Tests\TestCase;
 
 class ReservedGameSlugTest extends TestCase
 {
-    use RefreshDatabase;
+    use ForwardOnlyRefreshDatabase;
 
     public function test_reserved_slugs_are_rejected_before_storing_an_image(): void
     {
@@ -61,7 +61,7 @@ class ReservedGameSlugTest extends TestCase
     public function test_a_slug_that_only_starts_with_a_reserved_word_remains_available(): void
     {
         $game = app(SaveGame::class)->handle(new Game, ['name' => 'Un jeu', 'slug' => 'admin-tcg']);
-        $this->get('/admin-tcg')->assertOk();
+        $this->get('/fr/admin-tcg')->assertOk();
         $this->assertSame('admin-tcg', $game->slug);
     }
 }

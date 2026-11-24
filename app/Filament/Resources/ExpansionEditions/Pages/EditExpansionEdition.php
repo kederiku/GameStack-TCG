@@ -6,6 +6,7 @@ use App\Filament\Resources\ExpansionEditions\ExpansionEditionResource;
 use App\Filament\Resources\Expansions\ExpansionResource;
 use App\Filament\Support\Catalog\CatalogActions;
 use App\Filament\Support\Catalog\CatalogFields;
+use App\Filament\Support\Catalog\CatalogLabels;
 use App\Filament\Support\Catalog\EditCatalogRecord;
 use App\Models\ExpansionEdition;
 use Filament\Actions\Action;
@@ -21,7 +22,7 @@ class EditExpansionEdition extends EditCatalogRecord
     protected function getHeaderActions(): array
     {
         return [
-            Action::make('expansion')->label('Retour à l’extension')->icon(Heroicon::OutlinedArrowUturnLeft)
+            Action::make('expansion')->label(__('admin.labels.back-to-expansion'))->icon(Heroicon::OutlinedArrowUturnLeft)
                 ->url($this->expansionUrl()),
             CatalogActions::delete()->successRedirectUrl($this->expansionUrl()),
         ];
@@ -32,7 +33,7 @@ class EditExpansionEdition extends EditCatalogRecord
         $edition = $this->getRecord();
         assert($edition instanceof ExpansionEdition);
 
-        return $edition->expansion->name.' — '.CatalogFields::catalogueLabel($edition->expansion->catalog);
+        return CatalogLabels::name($edition->expansion).' — '.CatalogFields::catalogueLabel($edition->expansion->catalog);
     }
 
     /** @return array<string> */
@@ -43,9 +44,9 @@ class EditExpansionEdition extends EditCatalogRecord
         assert($edition instanceof ExpansionEdition);
 
         return [
-            ExpansionResource::getUrl() => 'Extensions et ensembles',
-            $this->expansionUrl() => $edition->expansion->name,
-            'Édition',
+            ExpansionResource::getUrl() => __('admin.labels.expansions-and-sets'),
+            $this->expansionUrl() => CatalogLabels::name($edition->expansion),
+            __('admin.labels.edition'),
         ];
     }
 

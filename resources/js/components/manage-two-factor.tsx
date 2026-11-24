@@ -1,3 +1,5 @@
+import { useLocale } from '@/hooks/use-locale';
+import { useLocalizedRoutes } from '@/hooks/use-localized-routes';
 import { Form } from '@inertiajs/react';
 import { ShieldCheck } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
@@ -7,7 +9,6 @@ import TwoFactorRecoveryCodes from '@/components/two-factor-recovery-codes';
 import TwoFactorSetupModal from '@/components/two-factor-setup-modal';
 import { Button } from '@/components/ui/button';
 import { useTwoFactorAuth } from '@/hooks/use-two-factor-auth';
-import { disable, enable } from '@/routes/two-factor';
 
 export type Props = {
     canManageTwoFactor?: boolean;
@@ -16,6 +17,11 @@ export type Props = {
 };
 
 export default function ManageTwoFactor(props: Props) {
+    const { t } = useLocale();
+    const localized = useLocalizedRoutes();
+    const disable = localized['two-factor.disable'];
+    const enable = localized['two-factor.enable'];
+
     const requiresConfirmation = props.requiresConfirmation ?? false;
     const twoFactorEnabled = props.twoFactorEnabled ?? false;
 
@@ -49,8 +55,8 @@ export default function ManageTwoFactor(props: Props) {
     return (
         <SettingsSection
             id="two-factor"
-            title="Double authentification"
-            description="Ajoutez une vérification supplémentaire à la connexion."
+            title={t('auth.manage-two-factor.twofactor-authentication')}
+            description={t('auth.manage-two-factor.description')}
             icon={ShieldCheck}
             action={
                 <Badge
@@ -61,15 +67,16 @@ export default function ManageTwoFactor(props: Props) {
                             : ''
                     }
                 >
-                    {twoFactorEnabled ? 'Activée' : 'Non activée'}
+                    {twoFactorEnabled
+                        ? t('auth.manage-two-factor.enabled')
+                        : t('auth.manage-two-factor.not-enabled')}
                 </Badge>
             }
         >
             {twoFactorEnabled ? (
                 <div className="flex w-full flex-col items-start justify-start gap-5">
                     <p className="max-w-2xl text-sm leading-6 text-muted-foreground">
-                        À chaque connexion, un code généré par votre application
-                        d’authentification vous sera demandé.
+                        {t('auth.manage-two-factor.enabled-description')}
                     </p>
 
                     <div className="relative inline">
@@ -82,8 +89,10 @@ export default function ManageTwoFactor(props: Props) {
                                     disabled={processing}
                                 >
                                     {processing
-                                        ? 'Désactivation…'
-                                        : 'Désactiver la double authentification'}
+                                        ? t('auth.disabling')
+                                        : t(
+                                              'auth.manage-two-factor.disable-twofactor-authentication',
+                                          )}
                                 </Button>
                             )}
                         </Form>
@@ -98,8 +107,7 @@ export default function ManageTwoFactor(props: Props) {
             ) : (
                 <div className="flex w-full flex-col items-start justify-start gap-5">
                     <p className="max-w-2xl text-sm leading-6 text-muted-foreground">
-                        Protégez votre compte avec un code temporaire généré sur
-                        votre téléphone, en complément du mot de passe.
+                        {t('auth.manage-two-factor.disabled-description')}
                     </p>
 
                     <div>
@@ -109,7 +117,7 @@ export default function ManageTwoFactor(props: Props) {
                                 onClick={() => setShowSetupModal(true)}
                             >
                                 <ShieldCheck />
-                                Poursuivre la configuration
+                                {t('auth.manage-two-factor.continue-setup')}
                             </Button>
                         ) : (
                             <Form
@@ -123,8 +131,10 @@ export default function ManageTwoFactor(props: Props) {
                                         disabled={processing}
                                     >
                                         {processing
-                                            ? 'Activation…'
-                                            : 'Activer la double authentification'}
+                                            ? t('auth.enabling')
+                                            : t(
+                                                  'auth.manage-two-factor.enable-twofactor-authentication',
+                                              )}
                                     </Button>
                                 )}
                             </Form>

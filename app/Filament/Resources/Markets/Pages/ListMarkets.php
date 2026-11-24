@@ -11,6 +11,6 @@ class ListMarkets extends ListCatalogRecords
 
     public function getSubheading(): string
     {
-        return 'Les marchés sont les territoires de commercialisation, par exemple France ou Japon. Ils servent à préciser les sorties d’une édition, avec leur date et leur canal de distribution.';
+        return __('admin.markets.list_help');
     }
 }

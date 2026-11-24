@@ -1,3 +1,4 @@
+import { useLocale } from '@/hooks/use-locale';
 import { Form } from '@inertiajs/react';
 import { REGEXP_ONLY_DIGITS } from 'input-otp';
 import { Check, Copy, ScanLine } from 'lucide-react';
@@ -20,7 +21,7 @@ import {
 import { Spinner } from '@/components/ui/spinner';
 import { useClipboard } from '@/hooks/use-clipboard';
 import { OTP_MAX_LENGTH } from '@/hooks/use-two-factor-auth';
-import { confirm } from '@/routes/two-factor';
+import { useLocalizedRoutes } from '@/hooks/use-localized-routes';
 
 function GridScanIcon() {
     return (
@@ -61,6 +62,7 @@ function TwoFactorSetupStep({
     onNextStep: () => void;
     errors: string[];
 }) {
+    const { t } = useLocale();
     const [copiedText, copy] = useClipboard();
     const IconComponent = copiedText === manualSetupKey ? Check : Copy;
 
@@ -96,7 +98,7 @@ function TwoFactorSetupStep({
                     <div className="relative flex w-full items-center justify-center">
                         <div className="absolute inset-0 top-1/2 h-px w-full bg-border" />
                         <span className="relative bg-card px-2 py-1 text-center text-xs text-muted-foreground">
-                            ou saisissez cette clé manuellement
+                            {t('auth.two-factor-setup-modal.manual-key')}
                         </span>
                     </div>
 
@@ -111,7 +113,9 @@ function TwoFactorSetupStep({
                                     <input
                                         type="text"
                                         readOnly
-                                        aria-label="Clé de configuration"
+                                        aria-label={t(
+                                            'auth.two-factor-setup-modal.setup-key',
+                                        )}
                                         value={manualSetupKey}
                                         className="h-full w-full min-w-0 bg-background p-3 font-mono text-sm text-foreground focus-visible:outline-2 focus-visible:outline-ring"
                                     />
@@ -119,8 +123,12 @@ function TwoFactorSetupStep({
                                         type="button"
                                         aria-label={
                                             copiedText === manualSetupKey
-                                                ? 'Clé copiée'
-                                                : 'Copier la clé'
+                                                ? t(
+                                                      'auth.two-factor-setup-modal.key-copied',
+                                                  )
+                                                : t(
+                                                      'auth.two-factor-setup-modal.copy-key',
+                                                  )
                                         }
                                         onClick={() => copy(manualSetupKey)}
                                         className="shrink-0 border-l border-border px-3 hover:bg-muted focus-visible:outline-2 focus-visible:outline-ring"
@@ -144,6 +152,7 @@ function TwoFactorVerificationStep({
     onClose: () => void;
     onBack: () => void;
 }) {
+    const { t } = useLocale();
     const [code, setCode] = useState<string>('');
     const pinInputContainerRef = useRef<HTMLDivElement>(null);
 
@@ -153,6 +162,7 @@ function TwoFactorVerificationStep({
         }, 0);
     }, []);
 
+    const confirm = useLocalizedRoutes()['two-factor.confirm'];
     return (
         <Form
             {...confirm.form()}
@@ -176,7 +186,9 @@ function TwoFactorVerificationStep({
                         <div className="flex w-full flex-col items-center space-y-3 py-2">
                             <InputOTP
                                 id="otp"
-                                aria-label="Code d’authentification à six chiffres"
+                                aria-label={t(
+                                    'auth.two-factor-setup-modal.sixdigit-authentication-code',
+                                )}
                                 autoComplete="one-time-code"
                                 name="code"
                                 maxLength={OTP_MAX_LENGTH}
@@ -212,7 +224,7 @@ function TwoFactorVerificationStep({
                                 onClick={onBack}
                                 disabled={processing}
                             >
-                                Retour
+                                {t('auth.two-factor-setup-modal.back')}
                             </Button>
                             <Button
                                 type="submit"
@@ -221,7 +233,7 @@ function TwoFactorVerificationStep({
                                     processing || code.length < OTP_MAX_LENGTH
                                 }
                             >
-                                Confirmer
+                                {t('auth.two-factor-setup-modal.confirm')}
                             </Button>
                         </div>
                     </div>
@@ -256,6 +268,7 @@ export default function TwoFactorSetupModal({
     fetchSetupData,
     errors,
 }: Props) {
+    const { t } = useLocale();
     const [showVerificationStep, setShowVerificationStep] =
         useState<boolean>(false);
 
@@ -266,29 +279,32 @@ export default function TwoFactorSetupModal({
     }>(() => {
         if (twoFactorEnabled) {
             return {
-                title: 'Double authentification activée',
-                description:
-                    'La double authentification est activée. Scannez le QR code ou saisissez la clé dans votre application d’authentification.',
-                buttonText: 'Fermer',
+                title: t(
+                    'auth.two-factor-setup-modal.twofactor-authentication-enabled',
+                ),
+                description: t(
+                    'auth.two-factor-setup-modal.enabled-description',
+                ),
+                buttonText: t('auth.two-factor-setup-modal.close'),
             };
         }
 
         if (showVerificationStep) {
             return {
-                title: 'Vérifier le code',
-                description:
-                    'Saisissez le code à six chiffres de votre application d’authentification.',
-                buttonText: 'Continuer',
+                title: t('auth.two-factor-setup-modal.verify-code'),
+                description: t('auth.two-factor-setup-modal.code-help'),
+                buttonText: t('auth.two-factor-setup-modal.continue'),
             };
         }
 
         return {
-            title: 'Configurer la double authentification',
-            description:
-                'Scannez le QR code ou saisissez la clé dans votre application d’authentification pour poursuivre.',
-            buttonText: 'Continuer',
+            title: t(
+                'auth.two-factor-setup-modal.set-up-twofactor-authentication',
+            ),
+            description: t('auth.two-factor-setup-modal.setup-description'),
+            buttonText: t('auth.two-factor-setup-modal.continue'),
         };
-    }, [twoFactorEnabled, showVerificationStep]);
+    }, [twoFactorEnabled, showVerificationStep, t]);
 
     const resetModalState = useCallback(() => {
         if (twoFactorEnabled) {

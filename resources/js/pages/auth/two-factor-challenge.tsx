@@ -1,6 +1,8 @@
+import { useLocale } from '@/hooks/use-locale';
+import { useLocalizedRoutes } from '@/hooks/use-localized-routes';
 import { Form, Head, setLayoutProps } from '@inertiajs/react';
 import { REGEXP_ONLY_DIGITS } from 'input-otp';
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -11,38 +13,24 @@ import {
     InputOTPSlot,
 } from '@/components/ui/input-otp';
 import { OTP_MAX_LENGTH } from '@/hooks/use-two-factor-auth';
-import { store } from '@/routes/two-factor/login';
 
 export default function TwoFactorChallenge() {
+    const { t } = useLocale();
+    const localized = useLocalizedRoutes();
+    const store = localized['two-factor.login.store'];
+
     const [showRecoveryInput, setShowRecoveryInput] = useState<boolean>(false);
     const [code, setCode] = useState<string>('');
 
-    const authConfigContent = useMemo<{
-        title: string;
-        description: string;
-        toggleText: string;
-    }>(() => {
-        if (showRecoveryInput) {
-            return {
-                title: 'Code de récupération',
-                description:
-                    'Saisissez l’un des codes de récupération conservés lors de l’activation de la double authentification.',
-                toggleText: 'Utiliser un code d’authentification',
-            };
-        }
-
-        return {
-            title: 'Vérification en deux étapes',
-            description:
-                'Saisissez le code à six chiffres de votre application d’authentification.',
-            toggleText: 'Utiliser un code de récupération',
-        };
-    }, [showRecoveryInput]);
-
-    setLayoutProps({
-        title: authConfigContent.title,
-        description: authConfigContent.description,
-    });
+    setLayoutProps(
+        showRecoveryInput
+            ? {
+                  titleKey: 'auth.two-factor-challenge.recovery-code',
+                  descriptionKey:
+                      'auth.two-factor-challenge.recovery-description',
+              }
+            : TwoFactorChallenge.layout,
+    );
 
     const toggleRecoveryMode = (clearErrors: () => void): void => {
         setShowRecoveryInput(!showRecoveryInput);
@@ -52,7 +40,9 @@ export default function TwoFactorChallenge() {
 
     return (
         <>
-            <Head title="Double authentification" />
+            <Head
+                title={t('auth.two-factor-challenge.twofactor-authentication')}
+            />
 
             <div className="space-y-6">
                 <Form
@@ -66,7 +56,9 @@ export default function TwoFactorChallenge() {
                             {showRecoveryInput ? (
                                 <>
                                     <Label htmlFor="recovery_code">
-                                        Code de récupération
+                                        {t(
+                                            'auth.two-factor-challenge.recovery-code',
+                                        )}
                                     </Label>
                                     <Input
                                         id="recovery_code"
@@ -75,7 +67,9 @@ export default function TwoFactorChallenge() {
                                         )}
                                         name="recovery_code"
                                         type="text"
-                                        placeholder="Votre code de récupération"
+                                        placeholder={t(
+                                            'auth.two-factor-challenge.your-recovery-code',
+                                        )}
                                         autoComplete="off"
                                         autoFocus={showRecoveryInput}
                                         required
@@ -88,7 +82,9 @@ export default function TwoFactorChallenge() {
                             ) : (
                                 <div className="flex flex-col items-center justify-center space-y-3 text-center">
                                     <Label htmlFor="code">
-                                        Code d’authentification
+                                        {t(
+                                            'auth.two-factor-challenge.authentication-code',
+                                        )}
                                     </Label>
                                     <div className="flex w-full items-center justify-center">
                                         <InputOTP
@@ -128,7 +124,7 @@ export default function TwoFactorChallenge() {
                                 className="w-full"
                                 disabled={processing}
                             >
-                                Continuer
+                                {t('auth.two-factor-challenge.continue')}
                             </Button>
 
                             <div className="text-center text-sm text-muted-foreground">
@@ -139,7 +135,11 @@ export default function TwoFactorChallenge() {
                                         toggleRecoveryMode(clearErrors)
                                     }
                                 >
-                                    {authConfigContent.toggleText}
+                                    {t(
+                                        showRecoveryInput
+                                            ? 'auth.two-factor-challenge.use-an-authentication-code'
+                                            : 'auth.two-factor-challenge.use-a-recovery-code',
+                                    )}
                                 </button>
                             </div>
                         </>
@@ -149,3 +149,8 @@ export default function TwoFactorChallenge() {
         </>
     );
 }
+
+TwoFactorChallenge.layout = {
+    titleKey: 'auth.two-factor-challenge.twostep-verification',
+    descriptionKey: 'auth.two-factor-challenge.code-description',
+} as const;
