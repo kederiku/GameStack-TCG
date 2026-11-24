@@ -1,9 +1,9 @@
 # Schéma neuf et catalogue TCG réel — vérifications
 
 Date : 2026-11-24. Branche : `codex/fresh-schema-and-tcg-seed`.
-Rapport arrêté avant publication de la PR. L’implémentation, la remise à zéro
-locale et les contrôles ci-dessous sont terminés. Les résultats de publication,
-de fusion et de CI sont suivis dans la PR associée à cette branche.
+Les sections initiales retracent la remise à zéro et les contrôles réalisés
+avant l’enrichissement demandé sur la PR 9. Les résultats de publication,
+de fusion et de CI sont suivis dans cette PR.
 
 ## Périmètre autorisé
 
@@ -32,7 +32,7 @@ la tâche de seed pour renforcer la preuve de son fonctionnement autonome.
 Ces contrôles portent exclusivement sur `gamestackr_testing`. Le contrôle de
 destination de `Tests\TestCase::createApplication()` est conservé.
 
-## Seed réel
+## Seed réel initial
 
 Implémentation : `1eb15e21867f8a0861d0cc31cce4e55c45543d19`.
 Revue indépendante par `real_tcg_seed_review2`, puis correction des noms localisés
@@ -52,7 +52,7 @@ aucune nouvelle régression relevée. Les huit tests du seed passent avec
 - La vérification du seeder de langues part désormais d’une table vide, avant
   l’appel de synchronisation CLI ; elle répond au point mineur de la tâche 1.
 
-Le manifeste contient 12 jeux, 19 catalogues, sept séries, 29 extensions,
+Le manifeste initial contient 12 jeux, 19 catalogues, sept séries, 29 extensions,
 35 éditions, 30 sorties, six langues et neuf marchés. Les sources attestent
 les attributs importés ; les années, éditeurs et relations facultatifs non
 retenus restent absents. Les images proviennent des deux fixtures officielles
@@ -82,7 +82,7 @@ stockés et leurs commandes de conversion sont retirés.
 La précision documentaire sur la portée de `make migrate` a été ajoutée au commit
 `738d78700e04a6af3d74c887477b9ae013a6c1e4` et approuvée dans la relecture finale.
 
-## Revue complète
+## Revue complète initiale
 
 L’agent indépendant `fresh_final_review` a examiné les 124 fichiers du diff
 depuis `5cdf438c1cdb82b30e6bc4650cf6c89213f8ad35` jusqu’à
@@ -128,7 +128,7 @@ worker arrêtés, sans le marqueur de maintenance partagé qui empêcherait leur
 requêtes simulées. Les tests ont continué à utiliser exclusivement
 `gamestackr_testing` avec le garde-fou existant.
 
-## Parcours navigateur
+## Parcours navigateur initial
 
 Contrôle dans le navigateur à sa taille par défaut, avec le catalogue réellement
 chargé dans l’application locale :
@@ -151,7 +151,7 @@ chargé dans l’application locale :
 - Aucun message d’erreur dans la console JavaScript observée. L’onglet de QA a
   été fermé avant le nettoyage final.
 
-## État final local
+## État local après la remise à zéro initiale
 
 Le compte temporaire a été supprimé. L’inventaire final vérifie :
 
@@ -188,6 +188,148 @@ extérieures au périmètre autorisé.
 La description de PR porte le SHA de tête relu et les résultats distants. La
 fusion reste soumise à la CI `tests / ci` sur ce SHA, puis au contrôle du commit
 résultant sur `main`, conformément à `AGENTS.md`.
+
+## Enrichissement du catalogue
+
+Le [complément demandé](specs/2026-11-24-tcg-catalog-enrichment-design.md) porte
+le catalogue à 119 fiches, 327 éditions imprimées dont 78 françaises, 213 sorties
+et dix langues de contenu. Les douze jeux, 19 catalogues, sept séries et neuf
+marchés restent les mêmes. Les interfaces restent en français et en anglais.
+
+| Jeu                  |  Fiches | Éditions | Dont FR | Sorties |
+| -------------------- | ------: | -------: | ------: | ------: |
+| Altered              |       5 |       10 |       5 |       5 |
+| Cyberpunk TCG        |       1 |        2 |       1 |       1 |
+| FINAL FANTASY TCG    |      10 |       43 |       9 |      13 |
+| Flesh and Blood      |      10 |       26 |       4 |      11 |
+| Disney Lorcana       |      10 |       33 |      10 |      24 |
+| Magic                |      10 |       60 |      10 |      54 |
+| NARUTO Mythos        |       2 |        4 |       2 |       3 |
+| ONE PIECE            |      20 |       24 |       4 |      21 |
+| Pokémon              |      15 |       25 |       7 |      17 |
+| Riftbound            |       6 |       22 |       6 |      15 |
+| Star Wars: Unlimited |      10 |       40 |      10 |       9 |
+| Yu-Gi-Oh!            |      20 |       38 |      10 |      40 |
+| **Total**            | **119** |  **327** |  **78** | **213** |
+
+ONE PIECE et Yu-Gi-Oh! ont chacun dix titres dans deux catalogues régionaux.
+Riftbound comprend cinq sets principaux et le coffret Premiers pas ; Star Wars:
+Unlimited comprend neuf sets principaux et le mini-set Icons 2027 Edition,
+commercialisé en 2026. Altered conserve cinq sets distribués en boosters
+d’origine ; les produits imprimés à la demande sont documentés dans les sources.
+Les catalogues récents ne sont pas complétés artificiellement. Les sorties dont
+la date, le marché ou le canal restent incertains sont omises.
+
+Les langues physiques sont EN 90, FR 78, JA 48, DE 26, ES 21, IT 27, PT 8,
+KO 3, chinois simplifié 22 et traditionnel 4. Les titres anglais non latins sont
+officiels lorsqu’ils existent, sinon identifiés comme rendus éditoriaux.
+Les noms natifs et les langues imprimées sont conservés. Une traduction du
+nom n’ajoute jamais une édition physique.
+
+Le commit `8dc76a324ced5747ad74804846bc3afbb40b9b59` ajoute le repli anglais de
+`display_name` et aligne le tri SQL sur le nom affiché. Les descriptions et les
+valeurs explicitement nulles gardent leurs règles. La revue indépendante
+`enrichment_fallback_review5` valide ce changement, avec 30 tests ciblés et
+475 assertions, puis deux contrôles Filament et sept assertions.
+
+Les données sont ajoutées au commit `d260842c006d30b20da69613e3bb4b8c98b7b777`,
+puis corrigées jusqu’à `85a75db0679d012262781dbf8bcbf0a85038f1ba` après les revues
+`enrichment_catalog_review6` et `enrichment_catalog_fix_review6`. La graphie
+chinoise complète de Dominaria United est testée. Les noms commerciaux français
+des Opus FFTCG 25, 28, 29 et 30 sont étayés par leur distributeur officiel.
+Pour les seuls Opus 26 et 27, les liens du distributeur étant indisponibles,
+le registre identifie explicitement des textes commerciaux secondaires,
+recoupés avec les titres et scans français Square Enix. Aucune date ou portée
+territoriale ne découle de ces deux fiches. La relecture a vérifié les pages
+accessibles et les cartes françaises ; aucun constat de données ne reste ouvert.
+
+### Vérifications de l’enrichissement
+
+- `make check` sur `d260842` : 400 tests PHP, 16 283 assertions, 19 tests frontend,
+  Pint, PHPStan, format, lint, traductions et TypeScript réussis.
+- Après correction des données : 12 tests du seed, 12 338 assertions et Pint
+  ciblé réussis. Les tests couvrent les éditions réelles, la provenance, les
+  traductions, les identités et médias à deux passages et les annulations.
+- `make up` puis `make test-storage` sur `d44941d` : deux tests, 24 assertions.
+- Le build de production avait déjà réussi par `make assets` puis `make init` ;
+  les fichiers frontend, dépendances et configuration de build n’ont pas changé
+  pendant l’enrichissement. La CI finale reconstruit néanmoins cette version.
+
+### Revue finale et concurrence
+
+La revue complète de la branche par l’agent indépendant
+`enrichment_catalog_review6` (GPT-6.2 Astra), depuis
+`5cdf438c1cdb82b30e6bc4650cf6c89213f8ad35`, a relevé un ordre de verrouillage
+incompatible entre le seed et les formulaires multilingues concurrents.
+Le correctif `6b27ae997494fa7ab632bb7b27c022272f9d12fe` impose le même ordre
+canonique des langues, tout en conservant les clés de référence et leur casse.
+Le test observe les vrais verrous SQL : échec attendu avant correction, puis
+ordre DE, EN, chinois simplifié et réutilisation des identités historiques.
+
+La relecture indépendante approuve ce SHA et la procédure opérationnelle,
+sans nouveau défaut. Les 134 tests ciblés passent avec 14 085 assertions.
+Le **dernier `make check` sur ce code passe : 400 tests PHP, 16 297 assertions,
+19 tests frontend**, avec Pint, PHPStan, lint, format, traductions et TypeScript.
+Le tri des noms de repli en administration française a désormais son assertion
+Filament directe. Le contrôle automatique de provenance pourrait couvrir aussi
+tous les codes facultatifs et libellés latins ; ce renforcement reste une
+amélioration mineure différée. Les valeurs actuelles ont reçu une revue des sources.
+
+### Application et navigateur après enrichissement
+
+- Application locale mise en maintenance, queue arrêtée et destinations
+  inventoriées avant l’opération. Deux exécutions de `make seed` réussies,
+  sans nouvelle remise à zéro : toutes les anciennes identités sont conservées.
+  Le second passage retrouve exactement les nouveaux identifiants et les quatre
+  mêmes chemins S3 et empreintes SHA-256. Les comptes par jeu et langue relevés
+  en base correspondent au tableau ci-dessus.
+- Parcours dans le navigateur par l’accès normal et un compte temporaire :
+  `/fr/pokemon/japanese/scarlet-ex?edition=ja` affiche « Scarlet ex » et
+  « Nom affiché en anglais », tout en conservant `スカーレットex` comme nom
+  officiel et une seule édition japonaise. Le sélecteur passe à `/en` en
+  conservant `edition=ja` ; le libellé anglais n’a plus de badge de repli.
+- Forces Temporelles propose cinq éditions physiques : FR, EN, DE, ES et IT.
+  Passer l’interface française en anglais conserve `edition=fr`, le nom
+  imprimé français et la bonne ressource. Aucune date non établie n’est ajoutée.
+- Filament français affiche 119 extensions et 327 éditions. Son filtre Pokémon
+  japonais affiche dans l’ordre « Pokémon 151 (Japon) », « Scarlet ex »,
+  « Violet ex ». Les noms de série utilisent aussi leur repli anglais.
+  Aucun enregistrement de catalogue n’a été modifié durant ce contrôle.
+- Aucune erreur JavaScript observée ; l’onglet de QA a été fermé avant nettoyage.
+
+### État local final après enrichissement
+
+Les inventaires avant et après QA ont distingué les résidus de cette campagne
+et une session anonyme préexistante dont l’origine ne pouvait pas être établie.
+Cette session a été **conservée**, avec vérification de son identifiant et de
+l’empreinte de sa ligne inchangés. Le nettoyage vise uniquement la session du
+compte QA. Les deux entrées de cache ont été rapprochées exactement du compteur
+et du minuteur de limitation de sa connexion, sans exposer clé ni adresse IP.
+Les autres tables transitoires et Mailpit étaient vides.
+
+| Élément                                  | Résultat final observé                                  |
+| ---------------------------------------- | ------------------------------------------------------- |
+| Utilisateurs, tokens, passkeys           | 0                                                       |
+| Session de QA                            | Supprimée                                               |
+| Session anonyme préexistante             | 1, conservée sans modification                          |
+| Jobs, lots, échecs et cache              | 0                                                       |
+| Jeux / catalogues / séries               | 12 / 19 / 7                                             |
+| Extensions / éditions / sorties          | 119 / 327 / 213                                         |
+| Langues de contenu / marchés / relations | 10 / 9 / 0                                              |
+| Garage                                   | 4 objets, chemins et SHA-256 identiques au seed initial |
+| Base de tests                            | Seul schéma public, vide                                |
+| Mailpit                                  | 0 message                                               |
+| Anciennes tables, fonctions et archives  | Absentes                                                |
+
+Les trois fichiers des disques simulés, 121 vues compilées et le journal ne
+contenant que des entrées `testing.ERROR` ont été supprimés, ainsi que le compte
+et son mot de passe temporaires et le cache PHPUnit. Les médias, `.env`, les accès
+Garage et les volumes restent préservés. L’application est sortie de maintenance,
+le worker tourne et les services sont disponibles ; `/up` répond HTTP 200.
+Les visites ultérieures peuvent naturellement recréer des sessions et du cache.
+
+Le SHA documentaire final, sa revue indépendante et les résultats GitHub sont
+consignés dans la [PR 9](https://github.com/kederiku/GameStack-TCG/pull/9).
 
 ## Décisions du journal d’exécution
 
@@ -230,3 +372,21 @@ en cas d’erreur. Leurs contrôles et corrections sont relatés plus haut.
 - Ruling: Use the repository’s existing explicit authorization for branch publication, PR and exact-SHA squash merge after independent review and green CI, rather than request the finishing skill’s choice menu again — AGENTS.md and user approval already select the delivery workflow — cost if wrong: publication follows the recorded authorization; merge remains gated by review and CI.
 
 - Ruling: Record post-publication statuses in PR metadata and the final response rather than add a commit claiming its own future CI/merge — versioned verification is explicitly a pre-publication local report — cost if wrong: readers of the local snapshot must consult the linked delivery evidence for GitHub completion.
+
+- Ruling: Keep explicit user-approved enrichment requirements without another design approval loop — latest answers specify quantity, physical French coverage and English fallback — cost if wrong: reversible seed/code choices on already isolated branch.
+
+- Ruling: Select five new international Pokémon sets, without the four optional native additions — existing regional distinctions plus these additions meet the approximate distinct-title target, while preserving all current native rows and adding English labels — cost if wrong: four verified optional products remain available for later expansion.
+
+- Ruling: Do not copy global Lorcana EN/FR launch dates to later Japanese/Chinese printings — official local releases demonstrably differ — cost if wrong: unconfirmed release rows stay absent, while physical editions remain visible.
+
+- Ruling: Extend Task 5 to CatalogPresentation::nameForQuery and corresponding sorting tests — implementer found its SQL explicitly promises equivalence to TranslatedContent, so leaving it unchanged would sort by a different name than displayed — cost if wrong: small additional SQL delta, covered by task review and focused tests. Brief/plan updated before implementation.
+
+- Ruling: Add Cyberpunk's actual FR edition using WeirdCo's official print record, but omit its FR date sourced only to a retailer; omit Riftbound Spiritforged zh-Hant while availability rests only on a Hong Kong reseller — strict primary-fact provenance remains binding — cost if wrong: confirmed optional dates/editions can be added later with a primary source.
+
+- Ruling: Permit explicitly identified secondary French commercial-title corroboration ONLY for FFTCG Opus26/27, paired with publisher English titles and publisher French card scans — real French printing and set identity already have primary proof, but dead distributor URLs cannot substantiate the exact commercial title; consultable retailer text is stronger than inventing a French translation or claiming English stock images prove one — cost if wrong: those two title spellings depend on retailer transcription and must remain attributed as secondary, with no release/market fact inferred. User's real-data requirement remains binding; this narrowly refines the plan's all-primary provenance preference.
+
+- Ruling: Keep the final review's optional source-guard expansion as a deferred Minor — all actual manifest values received independent data review and the current required-field checks pass; automatically asserting every optional code and Latin label would broaden this final concurrency fix — cost if wrong: future additions still need source review to catch omissions that the current contract does not reject.
+
+- Ruling: Accept final review boundaries for already-reviewed source pages and historical reset evidence, while requiring actual new seed/QA/cleanup observations — repeat live browsing of every source and reconstructing the completed reset add no new requirement; new operational facts cannot be inferred from a diff — cost if wrong: source availability can later change and remains documented, and final local observations must still be collected before delivery.
+
+- Ruling: Preserve the one pre-existing anonymous application session because its latest activity cannot be attributed confidently to our QA — this enrichment only authorizes test/QA residue cleanup — cost if wrong: one anonymous session remains until ordinary expiry instead of a completely empty sessions table; no account or test user remains. A fingerprint snapshot stores only ID/hash privately; final cleanup will remove only new QA sessions and verify the original row unchanged. Updated scratch finish-enrichment-qa.php and final-enrichment-inventory.php implement this execution-time branch of the approved selective-cleanup procedure.

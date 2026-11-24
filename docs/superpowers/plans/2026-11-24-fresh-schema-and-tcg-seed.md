@@ -20,7 +20,7 @@
 - PHP, Composer et Node exclusivement dans Docker via Makefile.
 - Tests exclusivement sur `gamestackr_testing` ; garder intact le garde-fou de `tests/TestCase.php`.
 - Aucun volume Docker supprimé ; préserver `.env`, clé applicative et configuration/accès Garage.
-- Aucun Faker ni donnée factice dans les seeders applicatifs ; chaque attribut factuel doit avoir une source officielle vérifiée.
+- Aucun Faker ni donnée factice dans les seeders applicatifs ; chaque attribut factuel doit avoir une source officielle vérifiée. Exception documentée pour les seuls noms commerciaux français des Opus FFTCG 26 et 27 : fiches détaillants accessibles, explicitement secondaires, recoupées avec les titres et scans français officiels ; aucune date ou disponibilité territoriale n’en est déduite.
 - Pas de nouvelle dépendance, d’import des anciennes données ou de dispositif générique de conversion.
 - Garder les fonctionnalités multilingues, les replis éditoriaux et les uploads actuels.
 - Réexécuter le seed ne duplique ni lignes ni médias ; les attributs fournis sont remis aux valeurs du manifeste, les autres traductions et fiches sont conservées.
@@ -149,12 +149,12 @@ documentaires circulaires pour attester leur propre fusion.
 
 **Interfaces:** mêmes tableaux de manifestes et identités naturelles que la tâche 2. Les nouveaux codes de langues de contenu sont ajoutés aux références communes avec leurs sources. Les noms anglais utilisent `display_name.en` ; les noms originaux et les éditions physiques restent dans leurs champs actuels. Les rapports de sources `enrichment-sources-pokemon-bandai.md`, `enrichment-sources-western.md` et `enrichment-sources-new-games.md` du workspace SDD fixent les faits vérifiés à intégrer. Les limites de disponibilité recensées font autorité sur le nombre approximatif demandé ; aucun quota artificiel.
 
-- [ ] Terminer la vérification officielle de toutes les additions et des éditions FR manquantes dans les sets existants. Séparer les noms anglais officiels des rendus éditoriaux de noms non latins dans les notes de source.
-- [ ] Écrire les assertions de contrat sur des ajouts attestés dans plusieurs jeux, leurs impressions FR et autres langues, et les noms anglais des séries/extensions non latines. Adapter le test ancien qui attendait un repli japonais en interface EN pour vérifier le nouveau libellé anglais et l’unique impression JA du produit natif.
-- [ ] Constater le RED des nouvelles assertions avant enrichissement.
-- [ ] Ajouter les valeurs vérifiées dans les manifestes par jeu, sans remplacer les identités existantes, sans images nouvelles non demandées, sans relations ou annonces non vérifiées. Garder les champs facultatifs absents lorsqu’aucune preuve ne les étaye.
-- [ ] Vérifier la couverture de provenance, l’existence des langues référencées, les versions FR attendues, la stabilité des identifiants/fichiers à deux exécutions et la conservation des traductions hors manifeste. Actualiser les chiffres et les limites du README.
-- [ ] Exécuter les tests du seed et de la localisation concernés, Pint/PHPStan, puis auto-revue et commit. Revue indépendante des données et des contrats.
+- [x] Terminer la vérification officielle de toutes les additions et des éditions FR manquantes dans les sets existants. Séparer les noms anglais officiels des rendus éditoriaux de noms non latins dans les notes de source.
+- [x] Écrire les assertions de contrat sur des ajouts attestés dans plusieurs jeux, leurs impressions FR et autres langues, et les noms anglais des séries/extensions non latines. Adapter le test ancien qui attendait un repli japonais en interface EN pour vérifier le nouveau libellé anglais et l’unique impression JA du produit natif.
+- [x] Constater le RED des nouvelles assertions avant enrichissement.
+- [x] Ajouter les valeurs vérifiées dans les manifestes par jeu, sans remplacer les identités existantes, sans images nouvelles non demandées, sans relations ou annonces non vérifiées. Garder les champs facultatifs absents lorsqu’aucune preuve ne les étaye.
+- [x] Vérifier la couverture de provenance, l’existence des langues référencées, les versions FR attendues, la stabilité des identifiants/fichiers à deux exécutions et la conservation des traductions hors manifeste. Actualiser les chiffres et les limites du README.
+- [x] Exécuter les tests du seed et de la localisation concernés, Pint/PHPStan, puis auto-revue et commit. Revue indépendante des données et des contrats.
 
 ## Task 7: Appliquer et livrer le catalogue enrichi
 
@@ -162,10 +162,10 @@ documentaires circulaires pour attester leur propre fusion.
 
 **Interfaces:** utiliser `make seed` sur la base applicative actuelle après validations. Aucune nouvelle remise à zéro ni suppression du catalogue réel déjà créé. La réexécution rétablit les valeurs prévues et ajoute les nouveaux identifiants, conformément au contrat approuvé.
 
-- [ ] Revue indépendante de la branche et de son nouveau delta, contrôles `make check`, `make assets` si nécessaires, `make up` puis `make test-storage`. Ne pas réutiliser la CI d’une ancienne tête pour fusionner la nouvelle.
-- [ ] Appliquer le seed et vérifier les nouveaux comptes par jeu/langue, les anciennes identités conservées, la stabilité d’une seconde exécution et les quatre médias inchangés.
-- [ ] Contrôle navigateur FR/EN d’un nom non latin disposant maintenant du repli anglais et d’une extension avec une vraie édition française ; vérifier les titres natifs et langues imprimées distincts.
-- [ ] Nettoyer les seules données temporaires de QA et de tests ; confirmer zéro compte conservé et services opérationnels. Actualiser le rapport et consigner les limites de disponibilité réelles.
+- [x] Revue indépendante de la branche et de son nouveau delta, contrôles `make check`, `make assets` si nécessaires, `make up` puis `make test-storage`. Ne pas réutiliser la CI d’une ancienne tête pour fusionner la nouvelle.
+- [x] Appliquer le seed et vérifier les nouveaux comptes par jeu/langue, les anciennes identités conservées, la stabilité d’une seconde exécution et les quatre médias inchangés.
+- [x] Contrôle navigateur FR/EN d’un nom non latin disposant maintenant du repli anglais et d’une extension avec une vraie édition française ; vérifier les titres natifs et langues imprimées distincts.
+- [x] Nettoyer les seules données temporaires de QA et de tests ; confirmer zéro compte conservé et services opérationnels. Actualiser le rapport et consigner les limites de disponibilité réelles.
 - [ ] Faire relire le SHA final, actualiser la PR 9 et reprendre les étapes de publication/CI/fusion de la tâche 4.
 
 ## Self-review
