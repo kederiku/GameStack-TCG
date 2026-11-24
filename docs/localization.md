@@ -51,11 +51,21 @@ Après validation, exécuter `artisan_init up` et rétablir le trafic. Si une
 maintenance est déjà active sur le store, garder ses options et omettre `down`
 et `up` jusqu’à la réouverture décidée par son propriétaire. Pour un store sur
 une connexion ou une table personnalisée, provisionner cette table sur sa
-connexion avant `make init`. La migration fournie crée `cache` et `cache_locks`
-sur la connexion applicative. Une base contenant déjà des données suit la
+connexion. Si elle occupe le même schéma que l’application, celui-ci est
+déjà non vide. Sous trafic isolé, poursuivre avec `artisan_init down`,
+`artisan_init migrate --force`, la simulation, la finalisation, l’audit et
+seulement ensuite `make init`, comme ci-dessus. Si elle se trouve sur une
+connexion distincte et que le schéma applicatif reste vide, `make init` peut
+effectuer l’installation neuve directement. La migration fournie crée `cache`
+et `cache_locks` sur la connexion applicative. Une base contenant déjà des données suit la
 procédure de bascule ci-dessous.
 
 ## Bascule d’une installation existante
+
+Commencer par un audit en lecture seule avec le nouveau code et le schéma
+historique (`make artisan ARGS=localization:audit`). Une anomalie demande une
+décision sur les données avant toute bascule. Les commandes Compose détaillées
+figurent dans le [rapport de vérification](superpowers/localization-verification.md#sauvegarde-et-répétition-sous-compose).
 
 1. Consigner la révision exacte de la dernière version déployable utilisant les
    anciennes tables et conserver son artefact. Mettre le site en maintenance
