@@ -3,44 +3,40 @@
 namespace App\Support\Catalog;
 
 use App\Models\Expansion;
-use App\Models\ExpansionLocalization;
 use App\Models\Series;
-use App\Models\SeriesLocalization;
+use App\Support\Localization\LocalizedRoutes;
+use App\Support\Localization\TranslatedContent;
+use Illuminate\Database\Eloquent\Model;
 
 class CatalogPresentation
 {
+    /** @return array{name: string, nameLanguage: ?string, nameFallback: bool} */
+    public static function displayName(Model $record, ?string $locale = null): array
+    {
+        $text = TranslatedContent::field($record, 'display_name', $locale ?? LocalizedRoutes::locale(request()));
+
+        // Names have a required scalar reference even when no translation exists.
+        return ['name' => (string) $text['value'], 'nameLanguage' => $text['locale'], 'nameFallback' => $text['fallback']];
+    }
+
+    /** @return array{description: ?string, descriptionLanguage: ?string, descriptionFallback: bool} */
+    public static function description(Model $record): array
+    {
+        $text = TranslatedContent::field($record, 'description', LocalizedRoutes::locale(request()));
+
+        return ['description' => $text['value'], 'descriptionLanguage' => $text['locale'], 'descriptionFallback' => $text['fallback']];
+    }
+
     /** @return array{name: string, language: ?string, fallback: bool} */
     public function name(Series|Expansion $record, string $languageCode): array
     {
-        $languageCode = CatalogRules::languageCode($languageCode);
-        $localization = $this->localization($record, $languageCode);
+        $text = self::displayName($record, $languageCode);
 
-        if ($localization !== null) {
-            return ['name' => $localization->name, 'language' => $localization->language->code, 'fallback' => false];
-        }
-
-        $default = $record->catalog->defaultLanguage->code;
-        $localization = $default === $languageCode ? null : $this->localization($record, $default);
-
-        return [
-            'name' => $localization->name ?? $record->name,
-            'language' => $localization?->language->code,
-            'fallback' => true,
-        ];
+        return ['name' => $text['name'], 'language' => $text['nameLanguage'], 'fallback' => $text['nameFallback']];
     }
 
     public function seriesImage(Series $record, string $languageCode): ?string
     {
-        $localization = $this->localization($record, CatalogRules::languageCode($languageCode));
-
-        return $localization instanceof SeriesLocalization ? $localization->image : null;
-    }
-
-    private function localization(Series|Expansion $record, string $languageCode): SeriesLocalization|ExpansionLocalization|null
-    {
-        return $record->localizations()
-            ->with('language')
-            ->whereHas('language', fn ($languages) => $languages->where('code', $languageCode))
-            ->first();
+        return $record->imageForLocale(CatalogRules::languageCode($languageCode))?->image;
     }
 }

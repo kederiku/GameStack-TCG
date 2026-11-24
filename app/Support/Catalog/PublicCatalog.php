@@ -10,6 +10,7 @@ use App\Models\ExpansionRelease;
 use App\Models\Game;
 use App\Models\Language;
 use App\Support\GameSlug;
+use App\Support\Localization\LocalizedRoutes;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 
@@ -50,10 +51,11 @@ class PublicCatalog
         $query = (clone $base)->when($catalog !== '*', fn (Builder $query) => $query->whereHas('catalog', fn (Builder $catalogs) => $catalogs->where('key', $catalog)));
         $languageExpansionIds = (clone $query)->select('expansions.id');
         $languages = Language::query()->whereIn('id', ExpansionEdition::query()->select('language_id')
-            ->where('is_visible', true)->whereIn('expansion_id', $languageExpansionIds))->orderBy('code')->get(['code', 'name']);
+            ->where('is_visible', true)->whereIn('expansion_id', $languageExpansionIds))->orderBy('code')->get(['id', 'code', 'name']);
+        $printLanguage = $languages->first(fn (Language $item) => CatalogRules::languageCode($item->code) === $language);
 
         $query->when($filters['language'] !== '*', fn (Builder $query) => $query->whereHas('editions', fn (Builder $editions) => $editions
-            ->where('is_visible', true)->whereHas('language', fn (Builder $languages) => $languages->where('code', $filters['language']))))
+            ->where('is_visible', true)->where('language_id', $printLanguage?->id)))
             ->when($filters['type'] !== 'all', fn (Builder $query) => $query->where('type', $filters['type']))
             ->when($filters['series'] !== '', fn (Builder $query) => $query->whereHas('series', fn (Builder $series) => $series->where('key', $filters['series'])));
         if ($filters['q'] !== '') {
@@ -66,15 +68,16 @@ class PublicCatalog
             ->where('expansion_editions.is_visible', true)
             ->whereColumn('expansion_editions.expansion_id', 'expansions.id')
             ->when($filters['language'] !== '*', fn (Builder $query) => $query
-                ->whereIn('expansion_editions.language_id', Language::query()->select('id')->where('code', $filters['language'])));
+                ->where('expansion_editions.language_id', $printLanguage?->id));
         $query->select('expansions.*')->selectSub($firstRelease, 'first_release_on');
         if ($filters['sort'] === 'name') {
-            $query->orderByRaw('coalesce(
-                (select el.name from expansion_localizations el join languages l on l.id = el.language_id
-                    where el.expansion_id = expansions.id and l.code = ? limit 1),
-                (select el.name from expansion_localizations el join catalogs c on c.default_language_id = el.language_id
-                    where el.expansion_id = expansions.id and c.id = expansions.catalog_id limit 1),
-                expansions.name)', [app()->getLocale()]);
+            // Legacy language rows retain their original casing; JSON keys are canonical.
+            $query->orderByRaw('coalesce(expansions.display_name ->> ?::text,
+                (select translation.value from catalogs
+                    join languages on languages.id = catalogs.default_language_id
+                    cross join jsonb_each_text(expansions.display_name) as translation
+                    where catalogs.id = expansions.catalog_id and lower(translation.key) = lower(languages.code)),
+                expansions.name)', [CatalogRules::languageCode(LocalizedRoutes::locale($request))]);
         } else {
             $query->orderByRaw('first_release_on '.($filters['sort'] === 'oldest' ? 'ASC' : 'DESC').' NULLS LAST');
         }
@@ -87,9 +90,9 @@ class PublicCatalog
 
         return [
             'catalogs' => $catalogs->map(fn (Catalog $item) => [
-                'id' => $item->id, 'key' => $item->key, 'name' => $item->name, 'count' => (int) ($counts[$item->id] ?? 0),
+                ...$this->presentation->catalog($item), 'count' => (int) ($counts[$item->id] ?? 0),
             ]),
-            'languages' => $languages,
+            'languages' => $languages->map(PublicCatalogPresentation::language(...)),
             'filters' => $filters,
             'expansions' => $expansions,
             'total' => (int) $counts->sum(),
@@ -112,7 +115,7 @@ class PublicCatalog
             ...$this->presentation->card($expansion),
             'editions' => $expansion->editions->map(fn (ExpansionEdition $item) => $this->presentation->edition($item))->values(),
             'selectedEdition' => $edition ? $this->presentation->edition($edition) : null,
-            'editionFallback' => $requested !== '' && $edition?->language->code !== $requested,
+            'editionFallback' => $requested !== '' && ($edition === null || CatalogRules::languageCode($edition->language->code) !== CatalogRules::languageCode($requested)),
             'related' => $related->map(fn (Expansion $item) => $this->presentation->card($item))->values(),
         ];
     }
@@ -121,7 +124,7 @@ class PublicCatalog
     private function relations(): array
     {
         return [
-            'catalog.game', 'catalog.defaultLanguage', 'series.localizations.language', 'localizations.language',
+            'catalog.game', 'catalog.defaultLanguage', 'series',
             'editions' => fn ($query) => $query->where('is_visible', true)->orderBy('language_id')->orderBy('id'),
             'editions.language', 'editions.releases.market',
         ];
@@ -147,9 +150,10 @@ class PublicCatalog
             'official_code' => 'translate(lower(official_code), ?, ?) like ?',
             default => 'translate(lower(name), ?, ?) like ?',
         }, [$accents, $plain, $term]);
-        $query->where(function (Builder $query) use ($match): void {
+        $query->where(function (Builder $query) use ($match, $accents, $plain, $term): void {
             $match($query, 'expansions.name');
-            $query->orWhereHas('localizations', fn (Builder $localizations) => $match($localizations, 'name'))
+            $query->orWhereRaw('exists (select 1 from jsonb_each_text(expansions.display_name) as translation
+                where translate(lower(translation.value), ?, ?) like ?)', [$accents, $plain, $term])
                 ->orWhereHas('editions', function (Builder $editions) use ($match): void {
                     $editions->where('is_visible', true)->where(function (Builder $editions) use ($match): void {
                         $match($editions, 'name');

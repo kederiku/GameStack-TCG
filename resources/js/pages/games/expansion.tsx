@@ -47,10 +47,19 @@ export default function ExpansionShow({
                     },
                     {
                         title: currentGame.name,
+                        lang: currentGame.nameLanguage ?? '',
                         href: currentGame.url,
                     },
-                    { title: expansion.catalog.name, href: catalogUrl },
-                    { title: expansion.name, href: '' },
+                    {
+                        title: expansion.catalog.name,
+                        lang: expansion.catalog.nameLanguage ?? '',
+                        href: catalogUrl,
+                    },
+                    {
+                        title: expansion.name,
+                        lang: expansion.nameLanguage ?? '',
+                        href: '',
+                    },
                 ]}
             />
             <Button asChild variant="ghost" className="mt-5 -ml-3">
@@ -88,10 +97,13 @@ export default function ExpansionShow({
                     </div>
                     <div className="min-w-0">
                         <p className="text-xs text-muted-foreground">
-                            {types[expansion.type]} · {expansion.catalog.name}
+                            {types[expansion.type]} ·{' '}
+                            <span lang={expansion.catalog.nameLanguage ?? ''}>
+                                {expansion.catalog.name}
+                            </span>
                         </p>
                         <h1
-                            lang={expansion.nameLanguage ?? undefined}
+                            lang={expansion.nameLanguage ?? ''}
                             className="mt-3 font-display text-4xl leading-tight font-black [overflow-wrap:anywhere] uppercase sm:text-5xl"
                         >
                             {expansion.name}
@@ -102,10 +114,14 @@ export default function ExpansionShow({
                                 {languageName(expansion.nameLanguage)}
                             </p>
                         )}
-                        <p className="mt-4 text-sm leading-7 whitespace-pre-line text-muted-foreground">
-                            {expansion.description ??
-                                t('catalog.expansion.description')}
-                        </p>
+                        {expansion.description !== null && (
+                            <p
+                                lang={expansion.descriptionLanguage ?? ''}
+                                className="mt-4 text-sm leading-7 whitespace-pre-line text-muted-foreground"
+                            >
+                                {expansion.description}
+                            </p>
+                        )}
                         {edition && (
                             <div className="mt-6">
                                 <p className="mb-3 text-xs text-muted-foreground">
@@ -174,6 +190,7 @@ export default function ExpansionShow({
                             {expansion.series ? (
                                 <Link
                                     href={expansion.series.url}
+                                    lang={expansion.series.nameLanguage ?? ''}
                                     className="text-brand-highlight hover:underline"
                                 >
                                     {expansion.series.name}

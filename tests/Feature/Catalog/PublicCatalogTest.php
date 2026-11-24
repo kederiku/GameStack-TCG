@@ -79,7 +79,7 @@ class PublicCatalogTest extends TestCase
         $catalog = $this->catalog(Game::factory()->create(['slug' => 'pokemon']));
         $expansion = $this->expansion($catalog);
         $fr = $this->language('fr', 'Français');
-        $expansion->localizations()->create(['language_id' => $fr->id, 'name' => 'Ensemble de base', 'description' => 'Description française']);
+        $expansion->update(['display_name' => ['fr' => 'Ensemble de base'], 'description' => ['fr' => 'Description française']]);
         $english = $this->edition($expansion);
         $french = $this->edition($expansion, $fr);
         DB::table('expansion_editions')->where('id', $english->id)->update(['image' => 'catalog/english.avif']);
@@ -100,7 +100,7 @@ class PublicCatalogTest extends TestCase
     {
         $catalog = $this->catalog(Game::factory()->create(['slug' => 'pokemon']));
         $expansion = $this->expansion($catalog);
-        $expansion->localizations()->create(['language_id' => $catalog->default_language_id, 'name' => 'English title']);
+        $expansion->setTranslation('display_name', 'en', 'English title')->save();
         $this->edition($expansion);
         $hidden = $this->edition($expansion, $this->language('fr', 'Français'));
         $hidden->update(['is_visible' => false]);
@@ -134,7 +134,7 @@ class PublicCatalogTest extends TestCase
         $release = $this->release($edition);
         $release->update(['released_on' => '2023-03-31', 'status' => 'released']);
         $cancelled = $this->release($edition, $this->market('us', 'États-Unis'), 'event');
-        $cancelled->update(['announced_period' => '2027', 'status' => 'cancelled']);
+        $cancelled->update(['reference_announced_period' => '2027', 'status' => 'cancelled']);
         $this->get('/fr/pokemon/international/base-set')->assertInertia(fn (Assert $page) => $page
             ->has('expansion.selectedEdition.releases', 2)
             ->where('expansion.selectedEdition.releases.0.releasedOn', '2023-03-31')
@@ -201,14 +201,13 @@ class PublicCatalogTest extends TestCase
     public function test_sorting_uses_localized_names_and_non_cancelled_release_dates(): void
     {
         $catalog = $this->catalog(Game::factory()->create(['slug' => 'pokemon']));
-        $fr = $this->language('fr', 'Français');
         $old = $this->expansion($catalog, key: 'old');
-        $old->localizations()->create(['language_id' => $fr->id, 'name' => 'Zulu']);
+        $old->setTranslation('display_name', 'fr', 'Zulu')->save();
         $oldEdition = $this->edition($old);
         $this->release($oldEdition)->update(['released_on' => '2020-01-01', 'status' => 'released']);
         $this->release($oldEdition, $this->market('japan', 'Japon'))->update(['released_on' => '2030-01-01', 'status' => 'cancelled']);
         $new = $this->expansion($catalog, key: 'new');
-        $new->localizations()->create(['language_id' => $fr->id, 'name' => 'Alpha']);
+        $new->setTranslation('display_name', 'fr', 'Alpha')->save();
         $this->release($this->edition($new))->update(['released_on' => '2023-01-01', 'status' => 'released']);
         $unknown = $this->expansion($catalog, key: 'unknown');
         $unknown->update(['name' => 'Middle']);

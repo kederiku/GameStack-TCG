@@ -27,7 +27,7 @@ export function Breadcrumbs({
 
                             return (
                                 <Fragment key={index}>
-                                    <BreadcrumbItem>
+                                    <BreadcrumbItem lang={item.lang}>
                                         {isLast ? (
                                             <BreadcrumbPage>
                                                 {item.title}

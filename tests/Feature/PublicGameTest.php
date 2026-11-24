@@ -24,6 +24,8 @@ class PublicGameTest extends TestCase
             ->where('canRegister', true)
             ->has('games', 3)
             ->where('games.0.name', 'Magic')
+            ->where('games.0.nameLanguage', null)
+            ->where('games.0.nameFallback', true)
             ->where('games.0.url', '/fr/magic')
             ->where('games.0.imageUrl', url('/storage/games/magic.webp'))
             ->where('games.1.slug', 'pokemon')
@@ -31,6 +33,17 @@ class PublicGameTest extends TestCase
             ->where('games.2.imageUrl', null)
             ->missing('games.0.created_at')
             ->missing('games.0.image'));
+    }
+
+    public function test_games_sort_by_the_resolved_name_then_id_in_each_interface_language(): void
+    {
+        $first = Game::factory()->create(['name' => 'Zulu', 'display_name' => ['fr' => 'Alpha', 'en' => 'Zulu']]);
+        $second = Game::factory()->create(['name' => 'Alpha', 'display_name' => ['fr' => 'Alpha']]);
+        $this->get('/fr')->assertInertia(fn (Assert $page) => $page
+            ->where('games.0.id', $first->id)->where('games.1.id', $second->id));
+        $this->get('/en')->assertInertia(fn (Assert $page) => $page
+            ->where('games.0.id', $second->id)->where('games.0.nameFallback', true)->where('games.0.nameLanguage', 'fr')
+            ->where('games.1.id', $first->id)->where('games.1.nameLanguage', 'en'));
     }
 
     public function test_the_landing_works_without_any_game(): void

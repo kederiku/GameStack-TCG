@@ -13,7 +13,10 @@ export function GameCard({ game }: { game: PublicGame }) {
         >
             <GameImage game={game} className="size-16 rounded-xl p-2.5" />
             <span className="min-w-0 flex-1">
-                <span className="block font-semibold [overflow-wrap:anywhere]">
+                <span
+                    lang={game.nameLanguage ?? ''}
+                    className="block font-semibold [overflow-wrap:anywhere]"
+                >
                     {game.name}
                 </span>
                 <span className="mt-1.5 block text-xs text-muted-foreground">

@@ -6,9 +6,11 @@ use App\Models\Catalog;
 use App\Models\Expansion;
 use App\Models\ExpansionEdition;
 use App\Models\ExpansionRelease;
+use App\Models\Language;
 use App\Models\Series;
 use App\Services\CatalogImages;
 use App\Support\Localization\LocalizedRoutes;
+use App\Support\Localization\TranslatedContent;
 
 class PublicCatalogPresentation
 {
@@ -18,9 +20,9 @@ class PublicCatalogPresentation
         $catalog = $expansion->catalog;
         $edition = $this->selectEdition($expansion, $language);
         $releases = $expansion->editions
-            ->filter(fn (ExpansionEdition $item) => $language === '*' || $item->language->code === $language)
+            ->filter(fn (ExpansionEdition $item) => $language === '*' || CatalogRules::languageCode($item->language->code) === $language)
             ->flatMap(fn (ExpansionEdition $item) => $item->releases->map(fn (ExpansionRelease $release) => [
-                ...$this->release($release), 'language' => $item->language->code,
+                ...$this->release($release), 'language' => CatalogRules::languageCode($item->language->code),
             ]))
             ->filter(fn (array $release) => $release['status'] !== 'cancelled' && $release['releasedOn'] !== null)
             ->sortBy('releasedOn');
@@ -28,14 +30,13 @@ class PublicCatalogPresentation
         return [
             'id' => $expansion->id,
             'key' => $expansion->key,
-            ...$this->name($expansion, $catalog),
+            ...CatalogPresentation::displayName($expansion),
+            ...CatalogPresentation::description($expansion),
             'type' => $expansion->type,
             'url' => LocalizedRoutes::url('games.expansions.show', ['game' => $catalog->game->slug, 'catalogKey' => $catalog->key, 'expansionKey' => $expansion->key], absolute: false),
-            'catalog' => ['id' => $catalog->id, 'key' => $catalog->key, 'name' => $catalog->name],
+            'catalog' => $this->catalog($catalog),
             'series' => $expansion->series ? $this->series($expansion->series, $catalog) : null,
-            'languages' => $expansion->editions->map(fn (ExpansionEdition $item) => [
-                'code' => $item->language->code, 'name' => $item->language->name,
-            ])->values()->all(),
+            'languages' => $expansion->editions->map(fn (ExpansionEdition $item) => self::language($item->language))->values()->all(),
             'edition' => $edition ? $this->edition($edition) : null,
             'firstRelease' => $releases->first(),
         ];
@@ -43,7 +44,9 @@ class PublicCatalogPresentation
 
     public function selectEdition(Expansion $expansion, string $requested): ?ExpansionEdition
     {
-        return $expansion->editions->first(fn (ExpansionEdition $item) => $item->language->code === $requested)
+        $requested = CatalogRules::languageCode($requested);
+
+        return $expansion->editions->first(fn (ExpansionEdition $item) => CatalogRules::languageCode($item->language->code) === $requested)
             ?? $expansion->editions->first(fn (ExpansionEdition $item) => $item->language_id === $expansion->catalog->default_language_id)
             ?? $expansion->editions->first();
     }
@@ -54,7 +57,7 @@ class PublicCatalogPresentation
         return [
             'id' => $edition->id,
             'name' => $edition->name,
-            'language' => ['code' => $edition->language->code, 'name' => $edition->language->name],
+            'language' => self::language($edition->language),
             'officialCode' => $edition->official_code,
             'imageUrl' => $edition->image ? CatalogImages::disk()->url($edition->image) : null,
             'status' => $edition->status,
@@ -66,12 +69,16 @@ class PublicCatalogPresentation
     /** @return array<string, mixed> */
     private function release(ExpansionRelease $release): array
     {
+        $period = TranslatedContent::field($release, 'announced_period', LocalizedRoutes::locale(request()));
+
         return [
             'id' => $release->id,
-            'market' => ['key' => $release->market->key, 'name' => $release->market->name],
+            'market' => ['key' => $release->market->key, ...CatalogPresentation::displayName($release->market)],
             'channel' => $release->channel,
             'releasedOn' => $release->released_on?->format('Y-m-d'),
-            'announcedPeriod' => $release->announced_period,
+            'announcedPeriod' => $period['value'],
+            'announcedPeriodLanguage' => $period['locale'],
+            'announcedPeriodFallback' => $period['fallback'],
             'status' => $release->status,
         ];
     }
@@ -79,25 +86,29 @@ class PublicCatalogPresentation
     /** @return array<string, mixed> */
     private function series(Series $series, Catalog $catalog): array
     {
+        $series->setRelation('catalog', $catalog);
+
         return [
             'id' => $series->id, 'key' => $series->key,
-            ...$this->name($series, $catalog),
+            ...CatalogPresentation::displayName($series),
+            ...CatalogPresentation::description($series),
             'url' => LocalizedRoutes::url('games.show', ['game' => $catalog->game->slug, 'catalog' => $catalog->key, 'series' => $series->key], absolute: false),
         ];
     }
 
-    /** @return array{name: string, nameLanguage: ?string, nameFallback: bool, description: ?string} */
-    private function name(Series|Expansion $record, Catalog $catalog): array
+    /** @return array<string, mixed> */
+    public function catalog(Catalog $catalog): array
     {
-        $locale = app()->getLocale();
-        $translation = $record->localizations->first(fn ($item) => $item->language->code === $locale)
-            ?? $record->localizations->first(fn ($item) => $item->language_id === $catalog->default_language_id);
-
         return [
-            'name' => $translation->name ?? $record->name,
-            'nameLanguage' => $translation?->language->code,
-            'nameFallback' => $translation?->language->code !== $locale,
-            'description' => $translation?->description,
+            'id' => $catalog->id, 'key' => $catalog->key,
+            ...CatalogPresentation::displayName($catalog),
+            ...CatalogPresentation::description($catalog),
         ];
+    }
+
+    /** @return array{code: string, name: string} */
+    public static function language(Language $language): array
+    {
+        return ['code' => CatalogRules::languageCode($language->code), 'name' => $language->name];
     }
 }

@@ -25,7 +25,7 @@ export function ExpansionCard({ expansion }: { expansion: PublicExpansion }) {
                     {types[expansion.type]}
                 </span>
                 <h3
-                    lang={expansion.nameLanguage ?? undefined}
+                    lang={expansion.nameLanguage ?? ''}
                     className="mt-1 font-display text-2xl leading-tight font-bold [overflow-wrap:anywhere] sm:text-3xl"
                 >
                     {expansion.name}
@@ -34,7 +34,14 @@ export function ExpansionCard({ expansion }: { expansion: PublicExpansion }) {
                     {expansion.firstRelease ? (
                         <>
                             {date(expansion.firstRelease.releasedOn)} ·{' '}
-                            {expansion.firstRelease.market.name}
+                            <span
+                                lang={
+                                    expansion.firstRelease.market
+                                        .nameLanguage ?? ''
+                                }
+                            >
+                                {expansion.firstRelease.market.name}
+                            </span>
                             {expansion.firstRelease.language !==
                                 edition?.language.code &&
                                 ` · ${languageName(expansion.firstRelease.language)}`}

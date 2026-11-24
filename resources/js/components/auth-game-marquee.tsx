@@ -12,7 +12,10 @@ function GameTile({ game }: { game: PublicGame }) {
                 game={game}
                 className="h-16 w-full rounded-none border-0 bg-transparent p-0 text-3xl text-slate-100"
             />
-            <span className="line-clamp-2 text-center text-xs leading-snug [overflow-wrap:anywhere] text-slate-300">
+            <span
+                lang={game.nameLanguage ?? ''}
+                className="line-clamp-2 text-center text-xs leading-snug [overflow-wrap:anywhere] text-slate-300"
+            >
                 {game.name}
             </span>
         </div>
@@ -55,7 +58,15 @@ export function AuthGameMarquee({ games }: { games: PublicGame[] }) {
             {games.length > 0 && (
                 <p className="sr-only">
                     {t('common.auth-game-marquee.available-games')}{' '}
-                    {games.map((game) => game.name).join(', ')}.
+                    {games.map((game, index) => (
+                        <span key={game.id}>
+                            {index > 0 && ', '}
+                            <span lang={game.nameLanguage ?? ''}>
+                                {game.name}
+                            </span>
+                        </span>
+                    ))}
+                    .
                 </p>
             )}
 

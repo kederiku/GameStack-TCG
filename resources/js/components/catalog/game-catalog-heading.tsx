@@ -20,7 +20,10 @@ export function GameCatalogHeading({
                 <p className="mb-3 text-[11px] font-semibold tracking-[0.16em] text-brand-highlight uppercase">
                     {t('catalog.game-catalog-heading.the-catalog')}
                 </p>
-                <h1 className="font-display text-6xl leading-none font-black tracking-tight [overflow-wrap:anywhere] uppercase sm:text-7xl lg:text-8xl">
+                <h1
+                    lang={game.nameLanguage ?? ''}
+                    className="font-display text-6xl leading-none font-black tracking-tight [overflow-wrap:anywhere] uppercase sm:text-7xl lg:text-8xl"
+                >
                     {game.name}
                     <span className="text-primary">.</span>
                 </h1>
@@ -28,7 +31,10 @@ export function GameCatalogHeading({
                     {t('catalog.game-catalog-heading.tagline')}
                 </p>
                 {details.description && (
-                    <p className="mt-3 max-w-xl text-sm leading-6 whitespace-pre-line text-muted-foreground">
+                    <p
+                        lang={details.descriptionLanguage ?? ''}
+                        className="mt-3 max-w-xl text-sm leading-6 whitespace-pre-line text-muted-foreground"
+                    >
                         {details.description}
                     </p>
                 )}

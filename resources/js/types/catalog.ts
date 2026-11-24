@@ -1,14 +1,18 @@
 export type CatalogLanguage = { code: string; name: string };
-export type CatalogName = {
+export type TranslatedName = {
     name: string;
     nameLanguage: string | null;
     nameFallback: boolean;
+};
+export type TranslatedDescription = {
+    descriptionLanguage: string | null;
+    descriptionFallback: boolean;
     description: string | null;
 };
-export type CatalogSummary = {
+export type CatalogName = TranslatedName & TranslatedDescription;
+export type CatalogSummary = CatalogName & {
     id: number;
     key: string;
-    name: string;
     count: number;
 };
 export type CatalogSeries = CatalogName & {
@@ -20,10 +24,12 @@ export type ExpansionType = 'main' | 'special' | 'promo' | 'deck' | 'reprint';
 export type PublicationStatus = 'announced' | 'released' | 'cancelled';
 export type EditionRelease = {
     id: number;
-    market: { key: string; name: string };
+    market: TranslatedName & { key: string };
     channel: 'general' | 'specialist' | 'prerelease' | 'crowdfunding' | 'event';
     releasedOn: string | null;
     announcedPeriod: string | null;
+    announcedPeriodLanguage: string | null;
+    announcedPeriodFallback: boolean;
     status: PublicationStatus;
 };
 export type PublicEdition = {
@@ -76,9 +82,8 @@ export type CatalogData = {
         next_page_url: string | null;
     };
 };
-export type GameDetails = {
+export type GameDetails = TranslatedDescription & {
     publisher: string | null;
     startYear: number | null;
     endYear: number | null;
-    description: string | null;
 };

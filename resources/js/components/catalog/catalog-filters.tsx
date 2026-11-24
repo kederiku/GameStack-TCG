@@ -84,6 +84,7 @@ export function CatalogFilters({
                         ...data.catalogs.map((catalog) => ({
                             value: catalog.key,
                             label: catalog.name,
+                            lang: catalog.nameLanguage ?? '',
                             count: catalog.count,
                         })),
                     ]}

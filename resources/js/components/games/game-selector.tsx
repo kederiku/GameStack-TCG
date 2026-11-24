@@ -50,7 +50,14 @@ export function GameSelector({
                         ) : (
                             <Layers2 className="size-4 text-muted-foreground" />
                         )}
-                        <span className="truncate">
+                        <span
+                            className="truncate"
+                            lang={
+                                currentGame && games.length > 0
+                                    ? (currentGame.nameLanguage ?? '')
+                                    : undefined
+                            }
+                        >
                             {games.length === 0
                                 ? t('catalog.game-selector.no-games-available')
                                 : (currentGame?.name ??
@@ -79,7 +86,10 @@ export function GameSelector({
                             className="min-w-0 gap-3 rounded-lg px-2.5 py-2.5"
                         >
                             <GameImage game={game} className="size-9" />
-                            <span className="min-w-0 flex-1 [overflow-wrap:anywhere]">
+                            <span
+                                lang={game.nameLanguage ?? ''}
+                                className="min-w-0 flex-1 [overflow-wrap:anywhere]"
+                            >
                                 {game.name}
                             </span>
                             {currentGame?.id === game.id && (

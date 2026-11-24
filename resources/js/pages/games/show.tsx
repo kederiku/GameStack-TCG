@@ -20,6 +20,10 @@ import type {
 } from '@/types/catalog';
 import type { PublicGame } from '@/types/game';
 
+function seriesKey(expansion: PublicExpansion) {
+    return `${expansion.catalog.id}-${expansion.series?.id ?? 'none'}`;
+}
+
 export default function GameShow({
     currentGame,
     gameDetails,
@@ -31,10 +35,24 @@ export default function GameShow({
 }) {
     const routes = useLocalizedRoutes();
     const { t, tChoice, languageName } = useLocale();
-    const groups = new Map<string, PublicExpansion[]>();
+    const groups: PublicExpansion[][] = [];
+    const bySeries = new Map<string, PublicExpansion[]>();
+    const counts = new Map<string, number>();
     for (const expansion of catalogData.expansions.data) {
-        const key = `${expansion.catalog.id}-${expansion.series?.id ?? 'none'}`;
-        groups.set(key, [...(groups.get(key) ?? []), expansion]);
+        const key = seriesKey(expansion);
+        counts.set(key, (counts.get(key) ?? 0) + 1);
+        const group = bySeries.get(key);
+        // Name sorting is global. A series may start another group later on the page.
+        if (
+            group &&
+            (catalogData.filters.sort !== 'name' || group === groups.at(-1))
+        ) {
+            group.push(expansion);
+        } else {
+            const next = [expansion];
+            bySeries.set(key, next);
+            groups.push(next);
+        }
     }
     const filtered =
         catalogData.filters.q ||
@@ -57,6 +75,7 @@ export default function GameShow({
                     { title: t('catalog.show.games'), href: routes.home.url() },
                     {
                         title: currentGame.name,
+                        lang: currentGame.nameLanguage ?? '',
                         href: currentGame.url,
                     },
                     { title: t('catalog.show.catalog'), href: '' },
@@ -103,29 +122,30 @@ export default function GameShow({
                 </div>
             )}
             <div className="space-y-9 pb-8">
-                {[...groups.entries()].map(([key, expansions]) => {
+                {groups.map((expansions) => {
                     const first = expansions[0];
                     const series = first.series;
                     const name =
                         series?.name ?? t('catalog.show.standalone-expansions');
                     return (
                         <Collapsible
-                            key={`${key}-${JSON.stringify(catalogData.filters)}`}
+                            key={`${first.id}-${JSON.stringify(catalogData.filters)}`}
                             defaultOpen
                         >
                             <div className="mb-4 flex items-center justify-between gap-3">
                                 <div className="min-w-0">
-                                    <p className="mb-1 text-[11px] text-muted-foreground">
+                                    <p
+                                        lang={first.catalog.nameLanguage ?? ''}
+                                        className="mb-1 text-[11px] text-muted-foreground"
+                                    >
                                         {first.catalog.name}
                                     </p>
-                                    <h2
-                                        className="font-display text-3xl leading-tight font-bold [overflow-wrap:anywhere]"
-                                        lang={series?.nameLanguage ?? undefined}
-                                    >
+                                    <h2 className="font-display text-3xl leading-tight font-bold [overflow-wrap:anywhere]">
                                         {series ? (
                                             <Link
                                                 className="rounded-sm hover:text-brand-highlight focus-visible:outline-2 focus-visible:outline-ring"
                                                 href={series.url}
+                                                lang={series.nameLanguage ?? ''}
                                             >
                                                 {name}
                                             </Link>
@@ -138,7 +158,7 @@ export default function GameShow({
                                                 'catalog.show.expansions-on-this-page',
                                             )}
                                         >
-                                            {expansions.length}
+                                            {counts.get(seriesKey(first))}
                                         </span>
                                     </h2>
                                 </div>
