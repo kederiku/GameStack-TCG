@@ -63,13 +63,13 @@
 - `DatabaseSeeder::run(): void` appelle pour l’instant uniquement le seeder de langues ; la tâche 2 y ajoute le catalogue réel.
 - `make init` utilise `migrate --force` puis `localization:sync-languages`.
 
-- [ ] Écrire `FreshSchemaTest` sur un schéma possédé de `gamestackr_testing` : migrations seules sans données métier, présence de JSONB et des champs d’authentification complets, absence des quatre tables historiques, langues après synchronisation, rollback puis nouvelle migration.
-- [ ] Exécuter `make test ARGS='tests/Feature/Database/FreshSchemaTest.php'` et constater l’échec sur l’historique actuel.
-- [ ] Écrire les cinq migrations finales en reprenant toutes les contraintes actuelles utiles. Supprimer l’ancien historique et les commandes de conversion de localisation.
-- [ ] Retirer l’ancien seeder conservateur et ses bindings. Supprimer uniquement les cas de test de conversion/bindings devenus sans objet ; garder les tests du domaine et des traductions. Le manifeste de faits peut rester lisible comme référence jusqu’à son remplacement en tâche 2.
-- [ ] Remplacer les traits `ForwardOnly*` par `RefreshDatabase` / `DatabaseMigrations`, avec amorçage des langues dans la base de tests. Adapter les tests de concurrence/stockage à `UsesIsolatedSchema`. Ne pas altérer le contrôle de destination dans `TestCase::createApplication()`.
-- [ ] Vérifier les protections avec `TestDatabaseIsolationTest` et `FreshSchemaTest`, puis exécuter la suite PHP et Pint/PHPStan via les commandes Composer du projet.
-- [ ] Mettre à jour le plan et créer un commit limité à cette tâche après vérification du diff.
+- [x] Écrire `FreshSchemaTest` sur un schéma possédé de `gamestackr_testing` : migrations seules sans données métier, présence de JSONB et des champs d’authentification complets, absence des quatre tables historiques, langues après synchronisation, rollback puis nouvelle migration.
+- [x] Exécuter `make test ARGS='tests/Feature/Database/FreshSchemaTest.php'` et constater l’échec sur l’historique actuel.
+- [x] Écrire les cinq migrations finales en reprenant toutes les contraintes actuelles utiles. Supprimer l’ancien historique et les commandes de conversion de localisation.
+- [x] Retirer l’ancien seeder conservateur et ses bindings. Supprimer uniquement les cas de test de conversion/bindings devenus sans objet ; garder les tests du domaine et des traductions. Le manifeste de faits peut rester lisible comme référence jusqu’à son remplacement en tâche 2.
+- [x] Remplacer les traits `ForwardOnly*` par `RefreshDatabase` / `DatabaseMigrations`, avec amorçage des langues dans la base de tests. Adapter les tests de concurrence/stockage à `UsesIsolatedSchema`. Ne pas altérer le contrôle de destination dans `TestCase::createApplication()`.
+- [x] Vérifier les protections avec `TestDatabaseIsolationTest` et `FreshSchemaTest`, puis exécuter la suite PHP et Pint/PHPStan via les commandes Composer du projet.
+- [x] Mettre à jour le plan et créer un commit limité à cette tâche après vérification du diff.
 
 ## Task 2: Catalogue réel, sourcé et réexécutable
 
