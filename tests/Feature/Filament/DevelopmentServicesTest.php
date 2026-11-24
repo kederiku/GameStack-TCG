@@ -29,10 +29,12 @@ class DevelopmentServicesTest extends TestCase
     public function test_local_admins_see_the_page_and_external_navigation_links(): void
     {
         $this->app['env'] = 'local';
+        $this->travelTo(now()->parse('2026-11-24 14:03:02'));
+        $this->get('/en/admin/development-services')->assertOk()->assertSee('11/24/2026');
         config(['development.mailpit_port' => 18025, 'development.garage_ui_port' => 13909]);
 
         $this->get('/fr/admin/services-developpement')->assertOk()
-            ->assertSee('État des services')->assertSee('PostgreSQL')
+            ->assertSee('24/11/2026')->assertSee('État des services')->assertSee('PostgreSQL')
             ->assertSee('http://localhost:18025', false)->assertSee('http://localhost:13909', false)
             ->assertSee('target="_blank"', false)->assertSee('wire:poll.15s.visible', false);
     }

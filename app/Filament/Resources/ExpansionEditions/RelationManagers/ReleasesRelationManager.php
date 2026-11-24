@@ -70,7 +70,7 @@ class ReleasesRelationManager extends CatalogRelationManager
                             ->whereColumn('markets.id', 'expansion_releases.market_id'), $direction === 'desc' ? 'desc' : 'asc')),
                 CatalogTables::enum('channel', __('admin.labels.channel'), CatalogLabels::channels()),
                 CatalogTables::enum('status', __('admin.labels.status'), CatalogLabels::statuses()),
-                TextColumn::make('released_on')->label(__('admin.labels.release-date'))->date('d/m/Y')->sortable(),
+                TextColumn::make('released_on')->label(__('admin.labels.release-date'))->isoDate('L')->sortable(),
                 TextColumn::make('announced_period')->state(fn (ExpansionRelease $record): ?string => TranslatedContent::field($record, 'announced_period', CatalogLabels::locale())['value'])->label(__('admin.labels.announced-period')),
                 TextColumn::make('source_url')->label(__('admin.labels.source'))->limit(40)->url(fn (ExpansionRelease $record): ?string => $record->source_url, true),
             ])

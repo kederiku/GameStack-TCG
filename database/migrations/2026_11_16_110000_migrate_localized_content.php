@@ -18,7 +18,7 @@ return new class extends Migration
             foreach (Locales::all() as $locale) {
                 $connection->table('languages')->insertOrIgnore([
                     'code' => $locale['code'], 'name' => $locale['label'],
-                    'created_at' => now(), 'updated_at' => now(),
+                    // A synthesized reference has no historical creation or update date.
                 ]);
             }
             (new LocalizedContentV1)->up($connection);

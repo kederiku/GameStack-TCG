@@ -84,7 +84,7 @@ class DevelopmentServices extends Page
         abort_unless(static::canAccess(), 403);
         $this->health = app(ServiceHealth::class)->check();
         $this->docker = app(DockerSnapshot::class)->read();
-        $this->checkedAt = now()->format('d/m/Y H:i:s T');
+        $this->checkedAt = now()->isoFormat('L LTS z');
     }
 
     /** @return array<Action> */

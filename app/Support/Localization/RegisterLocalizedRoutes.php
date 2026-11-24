@@ -13,6 +13,10 @@ final class RegisterLocalizedRoutes
         $files = app(TranslationFiles::class);
         foreach (array_keys(Locales::all()) as $locale) {
             $paths = $files->routes($locale);
+            $errors = LocalizedRoutePaths::collisions($paths);
+            if ($errors !== []) {
+                throw new RuntimeException($locale.': '.implode("\n", $errors));
+            }
             foreach (RouteDefinitions::all() as $definition) {
                 if ($definition['feature'] !== null && ! Features::enabled($definition['feature'])) {
                     continue;

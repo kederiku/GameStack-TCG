@@ -45,7 +45,7 @@ class GamesTable
                     ->icon(fn (bool $state): Heroicon => $state ? Heroicon::OutlinedEye : Heroicon::OutlinedEyeSlash),
                 TextColumn::make('updated_at')
                     ->label(__('admin.labels.updated-at'))
-                    ->dateTime('d/m/Y H:i')
+                    ->isoDateTime('L LT')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])

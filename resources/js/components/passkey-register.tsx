@@ -1,6 +1,5 @@
 import { passkeyErrorMessage } from '@/lib/passkey-error';
 import { useLocale } from '@/hooks/use-locale';
-import { useLocalizedRoutes } from '@/hooks/use-localized-routes';
 import { usePasskeyRegister } from '@laravel/passkeys/react';
 import { Plus } from 'lucide-react';
 import { useState } from 'react';
@@ -10,12 +9,12 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 
 type Props = {
+    routes: { options: string; submit: string };
     onSuccess: () => void;
 };
 
-export default function PasskeyRegistration({ onSuccess }: Props) {
+export default function PasskeyRegistration({ routes, onSuccess }: Props) {
     const { t } = useLocale();
-    const localized = useLocalizedRoutes();
     const [name, setName] = useState(() => {
         const ua = navigator.userAgent;
 
@@ -44,10 +43,7 @@ export default function PasskeyRegistration({ onSuccess }: Props) {
     const [showForm, setShowForm] = useState(false);
     const { register, isLoading, errorInstance, isSupported } =
         usePasskeyRegister({
-            routes: {
-                options: localized['passkey.registration-options'].url(),
-                submit: localized['passkey.store'].url(),
-            },
+            routes,
             onSuccess: () => {
                 setName('');
                 setShowForm(false);

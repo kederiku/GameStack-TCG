@@ -19,15 +19,17 @@ export default function ConfirmPassword() {
         <>
             <Head title={t('auth.confirm-password.confirm-your-identity')} />
 
-            <PasskeyVerify
-                routes={{
-                    options: confirmOptions(),
-                    submit: confirmStore(),
-                }}
-                label={t('auth.confirm-password.confirm-with-a-passkey')}
-                loadingLabel={t('auth.confirm-password.verifying')}
-                separator={t('auth.confirm-password.or-with-your-password')}
-            />
+            {confirmOptions && confirmStore && (
+                <PasskeyVerify
+                    routes={{
+                        options: confirmOptions.url(),
+                        submit: confirmStore.url(),
+                    }}
+                    label={t('auth.confirm-password.confirm-with-a-passkey')}
+                    loadingLabel={t('auth.confirm-password.verifying')}
+                    separator={t('auth.confirm-password.or-with-your-password')}
+                />
+            )}
 
             <Form {...store.form()} resetOnSuccess={['password']}>
                 {({ processing, errors }) => (

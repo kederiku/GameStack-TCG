@@ -106,7 +106,7 @@ void test('the name-sorted catalogue keeps A/B/A series cards in server order', 
             type: 'main',
             catalog,
             url: '/fr/tcg/intl/' + name,
-            languages: [],
+            languages: [{ code: 'qaa', name: 'Langue du catalogue' }],
             series: {
                 id: index % 2,
                 name: index % 2 ? 'Series B' : 'Series A',
@@ -152,6 +152,7 @@ void test('the name-sorted catalogue keeps A/B/A series cards in server order', 
                 setup: ({ App, props }) => createElement(App, props),
             });
             assert.ok(response && typeof response === 'object');
+            assert.match(response.body, /title="Langue du catalogue"/);
             assert.deepEqual(
                 [
                     ...response.body.matchAll(

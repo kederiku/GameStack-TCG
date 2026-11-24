@@ -108,6 +108,36 @@ class LegacyContentMigrationTest extends TestCase
         $this->assertSame(['FR', 'en', 'ja', 'zh-hant', 'pt-br'], $this->connection->table('languages')->orderBy('id')->pluck('code')->all());
     }
 
+    public function test_missing_interface_language_has_reproducible_strict_receipts_across_conversions(): void
+    {
+        // Reuse the fixture's English route dictionary for the additional interface code.
+        config(['localization.locales.de' => ['laravelLocale' => 'en', 'htmlLang' => 'de', 'label' => 'Deutsch', 'direction' => 'ltr']]);
+        $this->connection->table('languages')->where('id', 2)->update(['created_at' => '2010-05-01 00:00:00']);
+        $runs = [];
+        foreach (['2026-11-22', '2026-11-24'] as $date) {
+            $this->travelTo(now()->parse($date));
+            $this->connection->beginTransaction();
+            try {
+                $this->connection->statement('ALTER SEQUENCE languages_id_seq RESTART WITH 6');
+                (require database_path('migrations/2026_11_16_110000_migrate_localized_content.php'))->up();
+                $this->artisan('localization:finalize', ['--dry-run' => true])->assertSuccessful();
+                $runs[] = [
+                    (array) $this->connection->table('languages')->where('code', 'de')->firstOrFail(),
+                    (array) $this->connection->table('localization_conversion_verifications')->first(['source_hashes', 'target_hashes', 'counts']),
+                ];
+                $this->connection->table('languages')->where('id', 2)->update(['created_at' => now()]);
+                $this->artisan('localization:finalize', ['--dry-run' => true])->assertFailed();
+            } finally {
+                $this->connection->rollBack();
+                $this->travelBack();
+            }
+        }
+        $this->assertSame($runs[0], $runs[1]);
+        $this->assertSame('Deutsch', $runs[0][0]['name']);
+        $this->assertNull($runs[0][0]['created_at']);
+        $this->assertNull($runs[0][0]['updated_at']);
+    }
+
     public function test_bindings_use_parent_and_locale_even_for_deleted_localization_after_rename(): void
     {
         $converter = $this->converter();

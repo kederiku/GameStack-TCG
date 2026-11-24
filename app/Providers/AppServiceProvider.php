@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Http\Routing\LocalIntendedRedirector;
 use App\Models\Catalog;
 use App\Models\Expansion;
 use App\Models\ExpansionEdition;
@@ -29,6 +30,12 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
+        $this->app->singleton('redirect', function (): LocalIntendedRedirector {
+            $redirector = new LocalIntendedRedirector($this->app->make('url'));
+            $redirector->setSession($this->app->make('session.store'));
+
+            return $redirector;
+        });
         $this->app->extend('translation.loader', fn (Loader $loader) => new VendorTranslationLoader($loader));
     }
 

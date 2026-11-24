@@ -20,9 +20,10 @@ export function useLocale() {
     const languageName = (code: string, fallback?: string) => {
         try {
             return (
-                new Intl.DisplayNames([htmlLang], { type: 'language' }).of(
-                    code,
-                ) ??
+                new Intl.DisplayNames([htmlLang], {
+                    type: 'language',
+                    fallback: 'none',
+                }).of(code) ??
                 fallback ??
                 code
             );

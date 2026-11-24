@@ -12,7 +12,9 @@ use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Route;
 use Inertia\Testing\AssertableInertia as Assert;
 use Laravel\Fortify\Features;
+use Laravel\Passkeys\Contracts\PasskeyConfirmationResponse;
 use Laravel\Passkeys\Contracts\PasskeyLoginResponse;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\Concerns\ForwardOnlyRefreshDatabase;
 use Tests\TestCase;
 
@@ -65,6 +67,69 @@ class LocalizedAuthTest extends TestCase
             ->defaults('_locale', 'en');
         $this->getJson('/__test-passkey-response/en')->assertOk()->assertJsonPath('redirect', url('/en/dashboard'));
         $this->assertSame('/dashboard', config('passkeys.redirect'));
+    }
+
+    public function test_password_and_two_factor_ignore_outside_intended_destinations(): void
+    {
+        $user = User::factory()->create();
+        $this->withSession(['url.intended' => 'https://outside.invalid/path'])
+            ->post('/en/login', ['email' => $user->email, 'password' => 'password'])
+            ->assertRedirect('/en/dashboard');
+        $this->post('/en/logout');
+        $user = User::factory()->withTwoFactor()->create();
+        $this->post('/en/login', ['email' => $user->email, 'password' => 'password'])->assertRedirect('/en/two-factor-challenge');
+        $this->withSession(['url.intended' => '//outside.invalid/path'])
+            ->post('/en/two-factor-challenge', ['recovery_code' => $user->recoveryCodes()[0]])->assertRedirect('/en/dashboard');
+    }
+
+    public function test_password_and_two_factor_json_preserve_the_fortify_contract(): void
+    {
+        $user = User::factory()->create();
+        $this->withSession(['url.intended' => 'https://outside.invalid/path'])
+            ->postJson('/en/login', ['email' => $user->email, 'password' => 'password'])
+            ->assertOk()->assertExactJson(['two_factor' => false]);
+        $this->post('/en/logout');
+        $user = User::factory()->withTwoFactor()->create();
+        $this->withSession(['url.intended' => '//outside.invalid/path'])
+            ->postJson('/en/login', ['email' => $user->email, 'password' => 'password'])
+            ->assertOk()->assertExactJson(['two_factor' => true]);
+        $this->postJson('/en/two-factor-challenge', ['recovery_code' => $user->recoveryCodes()[0]])->assertNoContent();
+        $this->assertAuthenticatedAs($user);
+    }
+
+    #[DataProvider('intendedUrls')]
+    public function test_passkey_success_consumes_only_local_intended_urls(?string $intended, ?string $expected): void
+    {
+        foreach ([PasskeyLoginResponse::class, PasskeyConfirmationResponse::class] as $index => $response) {
+            $path = '/__test-passkey-'.$index;
+            Route::middleware('web')->get($path, fn () => app($response))->defaults('_locale', 'en');
+            $target = str_replace('{origin}', url('/'), $expected ?? url('/en/dashboard'));
+            $value = $intended === null ? null : str_replace('{origin}', url('/'), $intended);
+            foreach ([true, false] as $json) {
+                $this->withSession(['url.intended' => $value]);
+                if ($json) {
+                    $this->getJson($path)->assertOk()->assertExactJson(['redirect' => $target]);
+                } else {
+                    $this->get($path)->assertRedirect($target);
+                }
+            }
+        }
+    }
+
+    public static function intendedUrls(): array
+    {
+        return [
+            'absent' => [null, null],
+            'outside' => ['https://outside.invalid', null],
+            'scheme relative' => ['//outside.invalid', null],
+            'backslash' => ['/\\outside.invalid', null],
+            'control' => ["/en/\tsettings", null],
+            'credentials' => ['http://user@localhost/path', null],
+            'other port' => ['http://localhost:9999/path', null],
+            'other scheme' => ['mailto:local@localhost', null],
+            'local absolute' => ['{origin}/fr/admin/jeux/2/modifier?x=%2F&y=2#tab', '{origin}/fr/admin/jeux/2/modifier?x=%2F&y=2#tab'],
+            'local signed' => ['/fr/verification?x=%2f&signature=abc#view', '{origin}/fr/verification?x=%2f&signature=abc#view'],
+        ];
     }
 
     public function test_complete_installed_fortify_inventory_matches_the_adapter(): void

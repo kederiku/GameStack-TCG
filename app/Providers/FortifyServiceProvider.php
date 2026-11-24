@@ -4,7 +4,7 @@ namespace App\Providers;
 
 use App\Actions\Fortify\CreateNewUser;
 use App\Actions\Fortify\ResetUserPassword;
-use App\Http\Responses\LocalizedPasskeyLoginResponse;
+use App\Http\Responses\LocalizedPasskeyRedirectResponse;
 use App\Support\PublicGames;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
@@ -16,6 +16,7 @@ use Inertia\Inertia;
 use Inertia\Response;
 use Laravel\Fortify\Features;
 use Laravel\Fortify\Fortify;
+use Laravel\Passkeys\Contracts\PasskeyConfirmationResponse;
 use Laravel\Passkeys\Contracts\PasskeyLoginResponse;
 
 class FortifyServiceProvider extends ServiceProvider
@@ -33,7 +34,8 @@ class FortifyServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        $this->app->bind(PasskeyLoginResponse::class, LocalizedPasskeyLoginResponse::class);
+        $this->app->bind(PasskeyLoginResponse::class, LocalizedPasskeyRedirectResponse::class);
+        $this->app->bind(PasskeyConfirmationResponse::class, LocalizedPasskeyRedirectResponse::class);
         $this->configureActions();
         $this->configureViews();
         $this->configureRateLimiting();

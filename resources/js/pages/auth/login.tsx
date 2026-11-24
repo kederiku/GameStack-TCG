@@ -27,6 +27,8 @@ export default function Login({
     const register = localized['register'];
     const store = localized['login.store'];
     const request = localized['password.request'];
+    const loginOptions = localized['passkey.login-options'];
+    const loginSubmit = localized['passkey.login'];
 
     return (
         <>
@@ -38,11 +40,17 @@ export default function Login({
                 </div>
             )}
 
-            <PasskeyVerify
-                label={t('auth.login.passkey-login')}
-                loadingLabel={t('auth.login.logging-in')}
-                separator={t('auth.login.or-with-your-email')}
-            />
+            {loginOptions && loginSubmit && (
+                <PasskeyVerify
+                    routes={{
+                        options: loginOptions.url(),
+                        submit: loginSubmit.url(),
+                    }}
+                    label={t('auth.login.passkey-login')}
+                    loadingLabel={t('auth.login.logging-in')}
+                    separator={t('auth.login.or-with-your-email')}
+                />
+            )}
 
             <Form
                 {...store.form()}

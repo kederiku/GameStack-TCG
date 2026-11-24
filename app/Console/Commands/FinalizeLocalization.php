@@ -24,6 +24,7 @@ class FinalizeLocalization extends Command
 
     // V1 adds or renames these columns. Row digests cannot attest their shape on empty tables.
     private const CONVERSION_COLUMNS = [
+        self::RECEIPTS => ['version' => 'int4', 'source_hashes' => 'jsonb', 'target_hashes' => 'jsonb', 'counts' => 'jsonb', 'verified_at' => 'timestamptz', 'finalized_at' => 'timestamptz'],
         'games' => ['display_name' => 'jsonb', 'description' => 'jsonb', 'reference_description' => 'text'],
         'catalogs' => ['display_name' => 'jsonb', 'description' => 'jsonb', 'reference_description' => 'text'],
         'series' => ['display_name' => 'jsonb', 'description' => 'jsonb'],
@@ -39,8 +40,9 @@ class FinalizeLocalization extends Command
         $schema = $db->getSchemaBuilder();
 
         return $schema->hasTable(self::RECEIPTS)
-            && $db->table(self::RECEIPTS)->where('version', 1)->whereNotNull('verified_at')->whereNotNull('finalized_at')->exists()
-            && ! $schema->hasTable(self::SOURCES[0]) && ! $schema->hasTable(self::SOURCES[1]);
+            && ! $schema->hasTable(self::SOURCES[0]) && ! $schema->hasTable(self::SOURCES[1])
+            && self::conversionSchemaError($db) === null
+            && $db->table(self::RECEIPTS)->where('version', 1)->whereNotNull('verified_at')->whereNotNull('finalized_at')->exists();
     }
 
     public function handle(MaintenanceMode $maintenance): int
@@ -129,12 +131,48 @@ class FinalizeLocalization extends Command
     private static function conversionSchemaError(Connection $db): ?string
     {
         $schema = $db->getSchemaBuilder();
+        foreach (self::TARGETS as $table) {
+            if (! $schema->hasTable($table)) {
+                return "Incomplete V1 target schema: missing table {$table}.";
+            }
+        }
         foreach (self::CONVERSION_COLUMNS as $table => $columns) {
             $actual = array_column($schema->getColumns($table), 'type_name', 'name');
             foreach ($columns as $column => $type) {
                 if (($actual[$column] ?? null) !== $type) {
                     return "Incomplete V1 target schema: {$table}.{$column} requires PostgreSQL type {$type}.";
                 }
+            }
+        }
+
+        $foreignKeys = array_column($db->select(<<<'SQL'
+            SELECT pg_get_constraintdef(oid) AS definition
+            FROM pg_constraint
+            WHERE conrelid = 'series_images'::regclass AND contype = 'f' AND convalidated AND conenforced
+            SQL), 'definition');
+        foreach (['FOREIGN KEY (series_id) REFERENCES series(id) ON DELETE CASCADE', 'FOREIGN KEY (language_id) REFERENCES languages(id) ON DELETE RESTRICT'] as $definition) {
+            if (! in_array($definition, $foreignKeys, true)) {
+                return "Incomplete V1 target schema: series_images requires {$definition}.";
+            }
+        }
+        // PostgreSQL's index catalog includes NULLS NOT DISTINCT, predicates and validity.
+        foreach ([
+            ['series_images', 'id', true, false],
+            ['series_images', 'series_id,language_id', false, false],
+            ['catalog_example_bindings', 'record_type,record_id,locale', false, true],
+            [self::RECEIPTS, 'version', true, false],
+        ] as [$table, $columns, $primary, $nullsEqual]) {
+            $found = $db->scalar(<<<'SQL'
+                SELECT EXISTS (
+                    SELECT FROM pg_index
+                    WHERE indrelid = to_regclass(?) AND indisunique AND indisvalid AND indisready AND indimmediate
+                        AND indpred IS NULL AND indexprs IS NULL AND indisprimary = ? AND indnullsnotdistinct = ?
+                        AND ARRAY(SELECT pg_get_indexdef(indexrelid, n, true) FROM generate_series(1, indnkeyatts) AS n)
+                            = string_to_array(?, ',')
+                )
+                SQL, [$table, $primary, $nullsEqual, $columns]);
+            if (! $found) {
+                return "Incomplete V1 target schema: missing required uniqueness on {$table} ({$columns}).";
             }
         }
 

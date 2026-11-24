@@ -39,7 +39,11 @@ final class TranslationFiles
             foreach ($locales as $code => $locale) {
                 try {
                     $dictionaries[$code] = $this->read($locale, $domain);
-                    if ($domain !== 'routes') {
+                    if ($domain === 'routes') {
+                        foreach (LocalizedRoutePaths::collisions($dictionaries[$code]) as $collision) {
+                            $errors[] = $this->file($locale, $domain).': '.$collision;
+                        }
+                    } else {
                         foreach ($dictionaries[$code] as $key => $line) {
                             if (str_contains($line, '|') || preg_match('/\A[\[{][-\d*,.]+[\]}]/', $line)) {
                                 $pluralKeys[$key] = true;
@@ -60,9 +64,7 @@ final class TranslationFiles
                     $target = $lines[$key] ?? null;
 
                     if ($target === null) {
-                        if ($domain !== 'auth' || ! in_array($key, self::FRAMEWORK_AUTH_KEYS, true)) {
-                            $errors[] = "{$file}: missing key {$key}.";
-                        }
+                        $errors[] = "{$file}: missing key {$key}.";
 
                         continue;
                     }

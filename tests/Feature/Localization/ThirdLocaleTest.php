@@ -92,11 +92,30 @@ class ThirdLocaleTest extends TestCase
             'fallback' => ['value' => 'Nom français', 'locale' => 'fr', 'fallback' => true],
             'visit' => [303, '/de/anmelden'],
         ], json_decode($process->getOutput(), true));
-        unset($routes['auth']['login']);
-        File::put($routeFile, '<?php return '.var_export($routes, true).';');
+        $incomplete = $routes;
+        unset($incomplete['auth']['login']);
+        File::put($routeFile, '<?php return '.var_export($incomplete, true).';');
         $process = $run($command, 'localization:check');
         $this->assertFalse($process->isSuccessful());
         $this->assertStringContainsString('missing key auth.login', $process->getOutput());
         $this->assertFalse($run($command, 'route:cache')->isSuccessful());
+        foreach ([
+            ['dashboard', 'anmelden'],
+            ['auth.password.reset', 'admin/spiele/{token}/bearbeiten'],
+            ['auth.logout', 'admin/logout'],
+            ['admin.resources.catalogs', 'spiele'],
+        ] as [$key, $path]) {
+            $collision = $routes;
+            if (str_starts_with($key, 'auth.')) {
+                $collision['auth'][substr($key, 5)] = $path;
+            } else {
+                data_set($collision, $key, $path);
+            }
+            File::put($routeFile, '<?php return '.var_export($collision, true).';');
+            $check = $run($command, 'localization:check');
+            $this->assertFalse($check->isSuccessful(), $key);
+            $this->assertStringContainsString('collision', $check->getOutput().$check->getErrorOutput());
+            $this->assertFalse($run($command, 'route:cache')->isSuccessful(), $key);
+        }
     }
 }

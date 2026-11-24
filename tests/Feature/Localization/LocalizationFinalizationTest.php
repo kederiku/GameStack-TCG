@@ -85,7 +85,7 @@ class LocalizationFinalizationTest extends TestCase
     {
         $this->artisan('migrate', ['--force' => true])->assertSuccessful();
         // Empty target tables have the same row digests even when a column is missing.
-        DB::statement($alteration);
+        DB::unprepared($alteration);
         $receipts = DB::table('localization_conversion_verifications');
         if ($receiptState === 'unverified') {
             $receipts->update(['verified_at' => null]);
@@ -105,11 +105,34 @@ class LocalizationFinalizationTest extends TestCase
     public static function partialRestorations(): array
     {
         return [
+            'language foreign key' => ['ALTER TABLE series_images DROP CONSTRAINT series_images_language_id_foreign', 'verified'],
+            'wrong parent delete action' => ['ALTER TABLE series_images DROP CONSTRAINT series_images_series_id_foreign, ADD FOREIGN KEY (series_id) REFERENCES series(id) ON DELETE SET NULL', 'verified'],
+            'image uniqueness' => ['ALTER TABLE series_images DROP CONSTRAINT series_images_series_id_language_id_unique', 'verified'],
+            'nullable binding uniqueness' => ['DROP INDEX catalog_example_bindings_record_locale_unique; CREATE UNIQUE INDEX bindings_distinct ON catalog_example_bindings (record_type, record_id, locale)', 'verified'],
             'partial target schema' => ['ALTER TABLE games DROP COLUMN display_name', 'verified'],
             'missing image target' => ['ALTER TABLE series_images DROP COLUMN image', 'verified'],
             'wrong translation type' => ['ALTER TABLE markets ALTER COLUMN display_name DROP DEFAULT, ALTER COLUMN display_name TYPE text USING display_name::text', 'verified'],
             'absent verification' => ['ALTER TABLE games DROP COLUMN display_name', 'unverified'],
             'absent receipt' => ['ALTER TABLE games DROP COLUMN display_name', 'missing'],
+        ];
+    }
+
+    #[DataProvider('damagedFinalizedSchemas')]
+    public function test_finalized_commands_refuse_a_damaged_target(string $ddl): void
+    {
+        $this->artisan('localization:install')->assertSuccessful();
+        DB::statement($ddl);
+        $this->artisan('localization:finalize')->assertFailed();
+        $this->artisan('localization:install')->assertFailed();
+        $this->assertFalse($this->maintenance->active());
+    }
+
+    public static function damagedFinalizedSchemas(): array
+    {
+        return [
+            ['DROP TABLE series_images'],
+            ['ALTER TABLE games DROP COLUMN description'],
+            ['ALTER TABLE series_images DROP CONSTRAINT series_images_language_id_foreign'],
         ];
     }
 

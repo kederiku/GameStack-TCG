@@ -142,6 +142,19 @@ class TranslationFilesTest extends TestCase
         ], $files->frontend('pt-BR'));
     }
 
+    public function test_backend_auth_keys_require_parity_but_stay_out_of_frontend(): void
+    {
+        $root = $this->useTemporaryDictionaries();
+        $keys = ['failed' => 'Failed', 'password' => 'Invalid password', 'throttle' => 'Retry in :seconds'];
+        $this->writeDictionary($root, 'fr', 'auth', $keys);
+        $this->writeDictionary($root, 'en', 'auth', []);
+        $files = app(TranslationFiles::class);
+        foreach (array_keys($keys) as $key) {
+            $this->assertContains("en/auth.php: missing key {$key}.", $files->validate());
+            $this->assertArrayNotHasKey('auth.'.$key, $files->frontend('fr'));
+        }
+    }
+
     public function test_vendor_aliases_are_required_checked_and_never_exported(): void
     {
         $root = sys_get_temp_dir().'/gamestackr-vendor-copy-'.bin2hex(random_bytes(8));
@@ -176,7 +189,7 @@ class TranslationFilesTest extends TestCase
                 'welcome' => $locale === 'fr' ? 'Bonjour, :name !' : 'Welcome, :name!',
                 'results' => $locale === 'fr' ? ':count résultat|:count résultats' : ':count result|:count results',
             ]);
-            $this->writeDictionary($root, $locale, 'auth', ['login' => ['title' => 'Sign in']]);
+            $this->writeDictionary($root, $locale, 'auth', ['failed' => 'Invalid credentials', 'login' => ['title' => 'Sign in']]);
 
             foreach (['account' => 'Account', 'catalog' => 'Catalog', 'admin' => 'Admin', 'notifications' => 'Notification'] as $domain => $title) {
                 $this->writeDictionary($root, $locale, $domain, ['title' => $title]);

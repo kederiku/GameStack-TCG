@@ -1,8 +1,6 @@
 import { passkeyErrorMessage } from '@/lib/passkey-error';
 import { useLocale } from '@/hooks/use-locale';
 import { useLocalizedRoutes } from '@/hooks/use-localized-routes';
-import type { UrlMethodPair } from '@inertiajs/core';
-import { router } from '@inertiajs/react';
 import { usePasskeyVerify } from '@laravel/passkeys/react';
 import { KeyRound } from 'lucide-react';
 import InputError from '@/components/input-error';
@@ -11,9 +9,9 @@ import { Separator } from '@/components/ui/separator';
 import { Spinner } from '@/components/ui/spinner';
 
 type Props = {
-    routes?: {
-        options: UrlMethodPair;
-        submit: UrlMethodPair;
+    routes: {
+        options: string;
+        submit: string;
     };
     label?: string;
     loadingLabel?: string;
@@ -25,17 +23,15 @@ export default function PasskeyVerify({
     label,
     loadingLabel,
     separator,
-}: Props = {}) {
+}: Props) {
     const { t } = useLocale();
     const localized = useLocalizedRoutes();
     const { verify, isLoading, errorInstance, isSupported } = usePasskeyVerify({
-        routes: {
-            options:
-                routes?.options.url ?? localized['passkey.login-options'].url(),
-            submit: routes?.submit.url ?? localized['passkey.login'].url(),
-        },
+        routes,
         onSuccess: (response) => {
-            router.visit(response.redirect ?? localized.dashboard.url());
+            window.location.assign(
+                response.redirect ?? localized.dashboard.url(),
+            );
         },
     });
 

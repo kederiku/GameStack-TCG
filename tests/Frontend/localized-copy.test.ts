@@ -180,6 +180,20 @@ void test('real Inertia auth and account renders translate layouts, accessible c
                         ),
                     );
                 }
+                if (name === 'auth/two-factor-challenge') {
+                    assert.match(
+                        response.body,
+                        locale === 'en'
+                            ? /<h1[^>]*>Two-step verification<\/h1>/
+                            : /<h1[^>]*>Vérification en deux étapes<\/h1>/,
+                    );
+                    assert.match(
+                        response.body,
+                        locale === 'en'
+                            ? /Enter the six-digit code from your authenticator app/
+                            : /Saisissez le code à six chiffres de votre application/,
+                    );
+                }
                 if (name === 'settings/security') {
                     assert.match(
                         response.body,

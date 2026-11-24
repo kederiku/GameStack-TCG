@@ -19,6 +19,11 @@ export default function ManagePasskeys(props: Props) {
     const localized = useLocalizedRoutes();
     const destroy = localized['passkey.destroy'];
 
+    const options = localized['passkey.registration-options'];
+    const store = localized['passkey.store'];
+    if (!props.canManagePasskeys || !destroy || !options || !store) {
+        return null;
+    }
     const passkeys = props.passkeys ?? [];
 
     const handleDelete = (id: number, onError: () => void) => {
@@ -31,10 +36,6 @@ export default function ManagePasskeys(props: Props) {
     const handleRegisterSuccess = () => {
         router.reload();
     };
-
-    if (!(props.canManagePasskeys ?? false)) {
-        return null;
-    }
 
     return (
         <SettingsSection
@@ -70,7 +71,10 @@ export default function ManagePasskeys(props: Props) {
                     )}
                 </div>
 
-                <PasskeyRegistration onSuccess={handleRegisterSuccess} />
+                <PasskeyRegistration
+                    routes={{ options: options.url(), submit: store.url() }}
+                    onSuccess={handleRegisterSuccess}
+                />
             </div>
         </SettingsSection>
     );

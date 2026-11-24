@@ -11,6 +11,7 @@ use App\Filament\Resources\Expansions\Pages\EditExpansion;
 use App\Filament\Resources\Expansions\Pages\ListExpansions;
 use App\Filament\Resources\Expansions\RelationManagers\RelationsRelationManager;
 use App\Filament\Resources\Games\Pages\EditGame;
+use App\Filament\Resources\Games\Pages\ListGames;
 use App\Filament\Support\Catalog\CatalogFields;
 use App\Filament\Support\Catalog\CatalogLabels;
 use App\Models\Game;
@@ -118,6 +119,21 @@ class TranslatedAdminFormsTest extends TestCase
             ->call('save')->assertHasNoFormErrors();
         $this->assertSame([], $expansion->refresh()->getTranslations('display_name'));
         $this->assertSame([], $expansion->getTranslations('description'));
+    }
+
+    public function test_release_and_game_dates_use_the_panel_locale(): void
+    {
+        $this->actingAs(User::factory()->create(['is_admin' => true]));
+        $edition = $this->edition($this->expansion($this->catalog()));
+        $this->saveCatalog($this->release($edition), ['released_on' => '2026-11-24']);
+        $game = Game::factory()->create(['updated_at' => '2026-11-24 14:03:00']);
+        foreach (['en' => '11/24/2026', 'fr' => '24/11/2026'] as $locale => $date) {
+            Filament::setCurrentPanel(Filament::getPanel('admin-'.$locale));
+            app()->setLocale($locale);
+            Livewire::test(ReleasesRelationManager::class, ['ownerRecord' => $edition, 'pageClass' => EditExpansionEdition::class])
+                ->assertSee($date);
+            Livewire::test(ListGames::class)->assertTableColumnFormattedStateSet('updated_at', $date.($locale === 'en' ? ' 2:03 PM' : ' 14:03'), $game);
+        }
     }
 
     public function test_release_modal_keeps_pending_work_and_reverted_absent_periods(): void

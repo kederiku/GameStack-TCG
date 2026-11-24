@@ -95,12 +95,21 @@ figurent dans le [rapport de vérification](superpowers/localization-verificatio
 
     La migration copie les traductions et les chemins d’images, synchronise les
     langues actives, migre les liaisons d’exemples et établit les empreintes V1.
-    Elle rend les tables historiques accessibles en lecture seule. Jusqu’à la
+    Si une langue active manque au référentiel, la ligne créée par V1 conserve
+    des dates de création et de modification nulles faute de dates historiques.
+    Les dates existantes sont conservées. Deux conversions de la même sauvegarde
+    produisent ainsi les mêmes empreintes intégrales.
+    La migration rend les tables historiques accessibles en lecture seule. Jusqu’à la
     finalisation, garder toute écriture du catalogue suspendue, y compris les
     seeders. L’audit contrôle les références et le schéma. La simulation exige le
     schéma converti et le reçu vérifié V1. Elle contrôle les colonnes introduites
     ou renommées par la conversion, dont le type JSONB des traductions, même pour
-    une table vide. Elle compare les sources, les cibles et tous leurs compteurs
+    une table vide. Elle vérifie aussi les clés étrangères des images, leurs
+    actions de suppression et les unicités V1, notamment celle des liaisons dont
+    la locale est nulle. Après finalisation, les commandes d’installation et de
+    finalisation vérifient encore la structure des cibles. Les modifications de
+    contenu reprennent dès la réouverture. Avant le retrait des sources, la
+    simulation compare les sources, les cibles et tous leurs compteurs
     aux preuves initiales. Elle peut s’exécuter
     avant la maintenance sur une base déjà convertie et prend des verrous de
     lecture cohérente pouvant attendre les écritures. Elle garde les données,
