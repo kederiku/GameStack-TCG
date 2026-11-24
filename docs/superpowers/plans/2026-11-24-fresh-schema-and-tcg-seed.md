@@ -85,22 +85,23 @@
 - `tcg.php` retourne les références communes `languages`, `markets` et la liste `games` de chemins de fichiers ; `tcg-sources.php` retourne les sources indexées par ID avec `url`, `consulted_on`, `note`.
 - Produit `make seed` → `db:seed`. Cette commande n’efface aucune base et rétablit les attributs explicitement fournis.
 
-- [ ] Vérifier les sources officielles de tous les faits retenus pour les douze jeux visés. Préférer un champ absent ou une fiche écartée à une supposition ; documenter les écarts. Retirer les relations dont les sources prouvent seulement l’existence des produits, sans étayer la relation.
-- [ ] Écrire les tests avant le seeder : zéro utilisateur ; catalogue visible ; `one-piece` / `international` / `romance-dawn`, édition anglaise `OP01`, sortie `2022-12-02` ; Pokémon avec distinction entre texte FR et édition JA ; correction du slug `naruto-mythos`.
-- [ ] Ajouter les cas de réexécution : mêmes identifiants et nombre de fichiers ; champ fourni remis à sa valeur ; traduction supplémentaire et fiche étrangère conservées ; code de langue `EN` préexistant réutilisé ; média absent recréé une seule fois.
-- [ ] Ajouter un cas d’échec après création de média : rollback des nouvelles lignes et fichiers, conservation des objets antérieurs. Vérifier par un vrai point d’échec dans le service/action, pas seulement en reproduisant une boucle du seeder dans le test.
-- [ ] Exécuter `make test ARGS='tests/Feature/Catalog/TcgCatalogSeederTest.php'` et constater l’échec avant implémentation.
-- [ ] Écrire le seeder et les tableaux. Sérialiser les exécutions par verrou transactionnel PostgreSQL. Résoudre les parents par clés naturelles, appliquer les valeurs fournies avec les actions existantes, comparer les médias avant de les recopier. Pas de registre de bindings ni de mode migration.
-- [ ] Exécuter les tests du seed, du catalogue, des traductions et des images concernés ; vérifier la provenance de chaque champ et l’absence d’appel aux factories dans les seeders.
-- [ ] Mettre à jour le plan et créer un commit après vérification du diff et des sources effectivement consultées.
+- [x] Vérifier les sources officielles de tous les faits retenus pour les douze jeux visés. Préférer un champ absent ou une fiche écartée à une supposition ; documenter les écarts. Retirer les relations dont les sources prouvent seulement l’existence des produits, sans étayer la relation.
+- [x] Écrire les tests avant le seeder : zéro utilisateur ; catalogue visible ; `one-piece` / `international` / `romance-dawn`, édition anglaise `OP01`, sortie `2022-12-02` ; Pokémon avec distinction entre texte FR et édition JA ; correction du slug `naruto-mythos`.
+- [x] Ajouter les cas de réexécution : mêmes identifiants et nombre de fichiers ; champ fourni remis à sa valeur ; traduction supplémentaire et fiche étrangère conservées ; code de langue `EN` préexistant réutilisé ; média absent recréé une seule fois.
+- [x] Ajouter un cas d’échec après création de média : rollback des nouvelles lignes et fichiers, conservation des objets antérieurs. Vérifier par un vrai point d’échec dans le service/action, pas seulement en reproduisant une boucle du seeder dans le test.
+- [x] Exécuter `make test ARGS='tests/Feature/Catalog/TcgCatalogSeederTest.php'` et constater l’échec avant implémentation.
+- [x] Écrire le seeder et les tableaux. Sérialiser les exécutions par verrou transactionnel PostgreSQL. Résoudre les parents par clés naturelles, appliquer les valeurs fournies avec les actions existantes, comparer les médias avant de les recopier. Pas de registre de bindings ni de mode migration.
+- [x] Exécuter les tests du seed, du catalogue, des traductions et des images concernés ; vérifier la provenance de chaque champ et l’absence d’appel aux factories dans les seeders.
+- [x] Mettre à jour le plan et créer un commit après vérification du diff et des sources effectivement consultées.
 
 ## Task 3: Retrait des anciennes conversions d’images et documentation
 
-**Files:** supprimer `app/Console/Commands/ConvertGameImagesToAvif.php`, `CopyGameImagesToS3.php`, `tests/Feature/ConvertGameImagesTest.php`, `CopyGameImagesTest.php` ; modifier `tests/Integration/GarageStorageTest.php`, `README.md`, `docs/localization.md` et rapports historiques concernés.
+**Files:** supprimer `app/Console/Commands/ConvertGameImagesToAvif.php`, `CopyGameImagesToS3.php`, `tests/Feature/ConvertGameImagesTest.php`, `CopyGameImagesTest.php` ; modifier `app/Services/GameImages.php`, `app/Services/AvifImages.php`, `tests/Feature/GameImageStorageTest.php`, `tests/Feature/Auth/AuthGamesTest.php`, `tests/Feature/PublicGameTest.php`, `tests/Integration/GarageStorageTest.php`, `README.md`, `docs/localization.md` et rapports historiques concernés.
 
-**Interfaces:** les services d’upload et de stockage actuels restent inchangés. Les seules commandes de localisation utiles restent check/export/sync-languages ; aucun alias vers une conversion supprimée.
+**Interfaces:** conserver les uploads JPEG/PNG/WebP/SVG et leur normalisation AVIF, ainsi que le partage de l’encodeur introduit en tâche 2. Les chemins gérés de jeux et leur renommage ne conservent plus les anciens formats stockés WebP/SVG ; `AvifImages::write()` écrit uniquement de l’AVIF, sans paramètre d’extension historique. Les seules commandes de localisation utiles restent check/export/sync-languages ; aucun alias vers une conversion supprimée.
 
 - [ ] Retirer les commandes historiques et leur cas d’intégration dédié ; conserver les tests de cycle de vie réel Garage et les tests d’upload AVIF/SVG.
+- [ ] Retirer la compatibilité des anciens formats stockés dans `GameImages` et `AvifImages`, supprimer le cas historique de `GameImageStorageTest` et actualiser les chemins de fixtures publiques. Préserver les tests de téléversement SVG dans `GameSvgTest`.
 - [ ] Réécrire les procédures d’installation et de seed : `make init` non destructif, langues actives, `make seed` explicite avec données réelles et comportement de réexécution, création d’admin interactive.
 - [ ] Documenter la rupture d’historique et la remise à zéro explicite requise sur les autres installations. Retirer les anciennes procédures de conversion du guide actif ; annoter les rapports historiques sans les présenter comme instructions actuelles.
 - [ ] Exécuter les tests concernés d’images et de stockage ; rechercher les références exécutables aux commandes/tables supprimées. Formater les fichiers touchés avec les outils du projet.
