@@ -133,15 +133,15 @@ documentaires circulaires pour attester leur propre fusion.
 
 ## Task 5: Repli anglais des noms sans traduction française
 
-**Files:** `app/Support/Localization/TranslatedContent.php`, `tests/Feature/Localization/TranslatableContentTest.php`, `tests/Feature/Localization/TranslatedCatalogTest.php`, paragraphes de repli dans `README.md` et `docs/localization.md`.
+**Files:** `app/Support/Localization/TranslatedContent.php`, `app/Support/Catalog/CatalogPresentation.php`, `tests/Feature/Localization/TranslatableContentTest.php`, `tests/Feature/Localization/TranslatedCatalogTest.php`, tests de tri correspondants, paragraphes de repli dans `README.md` et `docs/localization.md`.
 
 **Interfaces:** conserver `TranslatedContent::field(Model $record, string $attribute, string $locale): array` et `resolve(array $translations, array $locales, ?string $reference = null): array`. Le résultat garde `value`, `locale`, `fallback`. Pour `display_name` seulement, les candidats sont langue demandée → `en` → repli existant du modèle → référence. Les autres attributs et le traitement de `null` explicite restent inchangés. La tâche 6 fournira les noms anglais dans les manifestes ; cette tâche ne crée aucune édition ni donnée de seed.
 
-- [ ] Ajouter un test avec catalogue de langue japonaise : un nom FR manque mais EN et JA existent, la réponse française utilise EN avec `locale=en` et `fallback=true`. Un vrai nom FR gagne ; sans EN le nom JA reste le repli. Vérifier aussi un modèle utilisant le repli applicatif, sans persister la traduction de repli.
-- [ ] Vérifier par un test de champ descriptif que l’ajout d’EN ne change pas sa politique de repli et que le `null` français explicite reste respecté. Couvrir les métadonnées publiques de nom/langue/repli dans une réponse Inertia.
-- [ ] Exécuter les tests ciblés et constater le RED attendu avant modification.
-- [ ] Modifier seulement la sélection des langues de noms, puis actualiser les deux guides actifs.
-- [ ] Exécuter les tests de contenu, catalogue traduit et seed ; Pint/PHPStan et le format des documents concernés. Commit limité à cette tâche après auto-revue ; revue indépendante.
+- [x] Ajouter un test avec catalogue de langue japonaise : un nom FR manque mais EN et JA existent, la réponse française utilise EN avec `locale=en` et `fallback=true`. Un vrai nom FR gagne ; sans EN le nom JA reste le repli. Vérifier aussi un modèle utilisant le repli applicatif, sans persister la traduction de repli.
+- [x] Vérifier par un test de champ descriptif que l’ajout d’EN ne change pas sa politique de repli et que le `null` français explicite reste respecté. Couvrir les métadonnées publiques de nom/langue/repli dans une réponse Inertia.
+- [x] Exécuter les tests ciblés et constater le RED attendu avant modification.
+- [x] Modifier la sélection des langues de noms et aligner son équivalent SQL `CatalogPresentation::nameForQuery` pour conserver un tri conforme au nom affiché, avec les mêmes règles de `null`. Vérifier cette parité puis actualiser les deux guides actifs.
+- [x] Exécuter les tests de contenu, catalogue traduit et seed ; Pint/PHPStan et le format des documents concernés. Commit limité à cette tâche après auto-revue ; revue indépendante.
 
 ## Task 6: Étendre les sets réels et leurs langues imprimées
 
