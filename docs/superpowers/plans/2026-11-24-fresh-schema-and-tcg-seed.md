@@ -12,6 +12,8 @@
 
 **Execution:** Conserver le mode sous-agents demandé dans la conversation. Le lancement est autorisé ; poursuivre sans demander une nouvelle autorisation pour les mêmes opérations.
 
+**Complément utilisateur avant fusion :** [catalogue enrichi et noms anglais](../specs/2026-11-24-tcg-catalog-enrichment-design.md). Les étapes locales de la tâche 4 sont terminées ; sa livraison GitHub attend désormais les tâches 5–7 ci-dessous. La PR 9 reste ouverte et ne doit pas être fusionnée sur son ancienne tête.
+
 ## Global Constraints
 
 - Branche `codex/fresh-schema-and-tcg-seed` ; préserver les changements étrangers à cette tâche.
@@ -128,6 +130,43 @@
 Les trois étapes GitHub ci-dessus sont suivies dans la description de PR et les
 checks distants après ce rapport de validation locale, sans ajouter des commits
 documentaires circulaires pour attester leur propre fusion.
+
+## Task 5: Repli anglais des noms sans traduction française
+
+**Files:** `app/Support/Localization/TranslatedContent.php`, `tests/Feature/Localization/TranslatableContentTest.php`, `tests/Feature/Localization/TranslatedCatalogTest.php`, paragraphes de repli dans `README.md` et `docs/localization.md`.
+
+**Interfaces:** conserver `TranslatedContent::field(Model $record, string $attribute, string $locale): array` et `resolve(array $translations, array $locales, ?string $reference = null): array`. Le résultat garde `value`, `locale`, `fallback`. Pour `display_name` seulement, les candidats sont langue demandée → `en` → repli existant du modèle → référence. Les autres attributs et le traitement de `null` explicite restent inchangés. La tâche 6 fournira les noms anglais dans les manifestes ; cette tâche ne crée aucune édition ni donnée de seed.
+
+- [ ] Ajouter un test avec catalogue de langue japonaise : un nom FR manque mais EN et JA existent, la réponse française utilise EN avec `locale=en` et `fallback=true`. Un vrai nom FR gagne ; sans EN le nom JA reste le repli. Vérifier aussi un modèle utilisant le repli applicatif, sans persister la traduction de repli.
+- [ ] Vérifier par un test de champ descriptif que l’ajout d’EN ne change pas sa politique de repli et que le `null` français explicite reste respecté. Couvrir les métadonnées publiques de nom/langue/repli dans une réponse Inertia.
+- [ ] Exécuter les tests ciblés et constater le RED attendu avant modification.
+- [ ] Modifier seulement la sélection des langues de noms, puis actualiser les deux guides actifs.
+- [ ] Exécuter les tests de contenu, catalogue traduit et seed ; Pint/PHPStan et le format des documents concernés. Commit limité à cette tâche après auto-revue ; revue indépendante.
+
+## Task 6: Étendre les sets réels et leurs langues imprimées
+
+**Files:** `database/seeders/data/tcg.php`, `database/seeders/data/tcg/*.php`, `database/seeders/data/tcg-sources.php`, `tests/Feature/Catalog/TcgCatalogSeederTest.php`, `README.md`. Le seeder et ses services restent inchangés sauf nécessité démontrée.
+
+**Interfaces:** mêmes tableaux de manifestes et identités naturelles que la tâche 2. Les nouveaux codes de langues de contenu sont ajoutés aux références communes avec leurs sources. Les noms anglais utilisent `display_name.en` ; les noms originaux et les éditions physiques restent dans leurs champs actuels. Les rapports de sources `enrichment-sources-pokemon-bandai.md`, `enrichment-sources-western.md` et `enrichment-sources-new-games.md` du workspace SDD fixent les faits vérifiés à intégrer. Les limites de disponibilité recensées font autorité sur le nombre approximatif demandé ; aucun quota artificiel.
+
+- [ ] Terminer la vérification officielle de toutes les additions et des éditions FR manquantes dans les sets existants. Séparer les noms anglais officiels des rendus éditoriaux de noms non latins dans les notes de source.
+- [ ] Écrire les assertions de contrat sur des ajouts attestés dans plusieurs jeux, leurs impressions FR et autres langues, et les noms anglais des séries/extensions non latines. Adapter le test ancien qui attendait un repli japonais en interface EN pour vérifier le nouveau libellé anglais et l’unique impression JA du produit natif.
+- [ ] Constater le RED des nouvelles assertions avant enrichissement.
+- [ ] Ajouter les valeurs vérifiées dans les manifestes par jeu, sans remplacer les identités existantes, sans images nouvelles non demandées, sans relations ou annonces non vérifiées. Garder les champs facultatifs absents lorsqu’aucune preuve ne les étaye.
+- [ ] Vérifier la couverture de provenance, l’existence des langues référencées, les versions FR attendues, la stabilité des identifiants/fichiers à deux exécutions et la conservation des traductions hors manifeste. Actualiser les chiffres et les limites du README.
+- [ ] Exécuter les tests du seed et de la localisation concernés, Pint/PHPStan, puis auto-revue et commit. Revue indépendante des données et des contrats.
+
+## Task 7: Appliquer et livrer le catalogue enrichi
+
+**Files:** compléter `docs/superpowers/fresh-schema-and-tcg-seed-verification.md` et ce plan ; scripts de contrôles ponctuels hors Git.
+
+**Interfaces:** utiliser `make seed` sur la base applicative actuelle après validations. Aucune nouvelle remise à zéro ni suppression du catalogue réel déjà créé. La réexécution rétablit les valeurs prévues et ajoute les nouveaux identifiants, conformément au contrat approuvé.
+
+- [ ] Revue indépendante de la branche et de son nouveau delta, contrôles `make check`, `make assets` si nécessaires, `make up` puis `make test-storage`. Ne pas réutiliser la CI d’une ancienne tête pour fusionner la nouvelle.
+- [ ] Appliquer le seed et vérifier les nouveaux comptes par jeu/langue, les anciennes identités conservées, la stabilité d’une seconde exécution et les quatre médias inchangés.
+- [ ] Contrôle navigateur FR/EN d’un nom non latin disposant maintenant du repli anglais et d’une extension avec une vraie édition française ; vérifier les titres natifs et langues imprimées distincts.
+- [ ] Nettoyer les seules données temporaires de QA et de tests ; confirmer zéro compte conservé et services opérationnels. Actualiser le rapport et consigner les limites de disponibilité réelles.
+- [ ] Faire relire le SHA final, actualiser la PR 9 et reprendre les étapes de publication/CI/fusion de la tâche 4.
 
 ## Self-review
 
