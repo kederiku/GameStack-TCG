@@ -1,5 +1,8 @@
 # Multi-TCG Catalog Implementation Plan
 
+> Archive historique. Le seeder d’exemples a été remplacé.
+> Voir [le catalogue chargé par `make seed`](../../../README.md#catalogue-tcg-dans-filament).
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Administrer les catalogues, séries, ensembles, éditions linguistiques et sorties des TCG, avec un seeder explicite de données réelles.

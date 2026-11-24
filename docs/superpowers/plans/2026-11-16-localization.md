@@ -1,5 +1,8 @@
 # Multilingue complet — Implementation Plan
 
+> Archive historique. Les procédures de conversion, de finalisation et de retour décrites ici ont été remplacées par un schéma Laravel neuf.
+> Voir [le guide de localisation actuel](../../localization.md).
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Livrer une application FR/EN entièrement traduite, avec chemins localisés, fichiers de langue centralisés et contenus administrés via Spatie, sans perte de données.

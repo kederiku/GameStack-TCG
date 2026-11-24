@@ -1,5 +1,8 @@
 # Local Image Storage Implementation Plan
 
+> Archive historique. La commande de copie vers S3 et la conversion des images existantes ont été retirées.
+> Voir [les instructions de stockage actuelles](../../../README.md#stockage-s3-local-et-interface).
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [x]`) syntax for tracking.
 
 **Goal:** Fournir Garage + Garage Web UI dans Docker et y migrer les images des jeux avec vérification.

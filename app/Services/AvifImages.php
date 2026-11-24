@@ -149,10 +149,10 @@ abstract class AvifImages
         }
     }
 
-    protected function write(string $contents, string $name, Connection $connection, string $extension = 'avif'): string
+    protected function write(string $contents, string $name, Connection $connection): string
     {
         $filename = substr(Str::slug($name), 0, 180) ?: static::FALLBACK_FILENAME;
-        $path = $this->directory().'/'.Str::uuid().'/'.$filename.'.'.$extension;
+        $path = $this->directory().'/'.Str::uuid().'/'.$filename.'.avif';
 
         // Register before writing: even a partially failed write must be removed.
         $connection->afterRollBack(fn () => rescue(fn () => $this->deleteUnused($path, $connection->getName())));

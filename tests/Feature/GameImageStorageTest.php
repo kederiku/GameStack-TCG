@@ -10,7 +10,7 @@ use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
-use RuntimeException;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\TestCase;
 
 class GameImageStorageTest extends TestCase
@@ -22,7 +22,6 @@ class GameImageStorageTest extends TestCase
         parent::setUp();
         config(['game-images.disk' => 's3']);
         Storage::fake('public');
-        Storage::fake('local');
         Storage::fake('s3', ['url' => 'http://images.localhost:3902']);
     }
 
@@ -66,22 +65,24 @@ class GameImageStorageTest extends TestCase
         }
     }
 
-    public function test_legacy_conversion_reads_remote_contents_without_using_a_local_path(): void
+    #[DataProvider('unsupportedStoredExtensions')]
+    public function test_renaming_a_game_leaves_unmanaged_files_untouched(string $extension): void
     {
-        $path = 'games/'.Str::uuid().'/legacy.webp';
-        $contents = UploadedFile::fake()->image('legacy.webp', 20, 10)->get();
-        Storage::disk('s3')->put($path, $contents);
-        $game = Game::factory()->create(['image' => $path]);
-        $remote = \Mockery::mock(Storage::disk('s3'))->makePartial();
-        $remote->shouldReceive('path')->andThrow(new RuntimeException('Remote storage has no local path'));
-        Storage::set('s3', $remote);
+        $path = 'games/'.Str::uuid().'/logo.'.$extension;
+        $disk = Storage::disk('s3');
+        $disk->put($path, 'Unmanaged file');
+        $game = Game::factory()->create(['name' => 'Original', 'image' => $path]);
 
-        $this->artisan('games:convert-images-to-avif')->assertSuccessful();
+        $renamed = app(SaveGame::class)->handle($game, ['name' => 'Renamed'])->refresh();
 
-        $this->assertStringEndsWith('.avif', $game->fresh()->image);
-        $this->assertSame('image/avif', $remote->mimeType($game->fresh()->image));
-        $this->assertSame($contents, Storage::disk('local')->get('game-images-before-avif/'.$path));
-        $remote->assertMissing($path);
-        $this->assertSame([], Storage::disk('public')->allFiles());
+        $this->assertSame('Renamed', $renamed->name);
+        $this->assertNull($renamed->image);
+        $this->assertSame([$path], $disk->allFiles());
+        $this->assertSame('Unmanaged file', $disk->get($path));
+    }
+
+    public static function unsupportedStoredExtensions(): array
+    {
+        return ['WebP' => ['webp'], 'SVG' => ['svg']];
     }
 }

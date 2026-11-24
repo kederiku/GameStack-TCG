@@ -35,9 +35,10 @@ class DashboardTest extends TestCase
 
     public function test_dashboard_exposes_sorted_public_games_and_preserves_the_account(): void
     {
+        $magicImage = 'games/d0595a10-41be-4559-aea5-a1cd52fa34a2/magic.avif';
         $user = User::factory()->create();
         Game::factory()->create(['name' => 'Pokémon', 'slug' => 'pokemon', 'image' => null]);
-        Game::factory()->create(['name' => 'Magic', 'slug' => 'magic', 'image' => 'games/magic.svg']);
+        Game::factory()->create(['name' => 'Magic', 'slug' => 'magic', 'image' => $magicImage]);
         Game::factory()->create(['name' => 'Admin', 'slug' => 'admin']);
         Game::factory()->create(['name' => 'Hidden', 'slug' => 'hidden', 'is_visible' => false]);
 
@@ -49,7 +50,7 @@ class DashboardTest extends TestCase
                 ->has('games', 2)
                 ->where('games.0.name', 'Magic')
                 ->where('games.0.url', '/fr/magic')
-                ->where('games.0.imageUrl', url('/storage/games/magic.svg'))
+                ->where('games.0.imageUrl', url('/storage/'.$magicImage))
                 ->where('games.1.name', 'Pokémon')
                 ->where('games.1.url', '/fr/pokemon')
                 ->where('games.1.imageUrl', null)

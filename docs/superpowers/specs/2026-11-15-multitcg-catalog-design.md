@@ -1,5 +1,8 @@
 # Catalogue multi-TCG, administration Filament et exemples réels
 
+> Archive historique. Le seeder d’exemples a été remplacé.
+> Voir [le catalogue chargé par `make seed`](../../../README.md#catalogue-tcg-dans-filament).
+
 Statut : conception validée par l’utilisateur le 15 novembre 2026 (« maintenant place au développement »). V1 implémentée ; voir le [rapport de vérification](../multitcg-catalog-verification.md).
 
 Cette version intègre l’[audit des treize jeux enregistrés](../multitcg-compatibility-audit.md).

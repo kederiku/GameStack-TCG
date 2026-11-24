@@ -30,7 +30,7 @@ class GameImages extends AvifImages
             throw ValidationException::withMessages(['image' => __('validation.images.read-image')]);
         }
 
-        return $this->write($contents, $name, $connection, pathinfo($path, PATHINFO_EXTENSION));
+        return $this->write($contents, $name, $connection);
     }
 
     public function deleteUnused(?string $path, ?string $connection = null): void
@@ -49,6 +49,6 @@ class GameImages extends AvifImages
 
     public function isManagedPath(string $path): bool
     {
-        return preg_match('/\Agames\/[a-f0-9-]{36}\/[a-z0-9-]+\.(?:avif|webp|svg)\z/', $path) === 1;
+        return preg_match('/\Agames\/[a-f0-9-]{36}\/[a-z0-9-]+\.avif\z/', $path) === 1;
     }
 }

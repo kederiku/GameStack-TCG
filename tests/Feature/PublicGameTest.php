@@ -14,9 +14,11 @@ class PublicGameTest extends TestCase
 
     public function test_the_landing_exposes_sorted_public_games_with_optional_images(): void
     {
+        $pokemonImage = 'games/860c07f9-10f0-4c9c-ad96-21327f4559ed/pokemon.avif';
+        $magicImage = 'games/d0595a10-41be-4559-aea5-a1cd52fa34a2/magic.avif';
         Game::factory()->create(['name' => 'Yu-Gi-Oh!', 'slug' => 'yugioh']);
-        Game::factory()->create(['name' => 'Pokémon', 'slug' => 'pokemon', 'image' => 'games/pokemon.svg']);
-        Game::factory()->create(['name' => 'Magic', 'slug' => 'magic', 'image' => 'games/magic.webp']);
+        Game::factory()->create(['name' => 'Pokémon', 'slug' => 'pokemon', 'image' => $pokemonImage]);
+        Game::factory()->create(['name' => 'Magic', 'slug' => 'magic', 'image' => $magicImage]);
 
         $this->get('/fr')->assertOk()->assertInertia(fn (Assert $page) => $page
             ->component('welcome')
@@ -27,9 +29,9 @@ class PublicGameTest extends TestCase
             ->where('games.0.nameLanguage', null)
             ->where('games.0.nameFallback', true)
             ->where('games.0.url', '/fr/magic')
-            ->where('games.0.imageUrl', url('/storage/games/magic.webp'))
+            ->where('games.0.imageUrl', url('/storage/'.$magicImage))
             ->where('games.1.slug', 'pokemon')
-            ->where('games.1.imageUrl', url('/storage/games/pokemon.svg'))
+            ->where('games.1.imageUrl', url('/storage/'.$pokemonImage))
             ->where('games.2.imageUrl', null)
             ->missing('games.0.created_at')
             ->missing('games.0.image'));
