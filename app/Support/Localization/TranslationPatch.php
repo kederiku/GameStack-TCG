@@ -46,11 +46,17 @@ final class TranslationPatch
             }
         }
 
-        $operations = self::between($before, $after);
-        foreach ($operations as &$operation) {
+        $operations = [];
+        foreach (self::between($before, $after) as $operation) {
             if ($operation['operation'] === 'set') {
-                $operation['value'] = self::value($operation['attribute'], $operation['value']);
+                $attribute = $operation['attribute'];
+                $locale = $operation['locale'];
+                $operation['value'] = self::value($attribute, $operation['value']);
+                if (array_key_exists($locale, $before[$attribute]) && $operation['value'] === $before[$attribute][$locale]) {
+                    continue;
+                }
             }
+            $operations[] = $operation;
         }
 
         return $operations;

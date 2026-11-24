@@ -7,7 +7,6 @@ use App\Models\Game;
 use App\Models\Language;
 use Illuminate\Support\Facades\DB;
 use PHPUnit\Framework\Attributes\DataProvider;
-use PHPUnit\Framework\Attributes\TestWith;
 use Symfony\Component\Process\Process;
 use Tests\Concerns\BuildsCatalog;
 use Tests\Concerns\UsesLocalizedSchema;
@@ -18,18 +17,25 @@ class TranslationConcurrencyTest extends TestCase
     use BuildsCatalog;
     use UsesLocalizedSchema;
 
-    #[TestWith(['eloquent'])]
-    #[TestWith(['game action'])]
-    #[TestWith(['catalog action'])]
-    public function test_stale_full_map_preserves_a_concurrent_french_edit(string $writer): void
+    public static function staleFullMaps(): iterable
+    {
+        foreach (['eloquent', 'game action', 'catalog action'] as $writer) {
+            yield "$writer, exact historical text" => [$writer, '  original  ', '  original  '];
+            yield "$writer, padded original text" => [$writer, 'Original', '  Original  '];
+            yield "$writer, blank for existing null" => [$writer, null, '   '];
+        }
+    }
+
+    #[DataProvider('staleFullMaps')]
+    public function test_stale_full_map_preserves_a_concurrent_french_edit(string $writer, ?string $original, string $submitted): void
     {
         $this->createLocalizedSchema();
         $record = $writer === 'catalog action' ? $this->series($this->catalog()) : Game::factory()->create();
-        DB::table($record->getTable())->where('id', $record->id)->update(['description' => '{"fr":"  original  ","en":"Old"}']);
+        DB::table($record->getTable())->where('id', $record->id)->update(['description' => json_encode(['fr' => $original, 'en' => 'Old'], JSON_THROW_ON_ERROR)]);
         $stale = $record->fresh();
         $record->refresh()->setTranslation('description', 'fr', 'Français modifié')->save();
 
-        $translations = ['fr' => '  original  ', 'en' => '  New  '];
+        $translations = ['fr' => $submitted, 'en' => '  New  '];
         if ($writer === 'eloquent') {
             $stale->setTranslations('description', $translations)->save();
         } elseif ($stale instanceof Game) {

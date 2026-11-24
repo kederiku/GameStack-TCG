@@ -60,6 +60,17 @@ class TranslatableContentTest extends TestCase
         $this->assertSame(1, Language::whereRaw('lower(code) = ?', ['zh-hant'])->count());
     }
 
+    public function test_full_map_delta_sets_a_new_blank_locale_and_skips_an_existing_null(): void
+    {
+        $game = new Game;
+        $game->setRawAttributes(['description' => '{"fr":null,"de":"Alt"}'], sync: true);
+
+        $this->assertSame([
+            ['attribute' => 'description', 'locale' => 'en', 'operation' => 'set', 'value' => null],
+            ['attribute' => 'description', 'locale' => 'de', 'operation' => 'remove', 'value' => null],
+        ], TranslationPatch::forRecord($game, ['description' => ['fr' => '  ', 'en' => '  ']]));
+    }
+
     public function test_each_content_model_uses_the_right_fallback_without_persisting_it(): void
     {
         $this->createLocalizedSchema();
