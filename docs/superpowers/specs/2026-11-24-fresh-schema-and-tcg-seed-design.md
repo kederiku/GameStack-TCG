@@ -1,7 +1,7 @@
 # Schéma neuf et catalogue TCG réel
 
 Date : 2026-11-24. Branche : `codex/fresh-schema-and-tcg-seed`.
-Statut : proposition à faire approuver avant implémentation.
+Statut : approuvée par l’utilisateur (« go »), le 2026-11-24.
 
 Relecture de conception : sous-agent indépendant `fresh_schema_builder_check`,
 2026-11-24 ; conclusion « nothing important left ». Cette vérification porte sur
@@ -23,8 +23,8 @@ Précision de l’utilisateur : le seed doit contenir des valeurs réelles de je
 cartes qui existent. Cette exigence concerne les fiches et leurs attributs, pas
 seulement l’emploi de noms de jeux réels sur des données autrement inventées.
 
-La suppression est autorisée. L’approbation attendue porte sur cette conception,
-pas sur une nouvelle autorisation d’effacer les mêmes données.
+La suppression et la conception sont autorisées. L’utilisateur a demandé de
+lancer l’implémentation après la précision sur les valeurs TCG réelles.
 
 ## Approches considérées
 
