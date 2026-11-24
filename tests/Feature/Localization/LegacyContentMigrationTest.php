@@ -3,8 +3,10 @@
 namespace Tests\Feature\Localization;
 
 use Database\Migrations\Support\LocalizedContentV1;
+use Illuminate\Contracts\Foundation\MaintenanceMode;
 use Illuminate\Database\Connection;
 use Illuminate\Database\QueryException;
+use Illuminate\Foundation\ArrayMaintenanceMode;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
@@ -166,9 +168,10 @@ class LegacyContentMigrationTest extends TestCase
         $converter = $this->converter();
         $converter->up($this->connection);
         $this->artisan('localization:audit')->assertSuccessful();
-        // Simulate the explicit finalization owned by the next migration, not an automatic cleanup.
-        $this->connection->statement('DROP TABLE series_localizations, expansion_localizations');
-        $this->connection->table('localization_conversion_verifications')->update(['finalized_at' => now()]);
+        $maintenance = new ArrayMaintenanceMode;
+        $this->app->instance(MaintenanceMode::class, $maintenance);
+        $maintenance->activate([]);
+        $this->artisan('localization:finalize')->assertSuccessful();
         $this->artisan('localization:audit')->assertSuccessful();
         $this->connection->table('games')->update(['slug' => 'connexion']);
         $this->artisan('localization:audit')->assertExitCode(1);

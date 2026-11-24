@@ -8,6 +8,7 @@ use App\Models\Language;
 use App\Models\Series;
 use App\Services\CatalogImages;
 use App\Support\Catalog\CatalogPresentation;
+use App\Support\Catalog\CatalogRules;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
@@ -88,7 +89,7 @@ class CatalogFields
 
     public static function catalogueLabel(Catalog $catalog): string
     {
-        return CatalogLabels::name($catalog->game).' — '.CatalogLabels::name($catalog).' ('.$catalog->defaultLanguage->code.')';
+        return CatalogLabels::name($catalog->game).' — '.CatalogLabels::name($catalog).' ('.CatalogRules::languageCode($catalog->defaultLanguage->code).')';
     }
 
     public static function series(): Select

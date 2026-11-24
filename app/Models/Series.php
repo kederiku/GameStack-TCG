@@ -17,7 +17,6 @@ use Illuminate\Validation\ValidationException;
  * @property int $sort_order
  * @property bool $is_visible
  * @property-read Catalog $catalog
- * @property-read Collection<int, SeriesLocalization> $localizations
  * @property-read Collection<int, Expansion> $expansions
  */
 #[Fillable(['catalog_id', 'key', 'name', 'type', 'sort_order', 'is_visible', 'display_name', 'description'])]
@@ -62,12 +61,6 @@ class Series extends CatalogRecord
     public function catalog(): BelongsTo
     {
         return $this->belongsTo(Catalog::class);
-    }
-
-    /** @return HasMany<SeriesLocalization, $this> */
-    public function localizations(): HasMany
-    {
-        return $this->hasMany(SeriesLocalization::class);
     }
 
     /** @return HasMany<SeriesImage, $this> */

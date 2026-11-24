@@ -16,6 +16,11 @@ declare module '@inertiajs/core' {
             availableLocales: LocaleDefinition[];
             localizedUrls: Partial<Record<LocaleCode, string>>;
             direction: 'ltr' | 'rtl';
+            metadata: {
+                canonical: string | null;
+                alternates: Record<string, string>;
+                robots: string | null;
+            };
             routeKey: string | null;
             auth: Auth;
             sidebarOpen: boolean;

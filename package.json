@@ -8,7 +8,7 @@
         "dev": "vp dev",
         "check": "npm run test:frontend && vp check",
         "check:fix": "vp check --fix",
-        "translations:export": "php artisan localization:export",
+        "translations:export": "php artisan wayfinder:generate --with-form && php artisan localization:export",
         "types:check": "npm run translations:export && tsc --noEmit",
         "test:frontend": "npm run translations:export && node --experimental-strip-types --test tests/Frontend/*.test.ts"
     },

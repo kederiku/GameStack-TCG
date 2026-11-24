@@ -25,7 +25,8 @@ init: env ## Installer le projet puis démarrer tous les services
 	$(RUN) php artisan config:clear
 	$(RUN) php docker/initialize-key.php
 	$(MAKE) storage-init
-	$(RUN) php artisan migrate --force
+	$(RUN) php artisan localization:check
+	$(RUN) php artisan localization:install
 	$(RUN) sh -c 'test -L public/storage || php artisan storage:link'
 	$(RUN) npm ci
 	$(RUN) npm run build
@@ -89,9 +90,9 @@ test-storage: ## Vérifier le cycle des images sur Garage réel (après make up)
 	$(RUN) php artisan test tests/Integration/GarageStorageTest.php
 
 check: ## Vérifier PHP, frontend, types et tests
+	$(RUN) php artisan localization:check
 	$(RUN) composer test
 	$(RUN) npm run check
-	$(RUN) php artisan wayfinder:generate --with-form
 	$(RUN) npm run types:check
 
 build: ## Construire l’image Docker
@@ -100,8 +101,8 @@ build: ## Construire l’image Docker
 assets: ## Compiler les assets de production
 	$(RUN) npm run build
 
-translations: ## Générer les dictionnaires et types React
-	$(RUN) php artisan localization:export
+translations: ## Générer les routes, les dictionnaires et les types React
+	$(RUN) npm run translations:export
 
 format: ## Formater PHP et frontend
 	$(RUN) composer lint

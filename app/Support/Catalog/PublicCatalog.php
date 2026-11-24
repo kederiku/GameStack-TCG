@@ -48,6 +48,8 @@ class PublicCatalog
             'q' => mb_substr(trim(self::input($request, 'q')), 0, 150),
         ];
 
+        $request->attributes->set('public_catalog_filters', $filters);
+
         $query = (clone $base)->when($catalog !== '*', fn (Builder $query) => $query->whereHas('catalog', fn (Builder $catalogs) => $catalogs->where('key', $catalog)));
         $languageExpansionIds = (clone $query)->select('expansions.id');
         $languages = Language::query()->whereIn('id', ExpansionEdition::query()->select('language_id')
@@ -138,7 +140,7 @@ class PublicCatalog
         $accents = 'àáâäãåèéêëìíîïòóôöõùúûüýÿçñ';
         $plain = 'aaaaaaeeeeiiiiooooouuuuyycn';
         $term = strtr(mb_strtolower($term), array_combine(mb_str_split($accents), mb_str_split($plain)));
-        $term = '%'.str_replace(['\\', '%', '_'], ['\\\\', '\\%', '\\_'], $term).'%';
+        $term = CatalogRules::containsPattern($term);
         $match = fn (Builder $query, string $column) => $query->whereRaw(match ($column) {
             'expansions.name' => 'translate(lower(expansions.name), ?, ?) like ?',
             'official_code' => 'translate(lower(official_code), ?, ?) like ?',

@@ -8,7 +8,7 @@ import { createServer } from 'vite';
 void test('expansion renders text with independent language provenance and omits deliberately absent descriptions', async () => {
     const server = await createServer({
         configFile: false,
-        server: { middlewareMode: true, hmr: false },
+        server: { middlewareMode: true, ws: false },
         resolve: { alias: { '@': `${process.cwd()}/resources/js` } },
     });
     try {
@@ -83,7 +83,7 @@ void test('expansion renders text with independent language provenance and omits
 void test('the name-sorted catalogue keeps A/B/A series cards in server order', async () => {
     const server = await createServer({
         configFile: false,
-        server: { middlewareMode: true, hmr: false },
+        server: { middlewareMode: true, ws: false },
         resolve: { alias: { '@': `${process.cwd()}/resources/js` } },
     });
     try {

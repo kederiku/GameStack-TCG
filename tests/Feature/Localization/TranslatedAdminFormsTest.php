@@ -11,12 +11,15 @@ use App\Filament\Resources\Expansions\Pages\EditExpansion;
 use App\Filament\Resources\Expansions\Pages\ListExpansions;
 use App\Filament\Resources\Expansions\RelationManagers\RelationsRelationManager;
 use App\Filament\Resources\Games\Pages\EditGame;
+use App\Filament\Support\Catalog\CatalogFields;
+use App\Filament\Support\Catalog\CatalogLabels;
 use App\Models\Game;
 use App\Models\User;
 use Filament\Actions\CreateAction;
 use Filament\Actions\EditAction;
 use Filament\Facades\Filament;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Livewire;
 use Tests\Concerns\BuildsCatalog;
@@ -26,6 +29,25 @@ use Tests\TestCase;
 class TranslatedAdminFormsTest extends TestCase
 {
     use BuildsCatalog, ForwardOnlyDatabaseMigrations;
+
+    public function test_catalog_controls_display_canonical_casing_for_historical_language_codes(): void
+    {
+        $language = $this->language('pt-BR', 'Português');
+        DB::table('languages')->where('id', $language->id)->update(['code' => 'pt-br']);
+        $this->assertStringEndsWith(' (pt-BR)', CatalogLabels::language($language->refresh()));
+        $this->assertStringEndsWith(' (pt-BR)', CatalogFields::catalogueLabel($this->catalog(language: $language)));
+    }
+
+    public function test_search_name_treats_postgres_wildcards_as_literals(): void
+    {
+        $literal = Game::factory()->create(['name' => 'Reference 100%']);
+        $translated = Game::factory()->create(['display_name' => ['en' => 'Marker_A']]);
+        foreach (['%' => $literal->id, '_' => $translated->id] as $term => $expected) {
+            $query = Game::query();
+            CatalogLabels::searchName($query, $term);
+            $this->assertSame([$expected], $query->pluck('id')->all());
+        }
+    }
 
     public function test_english_panel_edits_only_the_selected_content_language(): void
     {

@@ -2,8 +2,9 @@
 
 namespace Tests\Concerns;
 
-use Database\Migrations\Support\LocalizedContentV1;
 use Illuminate\Contracts\Console\Kernel;
+use Illuminate\Contracts\Foundation\MaintenanceMode;
+use Illuminate\Foundation\ArrayMaintenanceMode;
 use Illuminate\Foundation\Testing\RefreshDatabaseState;
 use Illuminate\Support\Facades\DB;
 use LogicException;
@@ -28,14 +29,11 @@ trait UsesLocalizedSchema
         $connection->statement('SET search_path TO '.$this->localizedSchema);
         $this->artisan('migrate', ['--force' => true])->assertSuccessful();
         $this->app[Kernel::class]->setArtisan(null);
-        require_once database_path('migrations/support/LocalizedContentV1.php');
-        $verification = (new LocalizedContentV1)->verify($connection);
-        $this->assertTrue($verification['ok'], implode("\n", $verification['problems']));
-        // Test-only final schema. Task 11 owns production finalization and must
-        // replace this simulation with its verified migration before cutover.
-        $connection->statement('DROP TABLE series_localizations, expansion_localizations');
-        $connection->statement('DROP FUNCTION localization_v1_read_only()');
-        $connection->table('localization_conversion_verifications')->update(['finalized_at' => now()]);
+        $maintenance = new ArrayMaintenanceMode;
+        $this->app->instance(MaintenanceMode::class, $maintenance);
+        $maintenance->activate([]);
+        $this->artisan('localization:finalize')->assertSuccessful();
+        $maintenance->deactivate();
     }
 
     protected function dropLocalizedSchema(): void

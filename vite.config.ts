@@ -18,13 +18,22 @@ function frontendTranslations(): Plugin {
         });
     }
 
+    let root: string;
+
     return {
         name: 'gamestackr-frontend-translations',
-        configResolved({ root }) {
-            exportTranslations(root);
+        configResolved(config) {
+            root = config.root;
+        },
+        buildStart: {
+            order: 'post',
+            sequential: true,
+            handler() {
+                exportTranslations(root);
+            },
         },
         configureServer(server) {
-            const { root, logger } = server.config;
+            const { logger } = server.config;
             const lang = resolve(root, 'lang');
             const localeConfig = resolve(root, 'config/localization.php');
             server.watcher.add([lang, localeConfig]);
@@ -77,6 +86,13 @@ export default defineConfig({
         tailwindcss(),
         wayfinder({
             formVariants: true,
+            patterns: [
+                'routes/**/*.php',
+                'app/**/Http/**/*.php',
+                'app/Support/Localization/**/*.php',
+                'lang/*/routes.php',
+                'config/localization.php',
+            ],
         }),
     ]),
     server: {

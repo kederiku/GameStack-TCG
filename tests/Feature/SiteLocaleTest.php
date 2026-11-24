@@ -15,7 +15,7 @@ class SiteLocaleTest extends TestCase
         $this->get('/')->assertRedirect('/fr');
         $this->get('/?lang=en')->assertCookieMissing('site_locale')->assertRedirect('/en');
         $this->get('/')->assertRedirect('/fr');
-        $this->get('/en')->assertSee('<html lang="en" class="dark">', false)
+        $this->get('/en')->assertSee('<html lang="en" dir="ltr" class="dark">', false)
             ->assertInertia(fn (Assert $page) => $page->where('locale', 'en'));
     }
 

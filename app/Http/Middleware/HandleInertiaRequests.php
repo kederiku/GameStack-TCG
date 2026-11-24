@@ -5,6 +5,7 @@ namespace App\Http\Middleware;
 use App\Support\Localization\AdminPanels;
 use App\Support\Localization\Locales;
 use App\Support\Localization\LocalizedRoutes;
+use App\Support\Localization\PublicMetadata;
 use Closure;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -81,6 +82,7 @@ class HandleInertiaRequests extends Middleware
             'locale' => LocalizedRoutes::locale($request),
             'availableLocales' => array_values(Locales::all()),
             'direction' => Locales::definition(LocalizedRoutes::locale($request))['direction'],
+            'metadata' => Inertia::always(fn (): array => PublicMetadata::for($request)),
             'routeKey' => LocalizedRoutes::key($request),
             'localizedUrls' => LocalizedRoutes::alternates($request),
             'auth' => [

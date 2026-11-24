@@ -4,6 +4,7 @@ namespace App\Filament\Support\Catalog;
 
 use App\Models\Language;
 use App\Support\Catalog\CatalogPresentation;
+use App\Support\Catalog\CatalogRules;
 use App\Support\Localization\AdminPanels;
 use App\Support\Localization\Locales;
 use Filament\Facades\Filament;
@@ -37,7 +38,7 @@ class CatalogLabels
 
     public static function language(Language $language): string
     {
-        return self::name($language).' ('.$language->code.')';
+        return self::name($language).' ('.CatalogRules::languageCode($language->code).')';
     }
 
     /** @param Builder<covariant Model> $query */
@@ -59,7 +60,7 @@ class CatalogLabels
     public static function searchName(Builder $query, string $search): void
     {
         $query->where(function (Builder $names) use ($search): void {
-            $pattern = '%'.$search.'%';
+            $pattern = CatalogRules::containsPattern($search);
             $names->whereLike('name', $pattern);
             $model = $names->getModel();
             if (method_exists($model, 'isTranslatableAttribute') && $model->isTranslatableAttribute('display_name')) {

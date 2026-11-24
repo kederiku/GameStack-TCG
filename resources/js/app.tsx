@@ -1,5 +1,5 @@
 import type { PropsWithChildren } from 'react';
-import { createInertiaApp } from '@inertiajs/react';
+import { createInertiaApp, Head, usePage } from '@inertiajs/react';
 import { Toaster } from '@/components/ui/sonner';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { initializeTheme } from '@/hooks/use-appearance';
@@ -10,8 +10,35 @@ import PublicLayout from '@/layouts/public-layout';
 import SettingsLayout from '@/layouts/settings/layout';
 
 function LocalizedApp({ children }: PropsWithChildren) {
+    const { metadata } = usePage().props;
+
     return (
         <LocaleProvider>
+            <Head>
+                {metadata.canonical && (
+                    <link
+                        head-key="canonical"
+                        rel="canonical"
+                        href={metadata.canonical}
+                    />
+                )}
+                {Object.entries(metadata.alternates).map(([language, url]) => (
+                    <link
+                        key={language}
+                        head-key={`alternate-${language}`}
+                        rel="alternate"
+                        hrefLang={language}
+                        href={url}
+                    />
+                ))}
+                {metadata.robots && (
+                    <meta
+                        head-key="robots"
+                        name="robots"
+                        content={metadata.robots}
+                    />
+                )}
+            </Head>
             {children}
             <Toaster />
         </LocaleProvider>

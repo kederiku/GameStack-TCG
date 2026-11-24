@@ -18,7 +18,6 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property bool $is_visible
  * @property-read Catalog $catalog
  * @property-read ?Series $series
- * @property-read Collection<int, ExpansionLocalization> $localizations
  * @property-read Collection<int, ExpansionEdition> $editions
  * @property-read Collection<int, ExpansionRelation> $relations
  * @property-read Collection<int, ExpansionRelation> $incomingRelations
@@ -59,12 +58,6 @@ class Expansion extends CatalogRecord
     public function series(): BelongsTo
     {
         return $this->belongsTo(Series::class);
-    }
-
-    /** @return HasMany<ExpansionLocalization, $this> */
-    public function localizations(): HasMany
-    {
-        return $this->hasMany(ExpansionLocalization::class);
     }
 
     /** @return HasMany<ExpansionEdition, $this> */

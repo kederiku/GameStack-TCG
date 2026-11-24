@@ -5,14 +5,12 @@ namespace App\Providers;
 use App\Models\Catalog;
 use App\Models\Expansion;
 use App\Models\ExpansionEdition;
-use App\Models\ExpansionLocalization;
 use App\Models\ExpansionRelation;
 use App\Models\ExpansionRelease;
 use App\Models\Language;
 use App\Models\Market;
 use App\Models\Series;
 use App\Models\SeriesImage;
-use App\Models\SeriesLocalization;
 use App\Policies\CatalogPolicy;
 use App\Support\Localization\VendorTranslationLoader;
 use Carbon\CarbonImmutable;
@@ -44,7 +42,7 @@ class AppServiceProvider extends ServiceProvider
 
         foreach ([
             Catalog::class, Series::class, Expansion::class, Language::class, Market::class,
-            SeriesImage::class, SeriesLocalization::class, ExpansionLocalization::class, ExpansionEdition::class,
+            SeriesImage::class, ExpansionEdition::class,
             ExpansionRelease::class, ExpansionRelation::class,
         ] as $model) {
             Gate::policy($model, CatalogPolicy::class);

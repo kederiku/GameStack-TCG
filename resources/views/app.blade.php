@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="dark">
+@php($language = \App\Support\Localization\Locales::definition($page['props']['locale']))
+<html lang="{{ $language['htmlLang'] }}" dir="{{ $language['direction'] }}" class="dark">
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -21,6 +22,15 @@
         @viteReactRefresh
         @vite(['resources/css/app.css', 'resources/js/app.tsx', "resources/js/pages/{$page['component']}.tsx"])
         <x-inertia::head>
+            @if($page['props']['metadata']['canonical'])
+                <link data-inertia="canonical" rel="canonical" href="{{ $page['props']['metadata']['canonical'] }}">
+            @endif
+            @foreach($page['props']['metadata']['alternates'] as $lang => $href)
+                <link data-inertia="alternate-{{ $lang }}" rel="alternate" hreflang="{{ $lang }}" href="{{ $href }}">
+            @endforeach
+            @if($page['props']['metadata']['robots'])
+                <meta data-inertia="robots" name="robots" content="{{ $page['props']['metadata']['robots'] }}">
+            @endif
             <title>{{ config('app.name', 'Laravel') }}</title>
         </x-inertia::head>
     </head>

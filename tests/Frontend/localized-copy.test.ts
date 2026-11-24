@@ -51,7 +51,7 @@ void test('application counts, replacement text and public passkey errors are lo
 void test('real Inertia auth and account renders translate layouts, accessible controls and links per locale', async () => {
     const server = await createServer({
         configFile: false,
-        server: { middlewareMode: true },
+        server: { middlewareMode: true, ws: false },
         resolve: { alias: { '@': `${process.cwd()}/resources/js` } },
     });
     try {
@@ -215,7 +215,7 @@ void test('real Inertia auth and account renders translate layouts, accessible c
 void test('passkey deletion renders localized pending and idle states', async () => {
     const server = await createServer({
         configFile: false,
-        server: { middlewareMode: true },
+        server: { middlewareMode: true, ws: false },
         resolve: { alias: { '@': `${process.cwd()}/resources/js` } },
     });
     try {

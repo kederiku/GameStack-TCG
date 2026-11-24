@@ -6,7 +6,6 @@ use App\Models\Catalog;
 use App\Models\CatalogRecord;
 use App\Models\Expansion;
 use App\Models\ExpansionEdition;
-use App\Models\ExpansionLocalization;
 use App\Models\ExpansionRelation;
 use App\Models\ExpansionRelease;
 use App\Models\Game;
@@ -14,7 +13,6 @@ use App\Models\Language;
 use App\Models\Market;
 use App\Models\Series;
 use App\Models\SeriesImage;
-use App\Models\SeriesLocalization;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\Validator;
@@ -87,6 +85,11 @@ class CatalogRules
         $record->forceFill($data);
     }
 
+    public static function containsPattern(string $literal): string
+    {
+        return '%'.str_replace(['\\', '%', '_'], ['\\\\', '\\%', '\\_'], $literal).'%';
+    }
+
     public static function validLanguageCode(string $code): bool
     {
         return preg_match(self::LANGUAGE_TAG, trim($code)) === 1;
@@ -120,7 +123,7 @@ class CatalogRules
     {
         $field = match (true) {
             $record instanceof Language => 'code',
-            $record instanceof SeriesImage, $record instanceof SeriesLocalization, $record instanceof ExpansionLocalization, $record instanceof ExpansionEdition => 'language_id',
+            $record instanceof SeriesImage, $record instanceof ExpansionEdition => 'language_id',
             $record instanceof ExpansionRelease => 'channel',
             $record instanceof ExpansionRelation => 'target_expansion_id',
             default => 'key',
@@ -180,17 +183,10 @@ class CatalogRules
                 'type' => ['required', 'string', Rule::in(Series::TYPES)], 'sort_order' => $order, 'is_visible' => $visibility,
             ],
             $record instanceof SeriesImage => ['series_id' => $fk('series'), 'language_id' => $fk('languages')],
-            $record instanceof SeriesLocalization => [
-                'series_id' => $fk('series'), 'language_id' => $fk('languages'),
-                'name' => $text, 'description' => $description,
-            ],
             $record instanceof Expansion => [
                 'catalog_id' => $fk('catalogs'), 'series_id' => ['bail', 'nullable', 'integer', Rule::exists($table.'series', 'id')],
                 'key' => $key, 'name' => $text, 'type' => ['required', 'string', Rule::in(Expansion::TYPES)],
                 'sort_order' => $order, 'is_visible' => $visibility,
-            ],
-            $record instanceof ExpansionLocalization => [
-                'expansion_id' => $fk('expansions'), 'language_id' => $fk('languages'), 'name' => $text, 'description' => $description,
             ],
             $record instanceof ExpansionEdition => [
                 'expansion_id' => $fk('expansions'), 'language_id' => $fk('languages'),
@@ -222,8 +218,8 @@ class CatalogRules
         $identity = match (true) {
             $record instanceof Catalog => ['game_id', 'key'],
             $record instanceof Series, $record instanceof Expansion => ['catalog_id', 'key'],
-            $record instanceof SeriesImage, $record instanceof SeriesLocalization => ['series_id', 'language_id'],
-            $record instanceof ExpansionLocalization, $record instanceof ExpansionEdition => ['expansion_id', 'language_id'],
+            $record instanceof SeriesImage => ['series_id', 'language_id'],
+            $record instanceof ExpansionEdition => ['expansion_id', 'language_id'],
             $record instanceof ExpansionRelease => ['edition_id', 'market_id', 'channel'],
             $record instanceof ExpansionRelation => ['source_expansion_id', 'target_expansion_id', 'type'],
             $record instanceof Language => ['code'],
@@ -282,8 +278,8 @@ class CatalogRules
         $columns = match (true) {
             $record instanceof Catalog => ['game_id', 'key'],
             $record instanceof Series, $record instanceof Expansion => ['catalog_id', 'key'],
-            $record instanceof SeriesImage, $record instanceof SeriesLocalization => ['series_id', 'language_id'],
-            $record instanceof ExpansionLocalization, $record instanceof ExpansionEdition => ['expansion_id', 'language_id'],
+            $record instanceof SeriesImage => ['series_id', 'language_id'],
+            $record instanceof ExpansionEdition => ['expansion_id', 'language_id'],
             $record instanceof ExpansionRelease => ['edition_id', 'market_id', 'channel'],
             $record instanceof ExpansionRelation => ['source_expansion_id', 'target_expansion_id', 'type'],
             $record instanceof Market => ['key'],
