@@ -26,7 +26,8 @@ init: env ## Installer le projet puis démarrer tous les services
 	$(RUN) php docker/initialize-key.php
 	$(MAKE) storage-init
 	$(RUN) php artisan localization:check
-	$(RUN) php artisan localization:install
+	$(RUN) php artisan migrate --force
+	$(RUN) php artisan localization:sync-languages
 	$(RUN) sh -c 'test -L public/storage || php artisan storage:link'
 	$(RUN) npm ci
 	$(RUN) npm run build

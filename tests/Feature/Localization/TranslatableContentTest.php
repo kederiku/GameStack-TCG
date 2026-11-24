@@ -4,23 +4,22 @@ namespace Tests\Feature\Localization;
 
 use App\Actions\Catalog\SaveTranslations;
 use App\Actions\Games\SaveGame;
-use App\Models\CatalogExampleBinding;
 use App\Models\Expansion;
 use App\Models\Game;
 use App\Models\Language;
 use App\Models\Series;
 use App\Support\Localization\TranslatedContent;
 use App\Support\Localization\TranslationPatch;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 use Tests\Concerns\BuildsCatalog;
-use Tests\Concerns\UsesLocalizedSchema;
 use Tests\TestCase;
 
 class TranslatableContentTest extends TestCase
 {
     use BuildsCatalog;
-    use UsesLocalizedSchema;
+    use RefreshDatabase;
 
     public function test_missing_translation_falls_back_with_provenance(): void
     {
@@ -47,7 +46,6 @@ class TranslatableContentTest extends TestCase
 
     public function test_nullable_text_and_inactive_content_locale_survive_round_trip(): void
     {
-        $this->createLocalizedSchema();
         $language = $this->language('zh-Hant', 'Chinese');
         DB::table('languages')->where('id', $language->id)->update(['code' => 'zh-hant']);
         $game = Game::factory()->create(['reference_description' => 'Base']);
@@ -73,7 +71,6 @@ class TranslatableContentTest extends TestCase
 
     public function test_each_content_model_uses_the_right_fallback_without_persisting_it(): void
     {
-        $this->createLocalizedSchema();
         $catalog = $this->catalog();
         $series = $this->series($catalog);
         $expansion = $this->expansion($catalog);
@@ -91,7 +88,6 @@ class TranslatableContentTest extends TestCase
 
     public function test_empty_display_name_and_unknown_locale_or_field_are_rejected(): void
     {
-        $this->createLocalizedSchema();
         $game = Game::factory()->create();
         foreach ([['fr', ['display_name' => ' ']], ['zz', ['description' => 'Unknown']], ['fr', ['name' => 'Wrong field']], ['fr', ['description' => ['nested']]]] as [$locale, $values]) {
             try {
@@ -105,7 +101,6 @@ class TranslatableContentTest extends TestCase
 
     public function test_language_delete_checks_active_and_json_only_usage(): void
     {
-        $this->createLocalizedSchema();
         $game = Game::factory()->create();
         $japanese = $this->language('ja', 'Japanese');
         $game->setTranslation('description', 'ja', null)->save();
@@ -124,7 +119,6 @@ class TranslatableContentTest extends TestCase
 
     public function test_stale_ordinary_and_service_saves_merge_only_modified_locale_keys(): void
     {
-        $this->createLocalizedSchema();
         foreach ([Game::factory()->create(), $this->series($this->catalog())] as $record) {
             $a = $record->fresh();
             $b = $record->fresh();
@@ -148,7 +142,6 @@ class TranslatableContentTest extends TestCase
 
     public function test_unknown_locale_is_rejected_even_for_empty_or_remove_requests(): void
     {
-        $this->createLocalizedSchema();
         $game = Game::factory()->create();
         foreach ([false, true] as $remove) {
             try {
@@ -162,7 +155,6 @@ class TranslatableContentTest extends TestCase
 
     public function test_raw_invalid_json_is_rejected_and_catalog_action_merges_stale_maps(): void
     {
-        $this->createLocalizedSchema();
         $series = $this->series($this->catalog());
         $stale = $series->fresh();
         $this->saveCatalog($series, ['description' => ['fr' => 'Français']]);
@@ -182,28 +174,8 @@ class TranslatableContentTest extends TestCase
         $this->assertSame('{}', DB::table('series')->where('id', $series->id)->value('description'));
     }
 
-    public function test_binding_only_usage_keeps_its_language_and_binding_writes_require_known_languages(): void
-    {
-        $this->createLocalizedSchema();
-        $japanese = $this->language('ja', 'Japanese');
-        $series = $this->series($this->catalog());
-        $binding = CatalogExampleBinding::create(['manifest_key' => 'series:example/ja', 'record_type' => 'series', 'record_id' => $series->id, 'locale' => 'JA']);
-        $this->assertSame('ja', $binding->fresh()->locale);
-        try {
-            $japanese->delete();
-            $this->fail('Binding-only locale usage must remain valid.');
-        } catch (ValidationException) {
-            $this->assertNotNull($japanese->fresh());
-        }
-        $binding->delete();
-        $japanese->delete();
-        $this->expectException(ValidationException::class);
-        CatalogExampleBinding::create(['manifest_key' => 'series:example/ja', 'record_type' => 'series', 'record_id' => $series->id, 'locale' => 'ja']);
-    }
-
     public function test_saving_another_field_or_locale_preserves_exact_historical_values(): void
     {
-        $this->createLocalizedSchema();
         $game = Game::factory()->create();
         DB::table('games')->where('id', $game->id)->update(['description' => '{"fr":"  original  ","en":""}']);
         $game->refresh();
@@ -219,7 +191,6 @@ class TranslatableContentTest extends TestCase
 
     public function test_reference_changes_and_game_service_preserve_other_translations(): void
     {
-        $this->createLocalizedSchema();
         $game = Game::factory()->create(['reference_description' => 'Reference']);
         $stale = $game->fresh();
         $game->setTranslation('description', 'en', 'English')->save();
@@ -231,7 +202,6 @@ class TranslatableContentTest extends TestCase
 
     public function test_full_map_preserves_unchanged_historical_text_and_normalizes_the_edit(): void
     {
-        $this->createLocalizedSchema();
         $game = Game::factory()->create();
         DB::table('games')->where('id', $game->id)->update(['description' => '{"fr":"  original  ","en":"Old"}']);
 

@@ -13,15 +13,15 @@ use App\Filament\Widgets\CatalogOverview;
 use App\Models\User;
 use App\Support\Localization\AdminPanels;
 use Filament\Facades\Filament;
+use Illuminate\Foundation\Testing\DatabaseMigrations;
 use Illuminate\Support\Facades\DB;
 use Livewire\Livewire;
 use Tests\Concerns\BuildsCatalog;
-use Tests\Concerns\ForwardOnlyDatabaseMigrations;
 use Tests\TestCase;
 
 class AdminUsabilityTest extends TestCase
 {
-    use BuildsCatalog, ForwardOnlyDatabaseMigrations;
+    use BuildsCatalog, DatabaseMigrations;
 
     protected function setUp(): void
     {

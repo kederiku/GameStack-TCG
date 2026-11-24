@@ -8,13 +8,14 @@ use App\Models\SeriesImage;
 use App\Services\CatalogImages;
 use App\Services\GameImages;
 use App\Support\PublicGames;
+use Database\Seeders\ContentLanguagesSeeder;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Tests\Concerns\BuildsCatalog;
-use Tests\Concerns\UsesLocalizedSchema;
+use Tests\Concerns\UsesIsolatedSchema;
 use Tests\TestCase;
 
 // Explicit opt-in: php artisan test tests/Integration/GarageStorageTest.php
@@ -22,7 +23,7 @@ use Tests\TestCase;
 class GarageStorageTest extends TestCase
 {
     use BuildsCatalog;
-    use UsesLocalizedSchema;
+    use UsesIsolatedSchema;
 
     /** @var list<string> */
     private array $paths = [];
@@ -30,7 +31,8 @@ class GarageStorageTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->createLocalizedSchema();
+        $this->createIsolatedSchema();
+        $this->artisan('migrate', ['--seed' => true, '--seeder' => ContentLanguagesSeeder::class])->assertSuccessful();
         config(['game-images.disk' => 's3']);
         Storage::fake('local');
     }

@@ -19,17 +19,17 @@ use App\Models\User;
 use Filament\Actions\CreateAction;
 use Filament\Actions\EditAction;
 use Filament\Facades\Filament;
+use Illuminate\Foundation\Testing\DatabaseMigrations;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Livewire;
 use Tests\Concerns\BuildsCatalog;
-use Tests\Concerns\ForwardOnlyDatabaseMigrations;
 use Tests\TestCase;
 
 class TranslatedAdminFormsTest extends TestCase
 {
-    use BuildsCatalog, ForwardOnlyDatabaseMigrations;
+    use BuildsCatalog, DatabaseMigrations;
 
     public function test_catalog_controls_display_canonical_casing_for_historical_language_codes(): void
     {

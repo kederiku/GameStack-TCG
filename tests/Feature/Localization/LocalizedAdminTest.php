@@ -8,16 +8,16 @@ use App\Models\User;
 use App\Support\Localization\AdminPanels;
 use Filament\Facades\Filament;
 use Filament\Panel;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Routing\RouteCollection;
 use Illuminate\Support\Facades\Route;
 use Livewire\Mechanisms\HandleRequests\HandleRequests;
 use Tests\Concerns\BuildsCatalog;
-use Tests\Concerns\ForwardOnlyRefreshDatabase;
 use Tests\TestCase;
 
 class LocalizedAdminTest extends TestCase
 {
-    use BuildsCatalog, ForwardOnlyRefreshDatabase;
+    use BuildsCatalog, RefreshDatabase;
 
     public function test_panel_locale_is_explicit(): void
     {

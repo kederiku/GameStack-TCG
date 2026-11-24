@@ -3,14 +3,14 @@
 namespace Tests\Feature;
 
 use App\Models\Game;
+use Illuminate\Foundation\Testing\DatabaseMigrations;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
-use Tests\Concerns\ForwardOnlyDatabaseMigrations;
 use Tests\TestCase;
 
 class CopyGameImagesTest extends TestCase
 {
-    use ForwardOnlyDatabaseMigrations;
+    use DatabaseMigrations;
 
     protected function setUp(): void
     {

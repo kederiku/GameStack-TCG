@@ -4,16 +4,16 @@ namespace Tests\Feature\Localization;
 
 use App\Models\Game;
 use App\Support\Catalog\PublicCatalog;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Inertia\Testing\AssertableInertia as Assert;
 use Tests\Concerns\BuildsCatalog;
-use Tests\Concerns\ForwardOnlyRefreshDatabase;
 use Tests\TestCase;
 
 class TranslatedCatalogTest extends TestCase
 {
     use BuildsCatalog;
-    use ForwardOnlyRefreshDatabase;
+    use RefreshDatabase;
 
     protected function setUp(): void
     {
