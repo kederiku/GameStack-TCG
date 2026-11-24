@@ -19,6 +19,10 @@ des données de vrais TCG. Il a confirmé « non supprime tout » lorsque la que
 portait sur la conservation des comptes, administrateurs et images. Il a choisi
 les **migrations Laravel réécrites** plutôt qu’un instantané SQL PostgreSQL.
 
+Précision de l’utilisateur : le seed doit contenir des valeurs réelles de jeux de
+cartes qui existent. Cette exigence concerne les fiches et leurs attributs, pas
+seulement l’emploi de noms de jeux réels sur des données autrement inventées.
+
 La suppression est autorisée. L’approbation attendue porte sur cette conception,
 pas sur une nouvelle autorisation d’effacer les mêmes données.
 
@@ -120,6 +124,12 @@ la suppression transactionnelle des images et les contrôles de chemins.
 crée aucun utilisateur, administrateur, compte fictif, prix, collection ou carte
 individuelle : ces trois derniers domaines ne font pas partie du modèle actuel.
 
+Le seed est un catalogue réel utilisable dans l’application. Aucun Faker, nom
+d’extension fictif, date arbitraire, code inventé ou édition linguistique supposée
+n’est autorisé. Les données artificielles nécessaires aux tests automatisés
+restent limitées à leurs factories et fixtures dans la base de tests ; elles ne
+sont jamais appelées par `DatabaseSeeder` ou `TcgCatalogSeeder`.
+
 Reprendre le périmètre du manifeste existant : Pokémon, Magic: The Gathering,
 One Piece, Yu-Gi-Oh!, Disney Lorcana, Cyberpunk TCG, Flesh and Blood, Riftbound,
 Naruto Mythos, Final Fantasy TCG, Star Wars: Unlimited et Altered. Revalider les
@@ -128,14 +138,29 @@ confirmé pour atteindre un quota. L’objectif est un échantillon représentat
 pas un catalogue exhaustif ni un synchroniseur avec des API externes.
 
 Le contenu comprend langues, marchés, catalogues, séries quand elles existent,
-extensions, éditions imprimées, sorties documentées et relations explicitement
-éditoriales. Les variantes régionales réellement distinctes restent distinctes.
+extensions, éditions imprimées et sorties documentées. Une relation entre deux
+extensions est chargée uniquement si une source officielle étaye cette relation ;
+un simple rapprochement proposé par l’ancien manifeste ne suffit pas. Une table
+peut rester vide si aucune donnée réelle vérifiée ne justifie de la remplir.
+Les variantes régionales réellement distinctes restent distinctes.
 Une traduction d’interface n’invente jamais une édition physique dans cette langue.
 
 Corriger le slug historique mal orthographié `naturo-mythos` en `naruto-mythos`.
 Ne pas créer une édition d’un jeu uniquement annoncé si sa langue d’impression
 n’est pas confirmée. Les dates, codes, éditeurs, descriptions et années absents
 des sources restent absents ; les textes éditoriaux sont identifiés comme tels.
+
+Les descriptions éventuelles résument des faits vérifiés, sans reprendre de longs
+textes commerciaux ni ajouter des informations plausibles mais non sourcées.
+Seuls les identifiants techniques, ordres d’affichage et libellés de classement
+internes sont définis par l’application ; ils ne sont pas présentés comme des
+codes ou noms officiels de produits.
+
+Exemple concret de valeurs vérifiées : pour One Piece, le produit anglais
+`ROMANCE DAWN` porte le code officiel `OP01` et la date de sortie du
+`2022-12-02`, d’après la [fiche officielle Bandai](https://en.onepiece-cardgame.com/products/boosters/op01.php),
+consultée le 2026-11-24. Les mêmes critères de provenance s’appliquent à chaque
+autre fiche importée.
 
 Les entités importées sont visibles, de sorte que le catalogue est consultable
 immédiatement après le seed. Les noms disponibles sont écrits directement dans
@@ -243,8 +268,10 @@ réécriture du système de traduction ou des alias d’URL.
    être annulées puis rejouées dans la base de tests.
 2. Les contraintes et les tests actuels du catalogue, des traductions, des comptes
    et des images restent couverts. Le garde-fou de `tests/TestCase.php` reste intact.
-3. `db:seed` crée les références et des fiches TCG sourcées, visibles et cohérentes,
-   sans utilisateur. Deux exécutions consécutives n’ajoutent pas de doublons ni
+3. `db:seed` crée les références et des fiches TCG réelles, sourcées, visibles et
+   cohérentes, sans utilisateur ni valeur factice. La vérification couvre les
+   attributs factuels, pas seulement l’existence du jeu. Deux exécutions
+   consécutives n’ajoutent pas de doublons ni
    de fichiers superflus ; les règles annoncées de mise à jour sont vérifiées.
 4. Les tests ne nécessitent ni réseau pour les données ni base applicative.
    Les tests des fonctionnalités supprimées sont retirés ; les tests du nouveau
