@@ -7,7 +7,6 @@ use App\Filament\Resources\Expansions\Pages\CreateExpansion;
 use App\Filament\Resources\Expansions\Pages\EditExpansion;
 use App\Filament\Resources\Expansions\Pages\ListExpansions;
 use App\Filament\Resources\Expansions\RelationManagers\EditionsRelationManager;
-use App\Filament\Resources\Expansions\RelationManagers\ExpansionLocalizationsRelationManager;
 use App\Filament\Resources\Expansions\RelationManagers\RelationsRelationManager;
 use App\Filament\Resources\Expansions\Schemas\ExpansionForm;
 use App\Filament\Resources\Expansions\Tables\ExpansionsTable;
@@ -50,7 +49,6 @@ class ExpansionResource extends Resource
     public static function getRelations(): array
     {
         return [
-            ExpansionLocalizationsRelationManager::class,
             EditionsRelationManager::class,
             RelationsRelationManager::class,
         ];

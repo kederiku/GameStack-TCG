@@ -42,7 +42,7 @@ class EditionsRelationManager extends CatalogRelationManager
                 ImageColumn::make('image')->label(__('admin.labels.artwork'))->disk(fn (): string => CatalogImages::diskName())
                     ->visibility('public')->imageHeight(40),
                 CatalogTables::name(__('admin.labels.edition')),
-                TextColumn::make('language.code')->label(__('admin.labels.language'))->badge()->searchable(),
+                CatalogTables::relatedName('language', __('admin.labels.language'))->badge(),
                 TextColumn::make('official_code')->label(__('admin.labels.official-code'))->searchable(),
                 CatalogTables::enum('status', __('admin.labels.status'), CatalogLabels::statuses()),
                 CatalogTables::visibility(),

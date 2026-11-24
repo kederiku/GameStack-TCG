@@ -71,13 +71,7 @@ class PublicCatalog
                 ->where('expansion_editions.language_id', $printLanguage?->id));
         $query->select('expansions.*')->selectSub($firstRelease, 'first_release_on');
         if ($filters['sort'] === 'name') {
-            // Legacy language rows retain their original casing; JSON keys are canonical.
-            $query->orderByRaw('coalesce(expansions.display_name ->> ?::text,
-                (select translation.value from catalogs
-                    join languages on languages.id = catalogs.default_language_id
-                    cross join jsonb_each_text(expansions.display_name) as translation
-                    where catalogs.id = expansions.catalog_id and lower(translation.key) = lower(languages.code)),
-                expansions.name)', [CatalogRules::languageCode(LocalizedRoutes::locale($request))]);
+            $query->orderBy(CatalogPresentation::nameForQuery($query->getModel(), LocalizedRoutes::locale($request)));
         } else {
             $query->orderByRaw('first_release_on '.($filters['sort'] === 'oldest' ? 'ASC' : 'DESC').' NULLS LAST');
         }

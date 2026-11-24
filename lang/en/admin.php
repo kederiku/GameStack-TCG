@@ -1,6 +1,21 @@
 <?php
 
 return [
+    'translation' => [
+        'heading' => 'Translation',
+        'language' => 'Content language',
+        'help' => 'Choose the language of the text to edit. Save your changes before switching languages.',
+        'display_name' => 'Display name',
+        'description' => 'Description',
+        'announced_period' => 'Announced period',
+        'remove' => 'Remove this translation on save',
+        'reference' => 'Reference values',
+        'suppress_description' => 'Leave the description empty in this language, without fallback',
+        'suppress_announced_period' => 'Leave the period empty in this language, without fallback',
+        'reference_name' => 'Reference name',
+        'images' => 'Images by language',
+        'add_image' => 'Add an image',
+    ],
     'navigation' => [
         'games' => 'Games',
         'catalogs' => 'Catalogs',
@@ -192,7 +207,7 @@ return [
     ],
     'series' => [
         'type_help' => 'The publisher’s terminology: series or block.',
-        'name_help' => 'E.g. Scarlet and Violet. Add translations under “Localizations” after creation.',
+        'name_help' => 'E.g. Scarlet and Violet. Add translations in the Translation section.',
         'help' => 'A series or block groups expansions from the same catalog. This level is optional: not every TCG uses it.',
         'image_label' => 'Series image in this language',
         'image_help' => 'Series logo or artwork in the selected language. Without an image, artwork from another language is never reused.',
@@ -206,7 +221,7 @@ return [
         'image_help' => 'Use the artwork for this language. Without an image, artwork from another edition is never reused.',
         'help' => 'An edition represents a version actually printed or announced in a language. Its markets, channels and release dates are then entered under “Releases”.',
         'description' => 'The actually printed or announced versions of this set, one per language. Open “Edit and manage releases” to specify markets and dates.',
-        'empty_help' => 'Create an edition for each language confirmed by the publisher. A simple name translation belongs under “Localizations”.',
+        'empty_help' => 'Create an edition for each language confirmed by the publisher. A simple name translation belongs in the Translation section.',
         'manage_releases' => 'Edit and manage releases',
     ],
     'releases' => [
@@ -239,7 +254,7 @@ return [
     'expansions' => [
         'name_help' => 'Reference name. Translations and printed editions are added after creation.',
         'type_help' => 'Type of card set. Booster packs and displays are separate products.',
-        'help' => 'This record describes a card set. After creation, add its editions by language, then each edition’s releases. “Localizations” only translates its presentation.',
+        'help' => 'This record describes a card set. After creation, add its editions by language, then each edition’s releases. Use the Translation section to edit the text presented in each language.',
         'list_help' => 'Open an expansion to manage its translations, printed editions and their releases.',
     ],
     'relationships' => [

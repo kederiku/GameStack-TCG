@@ -38,9 +38,9 @@ class CatalogFields
             ->helperText(__('admin.fields.key_help'));
     }
 
-    public static function description(): Textarea
+    public static function description(string $field): Textarea
     {
-        return Textarea::make('description')->label(__('admin.labels.description'))->rows(4)->columnSpanFull()
+        return Textarea::make($field)->label(__('admin.labels.description'))->rows(4)->columnSpanFull()
             ->helperText(__('admin.fields.description_help'));
     }
 
@@ -73,7 +73,7 @@ class CatalogFields
     {
         return Select::make('game_id')->label(__('admin.labels.game'))->required()->searchable()->disabledOn('edit')
             ->helperText(__('admin.fields.parent_help'))
-            ->options(fn (): array => Game::query()->orderBy('name')->pluck('name', 'id')->all());
+            ->options(fn (): array => Game::query()->get()->mapWithKeys(fn (Game $game): array => [$game->id => CatalogLabels::name($game)])->sort()->all());
     }
 
     public static function catalogue(): Select
@@ -86,7 +86,7 @@ class CatalogFields
 
     public static function catalogueLabel(Catalog $catalog): string
     {
-        return "{$catalog->game->name} — {$catalog->name} ({$catalog->defaultLanguage->code})";
+        return CatalogLabels::name($catalog->game).' — '.CatalogLabels::name($catalog).' ('.$catalog->defaultLanguage->code.')';
     }
 
     public static function series(): Select
@@ -98,7 +98,7 @@ class CatalogFields
                 $catalogId = self::positiveId($get('catalog_id'));
 
                 return $catalogId === null ? [] : Series::query()->where('catalog_id', $catalogId)
-                    ->orderBy('name')->pluck('name', 'id')->all();
+                    ->with('catalog.defaultLanguage')->get()->mapWithKeys(fn (Series $series): array => [$series->id => CatalogLabels::name($series)])->sort()->all();
             });
     }
 
@@ -119,7 +119,7 @@ class CatalogFields
 
         return Select::make($field)->label($label)->required()->searchable()
             ->options(fn (): array => Language::query()->orderBy('name')->get()
-                ->mapWithKeys(fn (Language $language): array => [$language->id => "{$language->name} ({$language->code})"])->all());
+                ->mapWithKeys(fn (Language $language): array => [$language->id => CatalogLabels::language($language)])->sort()->all());
     }
 
     public static function image(string $label, string $description = ''): FileUpload

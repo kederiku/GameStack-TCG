@@ -8,14 +8,14 @@ use App\Models\CatalogExampleBinding;
 use App\Models\CatalogRecord;
 use App\Models\Expansion;
 use App\Models\ExpansionEdition;
-use App\Models\ExpansionLocalization;
 use App\Models\ExpansionRelation;
 use App\Models\ExpansionRelease;
 use App\Models\Game;
 use App\Models\Language;
 use App\Models\Market;
 use App\Models\Series;
-use App\Models\SeriesLocalization;
+use App\Models\SeriesImage;
+use App\Support\Catalog\CatalogRules;
 use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
@@ -23,7 +23,7 @@ use Illuminate\Validation\ValidationException;
 use RuntimeException;
 
 /**
- * @phpstan-type ExampleRow array{type: string, attributes: array<string, string|int|bool|null>, references: array<string, string>, asset: ?string, facts: array<string, string>}
+ * @phpstan-type ExampleRow array{type: string, locale: ?string, attributes: array<string, string|int|bool|null>, references: array<string, string>, asset: ?string, facts: array<string, string>}
  */
 class SeedCatalogExamples
 {
@@ -45,6 +45,8 @@ class SeedCatalogExamples
             DB::select('select pg_advisory_xact_lock(20261115, 150000)');
             $counts = ['created' => 0, 'preserved' => 0, 'recreated' => 0];
             $resolved = [];
+            // Keep the former target while rebinding descendants of a deleted parent.
+            $originalIds = CatalogExampleBinding::query()->whereNull('locale')->lockForUpdate()->pluck('record_id', 'manifest_key');
 
             foreach ($manifest['records'] as $key => $row) {
                 $attributes = $row['attributes'];
@@ -73,7 +75,18 @@ class SeedCatalogExamples
                 }
 
                 try {
-                    [$record, $outcome] = $this->resolve($key, $row['type'], $attributes, $row['asset']);
+                    if ($row['locale'] === null) {
+                        [$record, $outcome] = $this->resolve($key, $row['type'], $attributes, $row['asset']);
+                    } else {
+                        $parentKey = $row['references'][$row['type'].'_id'];
+                        $record = $resolved[$parentKey];
+                        $language = $resolved[$row['references']['language_id']];
+                        if ((! $record instanceof Series && ! $record instanceof Expansion) || ! $language instanceof Language
+                            || CatalogRules::languageCode($language->code) !== $row['locale']) {
+                            throw $this->conflict($key, 'parent ou langue de traduction incompatible');
+                        }
+                        $outcome = $this->translation($key, $row, $record, $language, $originalIds->get($parentKey));
+                    }
                 } catch (UniqueConstraintViolationException|ValidationException $exception) {
                     throw new RuntimeException('Exemple '.$key.' : '.$exception->getMessage(), previous: $exception);
                 }
@@ -98,9 +111,7 @@ class SeedCatalogExamples
             'market' => [new Market, ['key']],
             'catalog' => [new Catalog, ['game_id', 'key']],
             'series' => [new Series, ['catalog_id', 'key']],
-            'series-localization' => [new SeriesLocalization, ['series_id', 'language_id']],
             'expansion' => [new Expansion, ['catalog_id', 'key']],
-            'expansion-localization' => [new ExpansionLocalization, ['expansion_id', 'language_id']],
             'edition' => [new ExpansionEdition, ['expansion_id', 'language_id']],
             'release' => [new ExpansionRelease, ['edition_id', 'market_id', 'channel']],
             'relation' => [new ExpansionRelation, ['source_expansion_id', 'target_expansion_id', 'type']],
@@ -114,7 +125,7 @@ class SeedCatalogExamples
 
         $identity = array_intersect_key($attributes, array_flip($identityFields));
         $binding = CatalogExampleBinding::query()->lockForUpdate()->find($key);
-        if ($binding !== null && $binding->record_type !== $type) {
+        if ($binding !== null && ($binding->record_type !== $type || $binding->locale !== null)) {
             throw $this->conflict($key, 'la liaison enregistrée désigne un autre type de fiche');
         }
 
@@ -160,7 +171,7 @@ class SeedCatalogExamples
         }
 
         $id = (int) $record->getKey();
-        if (CatalogExampleBinding::query()->where('record_type', $type)->where('record_id', $id)->exists()) {
+        if (CatalogExampleBinding::query()->where('record_type', $type)->where('record_id', $id)->whereNull('locale')->exists()) {
             throw $this->conflict($key, 'la fiche correspond déjà à une autre clé du manifeste');
         }
 
@@ -171,6 +182,43 @@ class SeedCatalogExamples
         }
 
         return [$record, $outcome];
+    }
+
+    /**
+     * @param  ExampleRow  $row
+     * @return 'created'|'preserved'|'recreated'
+     */
+    private function translation(string $key, array $row, Series|Expansion $parent, Language $language, ?int $originalParentId): string
+    {
+        $locale = CatalogRules::languageCode($language->code);
+        $binding = CatalogExampleBinding::query()->lockForUpdate()->find($key);
+        if ($binding !== null && ($originalParentId === null || $binding->record_type !== $row['type'] || $binding->locale !== $locale
+            || ! in_array($binding->record_id, [$parent->id, $originalParentId], true))) {
+            throw $this->conflict($key, 'la liaison de traduction désigne un autre parent ou une autre langue');
+        }
+
+        $parent->refresh();
+        $exists = array_key_exists($locale, $parent->getTranslations('display_name'));
+        if (! $exists) {
+            $values = $row['attributes'];
+            // An example localization historically contained a nullable description.
+            $values['description'] ??= null;
+            if (array_key_exists($locale, $parent->getTranslations('description'))) {
+                unset($values['description']);
+            }
+            app(SaveTranslations::class)->handle($parent, $locale, $values);
+            if ($parent instanceof Series && $row['asset'] !== null && $parent->imageForLocale($locale) === null) {
+                $this->create($key, new SeriesImage, ['series_id' => $parent->id, 'language_id' => $language->id], $row['asset']);
+            }
+        }
+        $outcome = $exists ? 'preserved' : ($binding === null ? 'created' : 'recreated');
+        $binding ??= new CatalogExampleBinding(['manifest_key' => $key, 'record_type' => $row['type'], 'locale' => $locale]);
+        $binding->record_id = $parent->id;
+        if ($binding->isDirty() && ! $binding->saveOrFail()) {
+            throw $this->conflict($key, 'la liaison de traduction n’a pas pu être enregistrée');
+        }
+
+        return $outcome;
     }
 
     /** @param array<string, string|int|bool|null> $attributes */

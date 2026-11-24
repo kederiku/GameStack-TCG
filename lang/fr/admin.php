@@ -1,6 +1,21 @@
 <?php
 
 return [
+    'translation' => [
+        'heading' => 'Traduction',
+        'language' => 'Langue du contenu',
+        'help' => 'Choisissez la langue du texte à modifier. Enregistrez vos modifications avant de changer de langue.',
+        'display_name' => 'Nom d’affichage',
+        'description' => 'Description',
+        'announced_period' => 'Période annoncée',
+        'remove' => 'Retirer cette traduction à l’enregistrement',
+        'reference' => 'Valeurs de référence',
+        'suppress_description' => 'Laisser la description vide pour cette langue, sans repli',
+        'suppress_announced_period' => 'Laisser la période vide pour cette langue, sans repli',
+        'reference_name' => 'Nom de référence',
+        'images' => 'Images par langue',
+        'add_image' => 'Ajouter une image',
+    ],
     'navigation' => [
         'games' => 'Jeux',
         'catalogs' => 'Catalogues',
@@ -192,7 +207,7 @@ return [
     ],
     'series' => [
         'type_help' => 'Le terme utilisé par l’éditeur : série ou bloc.',
-        'name_help' => 'Ex. Écarlate et Violet. Ajoutez les traductions dans « Localisations » après création.',
+        'name_help' => 'Ex. Écarlate et Violet. Ajoutez les traductions dans la section Traduction.',
         'help' => 'Une série ou un bloc regroupe plusieurs extensions d’un même catalogue. Ce niveau est facultatif : tous les TCG ne l’utilisent pas.',
         'image_label' => 'Image de la série dans cette langue',
         'image_help' => 'Logo ou visuel de la série dans la langue choisie. Sans image, aucun visuel d’une autre langue n’est repris.',
@@ -206,7 +221,7 @@ return [
         'image_help' => 'Utilisez le visuel propre à cette langue. Sans image, aucun visuel d’une autre édition n’est repris.',
         'help' => 'Une édition correspond à une version réellement imprimée ou annoncée dans une langue. Ses lieux, canaux et dates de commercialisation se renseignent ensuite dans « Sorties ».',
         'description' => 'Les versions réellement imprimées ou annoncées de cet ensemble, une par langue. Ouvrez « Modifier et gérer les sorties » pour préciser les marchés et dates.',
-        'empty_help' => 'Créez une édition pour chaque langue confirmée par l’éditeur. Une simple traduction du nom se renseigne dans « Localisations ».',
+        'empty_help' => 'Créez une édition pour chaque langue confirmée par l’éditeur. Une simple traduction du nom se renseigne dans la section Traduction.',
         'manage_releases' => 'Modifier et gérer les sorties',
     ],
     'releases' => [
@@ -239,7 +254,7 @@ return [
     'expansions' => [
         'name_help' => 'Nom de référence. Traductions et éditions imprimées se complètent après création.',
         'type_help' => 'Nature de l’ensemble de cartes. Les boosters et displays sont des produits distincts.',
-        'help' => 'Cette fiche décrit un ensemble de cartes. Après création, ajoutez ses éditions par langue, puis les sorties de chaque édition. « Localisations » sert uniquement à traduire sa présentation.',
+        'help' => 'Cette fiche décrit un ensemble de cartes. Après création, ajoutez ses éditions par langue, puis les sorties de chaque édition. La section Traduction permet de modifier le texte présenté dans chaque langue.',
         'list_help' => 'Ouvrez une extension pour gérer ses traductions, ses éditions imprimées et leurs sorties.',
     ],
     'relationships' => [

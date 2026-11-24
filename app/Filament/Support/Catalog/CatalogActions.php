@@ -25,7 +25,7 @@ class CatalogActions
         }
 
         try {
-            $saved = app(SaveCatalogRecord::class)->handle($record, $data);
+            $saved = TranslationFields::save($record, $data, app(SaveCatalogRecord::class)->handle(...));
         } catch (ValidationException $exception) {
             $messages = [];
             foreach ($exception->errors() as $field => $errors) {

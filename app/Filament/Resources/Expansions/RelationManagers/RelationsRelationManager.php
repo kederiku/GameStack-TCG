@@ -55,19 +55,19 @@ class RelationsRelationManager extends CatalogRelationManager
         // A symmetric relation may have this extension as either endpoint after canonicalization.
         return $table->query(ExpansionRelation::query()
             ->where(fn (Builder $query): Builder => $query->where('source_expansion_id', $owner->id)->orWhere('target_expansion_id', $owner->id))
-            ->with(['sourceExpansion.catalog', 'targetExpansion.catalog']))
+            ->with(['sourceExpansion.catalog.defaultLanguage', 'targetExpansion.catalog.defaultLanguage']))
             ->recordTitleAttribute('type')
             ->description(__('admin.relationships.description'))
             ->searchPlaceholder(__('admin.labels.search'))
             ->emptyStateHeading(__('admin.labels.no-relationships'))
             ->emptyStateDescription(__('admin.relationships.empty_help'))
             ->columns([
-                TextColumn::make('sourceExpansion.name')->label(__('admin.labels.source-expansion'))->searchable()
-                    ->description(fn (ExpansionRelation $record): string => $record->sourceExpansion->catalog->name)
+                CatalogTables::relatedName('sourceExpansion', __('admin.labels.source-expansion'))
+                    ->description(fn (ExpansionRelation $record): string => CatalogLabels::name($record->sourceExpansion->catalog))
                     ->url(fn (ExpansionRelation $record): string => ExpansionResource::getUrl('edit', ['record' => $record->source_expansion_id])),
                 CatalogTables::enum('type', __('admin.labels.type'), CatalogLabels::relationTypes()),
-                TextColumn::make('targetExpansion.name')->label(__('admin.labels.target-expansion'))->searchable()
-                    ->description(fn (ExpansionRelation $record): string => $record->targetExpansion->catalog->name)
+                CatalogTables::relatedName('targetExpansion', __('admin.labels.target-expansion'))
+                    ->description(fn (ExpansionRelation $record): string => CatalogLabels::name($record->targetExpansion->catalog))
                     ->url(fn (ExpansionRelation $record): string => ExpansionResource::getUrl('edit', ['record' => $record->target_expansion_id])),
                 TextColumn::make('notes')->label(__('admin.labels.justification'))->limit(60),
                 TextColumn::make('source_url')->label(__('admin.labels.source'))->limit(40)->url(fn (ExpansionRelation $record): string => $record->source_url, true),
@@ -82,13 +82,13 @@ class RelationsRelationManager extends CatalogRelationManager
         $owner = $this->getOwnerRecord();
         assert($owner instanceof Expansion);
 
-        return Expansion::query()->with('catalog')
+        return Expansion::query()->with('catalog.defaultLanguage')
             ->whereKeyNot($owner->id)
             ->whereRelation('catalog', 'game_id', $owner->catalog->game_id)
             ->where(fn (Builder $query): Builder => $query
-                ->whereLike('name', "%{$search}%")
+                ->where(fn (Builder $names) => CatalogLabels::searchName($names, $search))
                 ->orWhereLike('key', "%{$search}%")
-                ->orWhereRelation('catalog', fn (Builder $catalog): Builder => $catalog->whereLike('name', "%{$search}%")))
+                ->orWhereRelation('catalog', fn (Builder $catalog) => CatalogLabels::searchName($catalog, $search)))
             ->orderBy('name')->limit(50)->get()
             ->mapWithKeys(fn (Expansion $expansion): array => [$expansion->id => $this->label($expansion)])->all();
     }
@@ -96,13 +96,13 @@ class RelationsRelationManager extends CatalogRelationManager
     private function expansionLabel(mixed $value): ?string
     {
         $id = CatalogFields::positiveId($value);
-        $expansion = $id === null ? null : Expansion::query()->with('catalog')->find($id);
+        $expansion = $id === null ? null : Expansion::query()->with('catalog.defaultLanguage')->find($id);
 
         return $expansion === null ? null : $this->label($expansion);
     }
 
     private function label(Expansion $expansion): string
     {
-        return "{$expansion->name} — {$expansion->catalog->name} ({$expansion->key})";
+        return CatalogLabels::name($expansion).' — '.CatalogLabels::name($expansion->catalog).' ('.$expansion->key.')';
     }
 }

@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Games\Pages\Concerns;
 
 use App\Actions\Games\SaveGame;
+use App\Filament\Support\Catalog\TranslationFields;
 use App\Models\Game;
 use Illuminate\Validation\ValidationException;
 
@@ -12,7 +13,7 @@ trait SavesGame
     protected function saveGame(Game $game, array $data): Game
     {
         try {
-            return app(SaveGame::class)->handle($game, $data);
+            return TranslationFields::save($game, $data, app(SaveGame::class)->handle(...));
         } catch (ValidationException $exception) {
             $messages = [];
             foreach ($exception->errors() as $field => $errors) {

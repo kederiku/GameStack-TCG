@@ -24,7 +24,12 @@ abstract class EditCatalogRecord extends EditRecord
         assert($record instanceof CatalogRecord);
 
         try {
-            return CatalogActions::save($record, $data, 'data');
+            $saved = CatalogActions::save($record, $data, 'data');
+            if (isset($data['translation']['locale'])) {
+                $this->data['translation'] = TranslationFields::savedState($saved, $data['translation']['locale']);
+            }
+
+            return $saved;
         } catch (ValidationException $exception) {
             // Domain validation runs after the schema, so reveal its errors too.
             $this->dispatch('form-validation-error', livewireId: $this->getId());

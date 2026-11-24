@@ -3,7 +3,9 @@
 namespace App\Filament\Support\Catalog;
 
 use App\Models\Catalog;
+use App\Models\Game;
 use App\Models\Series;
+use Closure;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\EditAction;
 use Filament\Support\Enums\FontWeight;
@@ -11,6 +13,8 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 
 class CatalogTables
 {
@@ -33,7 +37,20 @@ class CatalogTables
     {
         $label ??= __('admin.labels.name');
 
-        return TextColumn::make('name')->label($label)->weight(FontWeight::SemiBold)->wrap()->searchable()->sortable();
+        return TextColumn::make('name')->label($label)->weight(FontWeight::SemiBold)->wrap()
+            ->state(fn (Model $record): string => CatalogLabels::name($record))
+            ->searchable(query: CatalogLabels::searchName(...))->sortable(query: CatalogLabels::sortName(...));
+    }
+
+    public static function relatedName(string $relationship, string $label): TextColumn
+    {
+        return TextColumn::make($relationship.'.name')->label($label)
+            ->state(function (Model $record) use ($relationship): ?string {
+                $related = data_get($record, $relationship);
+
+                return $related instanceof Model ? CatalogLabels::name($related) : null;
+            })
+            ->searchable(query: fn (Builder $query, string $search): Builder => $query->whereHas($relationship, fn (Builder $related) => CatalogLabels::searchName($related, $search)));
     }
 
     public static function key(string $field = 'key', ?string $label = null): TextColumn
@@ -60,21 +77,37 @@ class CatalogTables
 
     public static function gameFilter(string $relationship = 'game'): SelectFilter
     {
-        return SelectFilter::make('game')->label(__('admin.labels.game'))->relationship($relationship, 'name')->searchable()->preload();
+        return self::parentFilter('game', $relationship, __('admin.labels.game'), Game::query(), CatalogLabels::name(...));
     }
 
     public static function catalogFilter(): SelectFilter
     {
-        return SelectFilter::make('catalog')->label(__('admin.labels.catalog'))->relationship('catalog', 'name')
-            ->getOptionLabelFromRecordUsing(fn (Catalog $record): string => CatalogFields::catalogueLabel($record))
-            ->searchable()->preload();
+        return self::parentFilter('catalog', 'catalog', __('admin.labels.catalog'), Catalog::query()->with(['defaultLanguage', 'game']), CatalogFields::catalogueLabel(...));
     }
 
     public static function seriesFilter(): SelectFilter
     {
-        return SelectFilter::make('series')->label(__('admin.labels.series'))->relationship('series', 'name')
-            ->getOptionLabelFromRecordUsing(fn (Series $record): string => "{$record->name} — ".CatalogFields::catalogueLabel($record->catalog))
-            ->searchable()->preload();
+        return self::parentFilter('series', 'series', __('admin.labels.series'), Series::query()->with(['catalog.defaultLanguage', 'catalog.game']),
+            fn (Series $record): string => CatalogLabels::name($record).' — '.CatalogFields::catalogueLabel($record->catalog));
+    }
+
+    /**
+     * @template T of Model
+     *
+     * @param  Builder<T>  $options
+     * @param  Closure(T): string  $format
+     */
+    private static function parentFilter(string $key, string $relationship, string $label, Builder $options, Closure $format): SelectFilter
+    {
+        return SelectFilter::make($key)->label($label)->relationship($relationship, 'name',
+            fn (Builder $query) => $query->with($options->getEagerLoads()))
+            ->getOptionLabelFromRecordUsing($format)
+            ->getSearchResultsUsing(function (string $search) use ($options, $format): array {
+                $query = clone $options;
+                CatalogLabels::searchName($query, $search);
+
+                return $query->orderBy('name')->limit(50)->get()->mapWithKeys(fn (Model $record): array => [$record->getKey() => $format($record)])->all();
+            })->searchable()->preload();
     }
 
     public static function visibilityFilter(): TernaryFilter

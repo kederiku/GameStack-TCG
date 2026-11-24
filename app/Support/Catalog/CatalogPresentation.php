@@ -2,11 +2,17 @@
 
 namespace App\Support\Catalog;
 
+use App\Models\Catalog;
 use App\Models\Expansion;
+use App\Models\Game;
+use App\Models\Market;
 use App\Models\Series;
+use App\Support\Localization\Locales;
 use App\Support\Localization\LocalizedRoutes;
 use App\Support\Localization\TranslatedContent;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Query\Builder;
+use InvalidArgumentException;
 
 class CatalogPresentation
 {
@@ -17,6 +23,35 @@ class CatalogPresentation
 
         // Names have a required scalar reference even when no translation exists.
         return ['name' => (string) $text['value'], 'nameLanguage' => $text['locale'], 'nameFallback' => $text['fallback']];
+    }
+
+    /** Scalar SQL equivalent of the name resolver, used before pagination and in related-record sorts. */
+    public static function nameForQuery(Model $record, string $locale): Builder
+    {
+        $query = $record->getConnection()->query();
+        $table = match (true) {
+            $record instanceof Game => 'games',
+            $record instanceof Catalog => 'catalogs',
+            $record instanceof Market => 'markets',
+            $record instanceof Series => 'series',
+            $record instanceof Expansion => 'expansions',
+            default => throw new InvalidArgumentException('No translated name for this record.'),
+        };
+        $name = $table.'.name';
+        $names = $table.'.display_name';
+        $locale = CatalogRules::languageCode($locale);
+        if ($record instanceof Series || $record instanceof Expansion) {
+            $catalogId = $table.'.catalog_id';
+
+            // Historical language rows retain their original casing; JSON keys are canonical.
+            return $query->selectRaw("coalesce($names ->> ?::text,
+                (select translation.value from catalogs
+                    join languages on languages.id = catalogs.default_language_id
+                    cross join jsonb_each_text($names) as translation
+                    where catalogs.id = $catalogId and lower(translation.key) = lower(languages.code)), $name)", [$locale]);
+        }
+
+        return $query->selectRaw("coalesce($names ->> ?::text, $names ->> ?::text, $name)", [$locale, Locales::default()]);
     }
 
     /** @return array{description: ?string, descriptionLanguage: ?string, descriptionFallback: bool} */

@@ -6,7 +6,7 @@ use App\Filament\Concerns\HasLocalizedRoutes;
 use App\Filament\Resources\Series\Pages\CreateSeries;
 use App\Filament\Resources\Series\Pages\EditSeries;
 use App\Filament\Resources\Series\Pages\ListSeries;
-use App\Filament\Resources\Series\RelationManagers\SeriesLocalizationsRelationManager;
+use App\Filament\Resources\Series\RelationManagers\ImagesRelationManager;
 use App\Filament\Resources\Series\Schemas\SeriesForm;
 use App\Filament\Resources\Series\Tables\SeriesTable;
 use App\Filament\Support\LocalizedPageRegistration;
@@ -48,7 +48,7 @@ class SeriesResource extends Resource
     public static function getRelations(): array
     {
         return [
-            SeriesLocalizationsRelationManager::class,
+            ImagesRelationManager::class,
         ];
     }
 

@@ -2,6 +2,8 @@
 
 namespace App\Filament\Resources\Games\Schemas;
 
+use App\Filament\Support\Catalog\TranslationFields;
+use App\Models\Game;
 use App\Services\GameImages;
 use App\Support\GameSlug;
 use Filament\Forms\Components\FileUpload;
@@ -25,13 +27,14 @@ class GameForm
             ->columns(['default' => 1, 'lg' => 1, 'xl' => 3])
             ->components([
                 Group::make([
-                    Section::make(__('admin.labels.presentation'))
+                    ...TranslationFields::schema(Game::class),
+                    Section::make(__('admin.translation.reference'))
                         ->description(__('admin.games.presentation_help'))
                         ->icon(Heroicon::OutlinedIdentification)
                         ->columns(['default' => 1, 'md' => 2])
                         ->schema([
                             TextInput::make('name')
-                                ->label(__('admin.labels.name'))
+                                ->label(__('admin.translation.reference_name'))
                                 ->required()
                                 ->maxLength(255)
                                 ->live(onBlur: true)
@@ -45,7 +48,7 @@ class GameForm
                                 ->maxLength(255)
                                 ->placeholder('Wizards of the Coast')
                                 ->columnSpanFull(),
-                            Textarea::make('description')
+                            Textarea::make('reference_description')
                                 ->label(__('admin.labels.description'))
                                 ->placeholder(__('admin.games.description_placeholder'))
                                 ->rows(5)

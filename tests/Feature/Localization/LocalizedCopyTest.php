@@ -28,7 +28,7 @@ class LocalizedCopyTest extends TestCase
     public function test_admin_help_and_business_labels_are_resolved_per_request(): void
     {
         $admin = User::factory()->create(['is_admin' => true]);
-        $this->actingAs($admin)->get('/en/admin/games/create')->assertOk()->assertSee('Show on site')->assertSee('Presentation');
+        $this->actingAs($admin)->get('/en/admin/games/create')->assertOk()->assertSee('Show on site')->assertSee('Reference values')->assertSee('Content language');
         app()->setLocale('en');
         $this->assertSame('Main expansion', CatalogLabels::expansionTypes()['main']);
         app()->setLocale('fr');

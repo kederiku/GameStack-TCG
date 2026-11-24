@@ -3,11 +3,11 @@
 namespace App\Filament\Resources\Games\Tables;
 
 use App\Filament\Support\Catalog\CatalogActions;
+use App\Filament\Support\Catalog\CatalogTables;
 use App\Models\Game;
 use App\Services\GameImages;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\EditAction;
-use Filament\Support\Enums\FontWeight;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
@@ -25,13 +25,8 @@ class GamesTable
                     ->visibility('public')
                     ->imageHeight(40)
                     ->visibleFrom('md'),
-                TextColumn::make('name')
-                    ->label(__('admin.labels.game'))
-                    ->description(fn (Game $record): ?string => $record->publisher)
-                    ->wrap()
-                    ->weight(FontWeight::SemiBold)
-                    ->searchable()
-                    ->sortable(),
+                CatalogTables::name(__('admin.labels.game'))
+                    ->description(fn (Game $record): ?string => $record->publisher),
                 TextColumn::make('slug')
                     ->label(__('admin.labels.slug'))
                     ->searchable()
