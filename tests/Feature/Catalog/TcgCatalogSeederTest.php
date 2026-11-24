@@ -6,6 +6,7 @@ use App\Models\Expansion;
 use App\Models\ExpansionEdition;
 use App\Models\Game;
 use Database\Seeders\TcgCatalogSeeder;
+use Illuminate\Database\Events\QueryExecuted;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -234,15 +235,27 @@ class TcgCatalogSeederTest extends TestCase
         $this->assertDatabaseHas('expansions', ['id' => $foreign->id, 'key' => 'unlisted-expansion']);
     }
 
-    public function test_the_seed_reuses_a_preexisting_language_with_different_casing(): void
+    public function test_the_seed_locks_existing_languages_in_canonical_code_order(): void
     {
-        $id = DB::table('languages')->insertGetId(['code' => 'EN', 'name' => 'Existing English']);
+        $english = DB::table('languages')->insertGetId(['code' => 'EN', 'name' => 'Existing English']);
+        $chinese = DB::table('languages')->insertGetId(['code' => 'zh-hans', 'name' => 'Existing Simplified Chinese']);
+        $german = DB::table('languages')->insertGetId(['code' => 'de', 'name' => 'Existing German']);
+        $existing = array_fill_keys([$english, $chinese, $german], true);
+        $locked = [];
+        DB::listen(static function (QueryExecuted $query) use ($existing, &$locked): void {
+            if (str_contains($query->sql, 'from "languages"') && str_ends_with($query->sql, 'for update')
+                && isset($existing[$query->bindings[0]])) {
+                $locked[] = $query->bindings[0];
+            }
+        });
 
         $this->seed(TcgCatalogSeeder::class);
 
-        $this->assertSame([$id], DB::table('languages')->whereRaw("lower(code) = 'en'")->pluck('id')->all());
-        $this->assertDatabaseHas('languages', ['id' => $id, 'code' => 'EN']);
-        $this->assertDatabaseHas('expansion_editions', ['official_code' => 'OP01', 'language_id' => $id]);
+        $this->assertSame([$german, $english, $chinese], $locked);
+        $this->assertDatabaseHas('languages', ['id' => $english, 'code' => 'EN']);
+        $this->assertDatabaseHas('languages', ['id' => $chinese, 'code' => 'zh-hans']);
+        $this->assertDatabaseHas('expansion_editions', ['official_code' => 'OP01', 'language_id' => $english]);
+        $this->assertDatabaseHas('expansion_editions', ['official_code' => 'DMU', 'language_id' => $chinese]);
     }
 
     public function test_a_missing_seed_image_is_recreated_once(): void

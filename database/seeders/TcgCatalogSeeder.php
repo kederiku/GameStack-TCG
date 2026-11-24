@@ -10,6 +10,7 @@ use App\Models\Language;
 use App\Models\Market;
 use App\Models\SeriesImage;
 use App\Services\CatalogImages;
+use App\Support\Localization\ContentLanguageUsage;
 use Illuminate\Database\Connection;
 use Illuminate\Database\Seeder;
 use Illuminate\Http\UploadedFile;
@@ -46,10 +47,13 @@ class TcgCatalogSeeder extends Seeder
             $connection->statement('SELECT pg_advisory_xact_lock(hashtext(?))', ['gamestackr:tcg-catalog-seed']);
             $this->call(ContentLanguagesSeeder::class);
 
+            $languageKeys = array_keys($data['languages']);
+            $keysByCode = array_combine(array_map(strtolower(...), $languageKeys), $languageKeys);
             $languages = [];
-            foreach ($data['languages'] as $key => $language) {
-                $record = Language::query()->whereRaw('lower(code) = ?', [strtolower($key)])->first() ?? new Language;
-                $languages[$key] = $this->saveCatalog->handle($record, $language['attributes'])->id;
+            foreach (ContentLanguageUsage::orderedCodes($languageKeys) as $code) {
+                $key = $keysByCode[$code];
+                $record = Language::query()->whereRaw('lower(code) = ?', [$code])->first() ?? new Language;
+                $languages[$key] = $this->saveCatalog->handle($record, $data['languages'][$key]['attributes'])->id;
             }
 
             $markets = [];
