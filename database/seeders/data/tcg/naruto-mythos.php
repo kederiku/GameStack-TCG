@@ -2,11 +2,22 @@
 
 // Les sorties renseignées concernent le premier tirage. L’annonce Bandai porte sur un autre jeu.
 return [
-    'game' => ['slug' => 'naruto-mythos', 'name' => 'NARUTO Mythos TCG', 'is_visible' => true],
-    'sources' => ['name' => 'mythos-set'],
+    'game' => [
+        'slug' => 'naruto-mythos',
+        'name' => 'NARUTO Mythos TCG',
+        'is_visible' => true,
+        'display_name' => ['fr' => 'NARUTO Mythos TCG', 'en' => 'NARUTO Mythos TCG'],
+    ],
+    'sources' => ['name' => 'mythos-set', 'display_name.fr' => 'mythos-set', 'display_name.en' => 'mythos-set'],
     'catalogs' => [
         [
-            'attributes' => ['key' => 'international', 'name' => 'International', 'sort_order' => 0, 'is_visible' => true],
+            'attributes' => [
+                'key' => 'international',
+                'name' => 'International',
+                'sort_order' => 0,
+                'is_visible' => true,
+                'display_name' => ['fr' => 'International', 'en' => 'International'],
+            ],
             'default_language' => 'en',
             'series' => [],
             'expansions' => [

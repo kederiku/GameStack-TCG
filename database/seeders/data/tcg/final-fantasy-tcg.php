@@ -1,16 +1,34 @@
 <?php
 
 return [
-    'game' => ['slug' => 'final-fantasy-tcg', 'name' => 'FINAL FANTASY TRADING CARD GAME', 'is_visible' => true],
-    'sources' => ['name' => 'ff-chapter'],
+    'game' => [
+        'slug' => 'final-fantasy-tcg',
+        'name' => 'FINAL FANTASY TRADING CARD GAME',
+        'is_visible' => true,
+        'display_name' => ['fr' => 'FINAL FANTASY TRADING CARD GAME', 'en' => 'FINAL FANTASY TRADING CARD GAME'],
+    ],
+    'sources' => ['name' => 'ff-chapter', 'display_name.fr' => 'ff-chapter', 'display_name.en' => 'ff-chapter'],
     'catalogs' => [
         [
-            'attributes' => ['key' => 'chapter', 'name' => 'Chapter', 'sort_order' => 0, 'is_visible' => true],
+            'attributes' => [
+                'key' => 'chapter',
+                'name' => 'Chapter',
+                'sort_order' => 0,
+                'is_visible' => true,
+                'display_name' => ['fr' => 'Chapter', 'en' => 'Chapter'],
+            ],
             'default_language' => 'ja',
             'series' => [],
             'expansions' => [
                 [
-                    'attributes' => ['key' => 'chapter-i', 'name' => 'Chapter I', 'type' => 'main', 'sort_order' => 0, 'is_visible' => true],
+                    'attributes' => [
+                        'key' => 'chapter-i',
+                        'name' => 'Chapter I',
+                        'type' => 'main',
+                        'sort_order' => 0,
+                        'is_visible' => true,
+                        'display_name' => ['ja' => 'Chapter I'],
+                    ],
                     'series' => null,
                     'editions' => [
                         [
@@ -27,18 +45,31 @@ return [
                             'sources' => ['name' => 'ff-chapter-i', 'language' => 'ff-chapter', 'status' => 'ff-chapter-i'],
                         ],
                     ],
-                    'sources' => ['name' => 'ff-chapter-i'],
+                    'sources' => ['name' => 'ff-chapter-i', 'display_name.ja' => 'ff-chapter-i'],
                 ],
             ],
-            'sources' => ['name' => 'ff-chapter'],
+            'sources' => ['name' => 'ff-chapter', 'display_name.fr' => 'ff-chapter', 'display_name.en' => 'ff-chapter'],
         ],
         [
-            'attributes' => ['key' => 'opus', 'name' => 'Opus', 'sort_order' => 1, 'is_visible' => true],
+            'attributes' => [
+                'key' => 'opus',
+                'name' => 'Opus',
+                'sort_order' => 1,
+                'is_visible' => true,
+                'display_name' => ['fr' => 'Opus', 'en' => 'Opus'],
+            ],
             'default_language' => 'en',
             'series' => [],
             'expansions' => [
                 [
-                    'attributes' => ['key' => 'dreamlike-oceans', 'name' => 'Dreamlike Oceans', 'type' => 'main', 'sort_order' => 0, 'is_visible' => true],
+                    'attributes' => [
+                        'key' => 'dreamlike-oceans',
+                        'name' => 'Dreamlike Oceans',
+                        'type' => 'main',
+                        'sort_order' => 0,
+                        'is_visible' => true,
+                        'display_name' => ['en' => 'Dreamlike Oceans'],
+                    ],
                     'series' => null,
                     'editions' => [
                         [
@@ -55,10 +86,10 @@ return [
                             'sources' => ['name' => 'ff-dreamlike', 'language' => 'ff-dreamlike-card', 'status' => 'ff-dreamlike'],
                         ],
                     ],
-                    'sources' => ['name' => 'ff-dreamlike'],
+                    'sources' => ['name' => 'ff-dreamlike', 'display_name.en' => 'ff-dreamlike'],
                 ],
             ],
-            'sources' => ['name' => 'ff-chapter'],
+            'sources' => ['name' => 'ff-chapter', 'display_name.fr' => 'ff-chapter', 'display_name.en' => 'ff-chapter'],
         ],
     ],
 ];

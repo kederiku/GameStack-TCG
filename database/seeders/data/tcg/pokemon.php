@@ -2,11 +2,22 @@
 
 // « Pokémon 151 (Japon) » est un libellé d’interface français associé au produit P6.
 return [
-    'game' => ['slug' => 'pokemon', 'name' => 'Pokémon', 'is_visible' => true],
-    'sources' => ['name' => 'P1'],
+    'game' => [
+        'slug' => 'pokemon',
+        'name' => 'Pokémon',
+        'is_visible' => true,
+        'display_name' => ['fr' => 'Pokémon', 'en' => 'Pokémon'],
+    ],
+    'sources' => ['name' => 'P1', 'display_name.fr' => 'P1', 'display_name.en' => 'P1'],
     'catalogs' => [
         [
-            'attributes' => ['key' => 'international', 'name' => 'International', 'sort_order' => 0, 'is_visible' => true],
+            'attributes' => [
+                'key' => 'international',
+                'name' => 'International',
+                'sort_order' => 0,
+                'is_visible' => true,
+                'display_name' => ['fr' => 'International', 'en' => 'International'],
+            ],
             'default_language' => 'fr',
             'series' => [
                 [
@@ -110,7 +121,7 @@ return [
                                     'sources' => ['market' => 'P4', 'channel' => 'P4', 'released_on' => 'P4', 'status' => 'P4'],
                                 ],
                             ],
-                            'sources' => ['name' => 'P4', 'language' => 'P4', 'status' => 'P4'],
+                            'sources' => ['name' => 'P4', 'language' => 'P-EN-151-cards', 'status' => 'P4'],
                         ],
                     ],
                     'sources' => ['name' => 'P3', 'display_name.fr' => 'P3', 'display_name.en' => 'P4', 'series' => 'P3'],
@@ -123,18 +134,32 @@ return [
                 'name' => 'Japonais',
                 'sort_order' => 1,
                 'is_visible' => true,
-                'display_name' => ['en' => 'Japanese'],
+                'display_name' => ['fr' => 'Japonais', 'en' => 'Japanese'],
             ],
             'default_language' => 'ja',
             'series' => [
                 [
-                    'attributes' => ['key' => 'scarlet-violet', 'name' => 'スカーレット＆バイオレット', 'type' => 'series', 'sort_order' => 0, 'is_visible' => true],
-                    'sources' => ['name' => 'P5', 'type' => 'P5'],
+                    'attributes' => [
+                        'key' => 'scarlet-violet',
+                        'name' => 'スカーレット＆バイオレット',
+                        'type' => 'series',
+                        'sort_order' => 0,
+                        'is_visible' => true,
+                        'display_name' => ['ja' => 'スカーレット＆バイオレット'],
+                    ],
+                    'sources' => ['name' => 'P5', 'type' => 'P5', 'display_name.ja' => 'P5'],
                 ],
             ],
             'expansions' => [
                 [
-                    'attributes' => ['key' => 'scarlet-ex', 'name' => 'スカーレットex', 'type' => 'main', 'sort_order' => 0, 'is_visible' => true],
+                    'attributes' => [
+                        'key' => 'scarlet-ex',
+                        'name' => 'スカーレットex',
+                        'type' => 'main',
+                        'sort_order' => 0,
+                        'is_visible' => true,
+                        'display_name' => ['ja' => 'スカーレットex'],
+                    ],
                     'series' => 'scarlet-violet',
                     'editions' => [
                         [
@@ -151,10 +176,17 @@ return [
                             'sources' => ['name' => 'P5', 'language' => 'P5', 'status' => 'P5'],
                         ],
                     ],
-                    'sources' => ['name' => 'P5', 'series' => 'P5'],
+                    'sources' => ['name' => 'P5', 'series' => 'P5', 'display_name.ja' => 'P5'],
                 ],
                 [
-                    'attributes' => ['key' => 'violet-ex', 'name' => 'バイオレットex', 'type' => 'main', 'sort_order' => 1, 'is_visible' => true],
+                    'attributes' => [
+                        'key' => 'violet-ex',
+                        'name' => 'バイオレットex',
+                        'type' => 'main',
+                        'sort_order' => 1,
+                        'is_visible' => true,
+                        'display_name' => ['ja' => 'バイオレットex'],
+                    ],
                     'series' => 'scarlet-violet',
                     'editions' => [
                         [
@@ -171,7 +203,7 @@ return [
                             'sources' => ['name' => 'P5', 'language' => 'P5', 'status' => 'P5'],
                         ],
                     ],
-                    'sources' => ['name' => 'P5', 'series' => 'P5'],
+                    'sources' => ['name' => 'P5', 'series' => 'P5', 'display_name.ja' => 'P5'],
                 ],
                 [
                     'attributes' => [
@@ -180,7 +212,7 @@ return [
                         'type' => 'special',
                         'sort_order' => 2,
                         'is_visible' => true,
-                        'display_name' => ['fr' => 'Pokémon 151 (Japon)'],
+                        'display_name' => ['ja' => 'ポケモンカード151', 'fr' => 'Pokémon 151 (Japon)'],
                     ],
                     'series' => 'scarlet-violet',
                     'editions' => [
@@ -198,7 +230,7 @@ return [
                             'sources' => ['name' => 'P6', 'language' => 'P6', 'status' => 'P6'],
                         ],
                     ],
-                    'sources' => ['name' => 'P6', 'display_name.fr' => 'P6', 'series' => 'P6'],
+                    'sources' => ['name' => 'P6', 'display_name.fr' => 'P6', 'series' => 'P6', 'display_name.ja' => 'P6'],
                 ],
             ],
         ],
@@ -208,18 +240,32 @@ return [
                 'name' => 'Coréen',
                 'sort_order' => 2,
                 'is_visible' => true,
-                'display_name' => ['en' => 'Korean'],
+                'display_name' => ['fr' => 'Coréen', 'en' => 'Korean'],
             ],
             'default_language' => 'ko',
             'series' => [
                 [
-                    'attributes' => ['key' => 'scarlet-violet', 'name' => '스칼렛&바이올렛', 'type' => 'series', 'sort_order' => 0, 'is_visible' => true],
-                    'sources' => ['name' => 'P7', 'type' => 'P7'],
+                    'attributes' => [
+                        'key' => 'scarlet-violet',
+                        'name' => '스칼렛&바이올렛',
+                        'type' => 'series',
+                        'sort_order' => 0,
+                        'is_visible' => true,
+                        'display_name' => ['ko' => '스칼렛&바이올렛'],
+                    ],
+                    'sources' => ['name' => 'P7', 'type' => 'P7', 'display_name.ko' => 'P7'],
                 ],
             ],
             'expansions' => [
                 [
-                    'attributes' => ['key' => '151', 'name' => '포켓몬 카드 151', 'type' => 'special', 'sort_order' => 0, 'is_visible' => true],
+                    'attributes' => [
+                        'key' => '151',
+                        'name' => '포켓몬 카드 151',
+                        'type' => 'special',
+                        'sort_order' => 0,
+                        'is_visible' => true,
+                        'display_name' => ['ko' => '포켓몬 카드 151'],
+                    ],
                     'series' => 'scarlet-violet',
                     'editions' => [
                         [
@@ -236,7 +282,7 @@ return [
                             'sources' => ['name' => 'P7', 'language' => 'P7', 'status' => 'P7'],
                         ],
                     ],
-                    'sources' => ['name' => 'P7', 'series' => 'P7'],
+                    'sources' => ['name' => 'P7', 'series' => 'P7', 'display_name.ko' => 'P7'],
                 ],
             ],
         ],
@@ -246,22 +292,43 @@ return [
                 'name' => 'Chinois traditionnel',
                 'sort_order' => 3,
                 'is_visible' => true,
-                'display_name' => ['en' => 'Traditional Chinese'],
+                'display_name' => ['fr' => 'Chinois traditionnel', 'en' => 'Traditional Chinese'],
             ],
             'default_language' => 'zh-Hant',
             'series' => [
                 [
-                    'attributes' => ['key' => 'scarlet-violet', 'name' => '朱＆紫', 'type' => 'series', 'sort_order' => 0, 'is_visible' => true],
-                    'sources' => ['name' => 'P-TW-series', 'type' => 'P-TW-series'],
+                    'attributes' => [
+                        'key' => 'scarlet-violet',
+                        'name' => '朱＆紫',
+                        'type' => 'series',
+                        'sort_order' => 0,
+                        'is_visible' => true,
+                        'display_name' => ['zh-Hant' => '朱＆紫'],
+                    ],
+                    'sources' => ['name' => 'P-TW-series', 'type' => 'P-TW-series', 'display_name.zh-Hant' => 'P-TW-series'],
                 ],
                 [
-                    'attributes' => ['key' => 'sun-moon', 'name' => '太陽 & 月亮', 'type' => 'series', 'sort_order' => 1, 'is_visible' => true],
-                    'sources' => ['name' => 'P9', 'type' => 'P9'],
+                    'attributes' => [
+                        'key' => 'sun-moon',
+                        'name' => '太陽 & 月亮',
+                        'type' => 'series',
+                        'sort_order' => 1,
+                        'is_visible' => true,
+                        'display_name' => ['zh-Hant' => '太陽 & 月亮'],
+                    ],
+                    'sources' => ['name' => 'P9', 'type' => 'P9', 'display_name.zh-Hant' => 'P9'],
                 ],
             ],
             'expansions' => [
                 [
-                    'attributes' => ['key' => '151', 'name' => '寶可夢卡牌151', 'type' => 'special', 'sort_order' => 0, 'is_visible' => true],
+                    'attributes' => [
+                        'key' => '151',
+                        'name' => '寶可夢卡牌151',
+                        'type' => 'special',
+                        'sort_order' => 0,
+                        'is_visible' => true,
+                        'display_name' => ['zh-Hant' => '寶可夢卡牌151'],
+                    ],
                     'series' => 'scarlet-violet',
                     'editions' => [
                         [
@@ -278,10 +345,17 @@ return [
                             'sources' => ['name' => 'P8', 'language' => 'P8', 'status' => 'P8'],
                         ],
                     ],
-                    'sources' => ['name' => 'P8', 'series' => 'P-TW-series'],
+                    'sources' => ['name' => 'P8', 'series' => 'P-TW-series', 'display_name.zh-Hant' => 'P8'],
                 ],
                 [
-                    'attributes' => ['key' => 'set-b', 'name' => '眾星雲集組合篇 SET B', 'type' => 'special', 'sort_order' => 1, 'is_visible' => true],
+                    'attributes' => [
+                        'key' => 'set-b',
+                        'name' => '眾星雲集組合篇 SET B',
+                        'type' => 'special',
+                        'sort_order' => 1,
+                        'is_visible' => true,
+                        'display_name' => ['zh-Hant' => '眾星雲集組合篇 SET B'],
+                    ],
                     'series' => 'sun-moon',
                     'editions' => [
                         [
@@ -292,7 +366,7 @@ return [
                             'sources' => ['name' => 'P9', 'language' => 'P9', 'status' => 'P9'],
                         ],
                     ],
-                    'sources' => ['name' => 'P9', 'series' => 'P9'],
+                    'sources' => ['name' => 'P9', 'series' => 'P9', 'display_name.zh-Hant' => 'P9'],
                 ],
             ],
         ],
@@ -302,18 +376,32 @@ return [
                 'name' => 'Chinois simplifié',
                 'sort_order' => 4,
                 'is_visible' => true,
-                'display_name' => ['en' => 'Simplified Chinese'],
+                'display_name' => ['fr' => 'Chinois simplifié', 'en' => 'Simplified Chinese'],
             ],
             'default_language' => 'zh-Hans',
             'series' => [
                 [
-                    'attributes' => ['key' => 'scarlet-violet', 'name' => '朱&紫', 'type' => 'series', 'sort_order' => 0, 'is_visible' => true],
-                    'sources' => ['name' => 'P-CN-series', 'type' => 'P-CN-series'],
+                    'attributes' => [
+                        'key' => 'scarlet-violet',
+                        'name' => '朱&紫',
+                        'type' => 'series',
+                        'sort_order' => 0,
+                        'is_visible' => true,
+                        'display_name' => ['zh-Hans' => '朱&紫'],
+                    ],
+                    'sources' => ['name' => 'P-CN-series', 'type' => 'P-CN-series', 'display_name.zh-Hans' => 'P-CN-series'],
                 ],
             ],
             'expansions' => [
                 [
-                    'attributes' => ['key' => '151-jing', 'name' => '收集啦151 惊', 'type' => 'special', 'sort_order' => 0, 'is_visible' => true],
+                    'attributes' => [
+                        'key' => '151-jing',
+                        'name' => '收集啦151 惊',
+                        'type' => 'special',
+                        'sort_order' => 0,
+                        'is_visible' => true,
+                        'display_name' => ['zh-Hans' => '收集啦151 惊'],
+                    ],
                     'series' => 'scarlet-violet',
                     'editions' => [
                         [
@@ -330,10 +418,17 @@ return [
                             'sources' => ['name' => 'P10', 'language' => 'P10', 'status' => 'P10'],
                         ],
                     ],
-                    'sources' => ['name' => 'P10', 'series' => 'P-CN-series'],
+                    'sources' => ['name' => 'P10', 'series' => 'P-CN-series', 'display_name.zh-Hans' => 'P10'],
                 ],
                 [
-                    'attributes' => ['key' => '151-ju', 'name' => '收集啦151 聚', 'type' => 'special', 'sort_order' => 1, 'is_visible' => true],
+                    'attributes' => [
+                        'key' => '151-ju',
+                        'name' => '收集啦151 聚',
+                        'type' => 'special',
+                        'sort_order' => 1,
+                        'is_visible' => true,
+                        'display_name' => ['zh-Hans' => '收集啦151 聚'],
+                    ],
                     'series' => 'scarlet-violet',
                     'editions' => [
                         [
@@ -350,7 +445,7 @@ return [
                             'sources' => ['name' => 'P10', 'language' => 'P10', 'status' => 'P10'],
                         ],
                     ],
-                    'sources' => ['name' => 'P10', 'series' => 'P-CN-series'],
+                    'sources' => ['name' => 'P10', 'series' => 'P-CN-series', 'display_name.zh-Hans' => 'P10'],
                 ],
             ],
         ],

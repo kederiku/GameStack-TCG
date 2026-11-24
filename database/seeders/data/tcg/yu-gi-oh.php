@@ -1,11 +1,22 @@
 <?php
 
 return [
-    'game' => ['slug' => 'yu-gi-oh', 'name' => 'Yu-Gi-Oh!', 'is_visible' => true],
-    'sources' => ['name' => 'Y3'],
+    'game' => [
+        'slug' => 'yu-gi-oh',
+        'name' => 'Yu-Gi-Oh!',
+        'is_visible' => true,
+        'display_name' => ['fr' => 'Yu-Gi-Oh!', 'en' => 'Yu-Gi-Oh!'],
+    ],
+    'sources' => ['name' => 'Y3', 'display_name.fr' => 'Y3', 'display_name.en' => 'Y3'],
     'catalogs' => [
         [
-            'attributes' => ['key' => 'tcg', 'name' => 'TCG', 'sort_order' => 0, 'is_visible' => true],
+            'attributes' => [
+                'key' => 'tcg',
+                'name' => 'TCG',
+                'sort_order' => 0,
+                'is_visible' => true,
+                'display_name' => ['fr' => 'TCG', 'en' => 'TCG'],
+            ],
             'default_language' => 'fr',
             'series' => [],
             'expansions' => [
@@ -62,13 +73,20 @@ return [
                 'name' => 'OCG japonais',
                 'sort_order' => 1,
                 'is_visible' => true,
-                'display_name' => ['en' => 'Japanese OCG'],
+                'display_name' => ['fr' => 'OCG japonais', 'en' => 'Japanese OCG'],
             ],
             'default_language' => 'ja',
             'series' => [],
             'expansions' => [
                 [
-                    'attributes' => ['key' => 'darkwing-blast', 'name' => 'DARKWING BLAST', 'type' => 'main', 'sort_order' => 0, 'is_visible' => true],
+                    'attributes' => [
+                        'key' => 'darkwing-blast',
+                        'name' => 'DARKWING BLAST',
+                        'type' => 'main',
+                        'sort_order' => 0,
+                        'is_visible' => true,
+                        'display_name' => ['ja' => 'DARKWING BLAST'],
+                    ],
                     'series' => null,
                     'editions' => [
                         [
@@ -85,7 +103,7 @@ return [
                             'sources' => ['name' => 'Y1', 'language' => 'yugioh-ja-card', 'status' => 'Y1'],
                         ],
                     ],
-                    'sources' => ['name' => 'Y1'],
+                    'sources' => ['name' => 'Y1', 'display_name.ja' => 'Y1'],
                 ],
             ],
         ],

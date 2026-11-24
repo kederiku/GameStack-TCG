@@ -1,16 +1,34 @@
 <?php
 
 return [
-    'game' => ['slug' => 'riftbound', 'name' => 'Riftbound', 'is_visible' => true],
-    'sources' => ['name' => 'riftbound-sets'],
+    'game' => [
+        'slug' => 'riftbound',
+        'name' => 'Riftbound',
+        'is_visible' => true,
+        'display_name' => ['fr' => 'Riftbound', 'en' => 'Riftbound'],
+    ],
+    'sources' => ['name' => 'riftbound-sets', 'display_name.fr' => 'riftbound-sets', 'display_name.en' => 'riftbound-sets'],
     'catalogs' => [
         [
-            'attributes' => ['key' => 'international', 'name' => 'International', 'sort_order' => 0, 'is_visible' => true],
+            'attributes' => [
+                'key' => 'international',
+                'name' => 'International',
+                'sort_order' => 0,
+                'is_visible' => true,
+                'display_name' => ['fr' => 'International', 'en' => 'International'],
+            ],
             'default_language' => 'en',
             'series' => [],
             'expansions' => [
                 [
-                    'attributes' => ['key' => 'origins', 'name' => 'Origins', 'type' => 'main', 'sort_order' => 0, 'is_visible' => true],
+                    'attributes' => [
+                        'key' => 'origins',
+                        'name' => 'Origins',
+                        'type' => 'main',
+                        'sort_order' => 0,
+                        'is_visible' => true,
+                        'display_name' => ['en' => 'Origins'],
+                    ],
                     'series' => null,
                     'editions' => [
                         [
@@ -37,10 +55,17 @@ return [
                             ],
                         ],
                     ],
-                    'sources' => ['name' => 'riftbound-sets'],
+                    'sources' => ['name' => 'riftbound-sets', 'display_name.en' => 'riftbound-sets'],
                 ],
                 [
-                    'attributes' => ['key' => 'proving-grounds', 'name' => 'Proving Grounds', 'type' => 'deck', 'sort_order' => 1, 'is_visible' => true],
+                    'attributes' => [
+                        'key' => 'proving-grounds',
+                        'name' => 'Proving Grounds',
+                        'type' => 'deck',
+                        'sort_order' => 1,
+                        'is_visible' => true,
+                        'display_name' => ['en' => 'Proving Grounds'],
+                    ],
                     'series' => null,
                     'editions' => [
                         [
@@ -62,7 +87,7 @@ return [
                             'sources' => ['name' => 'riftbound-release', 'language' => 'riftbound-release', 'status' => 'riftbound-launch', 'official_code' => 'riftbound-sets'],
                         ],
                     ],
-                    'sources' => ['name' => 'riftbound-sets', 'type' => 'riftbound-sets'],
+                    'sources' => ['name' => 'riftbound-sets', 'type' => 'riftbound-sets', 'display_name.en' => 'riftbound-sets'],
                 ],
             ],
         ],

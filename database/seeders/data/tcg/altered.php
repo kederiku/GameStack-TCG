@@ -1,16 +1,34 @@
 <?php
 
 return [
-    'game' => ['slug' => 'altered', 'name' => 'Altered', 'is_visible' => true],
-    'sources' => ['name' => 'altered-physical'],
+    'game' => [
+        'slug' => 'altered',
+        'name' => 'Altered',
+        'is_visible' => true,
+        'display_name' => ['fr' => 'Altered', 'en' => 'Altered'],
+    ],
+    'sources' => ['name' => 'altered-physical', 'display_name.fr' => 'altered-physical', 'display_name.en' => 'altered-physical'],
     'catalogs' => [
         [
-            'attributes' => ['key' => 'international', 'name' => 'International', 'sort_order' => 0, 'is_visible' => true],
+            'attributes' => [
+                'key' => 'international',
+                'name' => 'International',
+                'sort_order' => 0,
+                'is_visible' => true,
+                'display_name' => ['fr' => 'International', 'en' => 'International'],
+            ],
             'default_language' => 'en',
             'series' => [],
             'expansions' => [
                 [
-                    'attributes' => ['key' => 'beyond-the-gates', 'name' => 'Beyond the Gates', 'type' => 'main', 'sort_order' => 0, 'is_visible' => true],
+                    'attributes' => [
+                        'key' => 'beyond-the-gates',
+                        'name' => 'Beyond the Gates',
+                        'type' => 'main',
+                        'sort_order' => 0,
+                        'is_visible' => true,
+                        'display_name' => ['en' => 'Beyond the Gates'],
+                    ],
                     'series' => null,
                     'editions' => [
                         [
@@ -32,7 +50,7 @@ return [
                             'sources' => ['name' => 'altered-physical', 'language' => 'altered-distributor', 'status' => 'altered-physical'],
                         ],
                     ],
-                    'sources' => ['name' => 'altered-physical'],
+                    'sources' => ['name' => 'altered-physical', 'display_name.en' => 'altered-physical'],
                 ],
             ],
         ],

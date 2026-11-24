@@ -1,11 +1,22 @@
 <?php
 
 return [
-    'game' => ['slug' => 'lorcana', 'name' => 'Disney Lorcana', 'is_visible' => true],
-    'sources' => ['name' => 'L2'],
+    'game' => [
+        'slug' => 'lorcana',
+        'name' => 'Disney Lorcana',
+        'is_visible' => true,
+        'display_name' => ['fr' => 'Disney Lorcana', 'en' => 'Disney Lorcana'],
+    ],
+    'sources' => ['name' => 'L2', 'display_name.fr' => 'L2', 'display_name.en' => 'L2'],
     'catalogs' => [
         [
-            'attributes' => ['key' => 'international', 'name' => 'International', 'sort_order' => 0, 'is_visible' => true],
+            'attributes' => [
+                'key' => 'international',
+                'name' => 'International',
+                'sort_order' => 0,
+                'is_visible' => true,
+                'display_name' => ['fr' => 'International', 'en' => 'International'],
+            ],
             'default_language' => 'fr',
             'series' => [],
             'expansions' => [

@@ -1,11 +1,22 @@
 <?php
 
 return [
-    'game' => ['slug' => 'star-wars-unlimited', 'name' => 'Star Wars: Unlimited', 'is_visible' => true],
-    'sources' => ['name' => 'swu-global-release'],
+    'game' => [
+        'slug' => 'star-wars-unlimited',
+        'name' => 'Star Wars: Unlimited',
+        'is_visible' => true,
+        'display_name' => ['fr' => 'Star Wars: Unlimited', 'en' => 'Star Wars: Unlimited'],
+    ],
+    'sources' => ['name' => 'swu-global-release', 'display_name.fr' => 'swu-global-release', 'display_name.en' => 'swu-global-release'],
     'catalogs' => [
         [
-            'attributes' => ['key' => 'international', 'name' => 'International', 'sort_order' => 0, 'is_visible' => true],
+            'attributes' => [
+                'key' => 'international',
+                'name' => 'International',
+                'sort_order' => 0,
+                'is_visible' => true,
+                'display_name' => ['fr' => 'International', 'en' => 'International'],
+            ],
             'default_language' => 'fr',
             'series' => [],
             'expansions' => [

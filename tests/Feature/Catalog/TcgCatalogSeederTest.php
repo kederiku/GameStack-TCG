@@ -39,6 +39,8 @@ class TcgCatalogSeederTest extends TestCase
         $this->get('/en/one-piece/international/romance-dawn?edition=en')->assertOk()
             ->assertInertia(fn (Assert $page) => $page
                 ->where('expansion.name', 'ROMANCE DAWN')
+                ->where('expansion.nameLanguage', 'en')
+                ->where('expansion.nameFallback', false)
                 ->where('expansion.selectedEdition.language.code', 'en')
                 ->where('expansion.selectedEdition.officialCode', 'OP01')
                 ->where('expansion.selectedEdition.releases.0.market.key', 'north-america')
@@ -47,9 +49,29 @@ class TcgCatalogSeederTest extends TestCase
             ->assertInertia(fn (Assert $page) => $page
                 ->where('expansion.name', 'Pokémon 151 (Japon)')
                 ->where('expansion.nameLanguage', 'fr')
+                ->where('expansion.nameFallback', false)
+                ->where('expansion.catalog.name', 'Japonais')
+                ->where('expansion.catalog.nameLanguage', 'fr')
+                ->where('expansion.catalog.nameFallback', false)
                 ->has('expansion.editions', 1)
                 ->where('expansion.selectedEdition.language.code', 'ja')
                 ->where('expansion.selectedEdition.name', 'ポケモンカード151'));
+    }
+
+    public function test_english_display_falls_back_to_the_japanese_expansion_and_series_names(): void
+    {
+        $this->seed(TcgCatalogSeeder::class);
+
+        $this->get('/en/pokemon/japanese/151?edition=ja')->assertOk()
+            ->assertInertia(fn (Assert $page) => $page
+                ->where('expansion.name', 'ポケモンカード151')
+                ->where('expansion.nameLanguage', 'ja')
+                ->where('expansion.nameFallback', true)
+                ->where('expansion.series.nameLanguage', 'ja')
+                ->where('expansion.series.nameFallback', true)
+                ->where('expansion.catalog.name', 'Japanese')
+                ->where('expansion.catalog.nameLanguage', 'en')
+                ->where('expansion.catalog.nameFallback', false));
     }
 
     public function test_a_second_seed_reuses_records_and_encoded_media(): void
