@@ -71,6 +71,40 @@ return [
                     ],
                     'sources' => ['name' => 'mythos-set', 'display_name.en' => 'mythos-set', 'display_name.fr' => 'mythos-set'],
                 ],
+                [
+                    'attributes' => [
+                        'key' => 'shinobi-shiren',
+                        'name' => 'Shinobi Shiren',
+                        'type' => 'main',
+                        'sort_order' => 1,
+                        'is_visible' => true,
+                        'display_name' => ['en' => 'Shinobi Shiren', 'fr' => 'Shinobi Shiren'],
+                    ],
+                    'series' => null,
+                    'editions' => [
+                        [
+                            'attributes' => ['name' => 'Shinobi Shiren', 'status' => 'released', 'is_visible' => true],
+                            'language' => 'en',
+                            'asset' => null,
+                            'releases' => [
+                                [
+                                    'attributes' => ['channel' => 'general', 'released_on' => '2026-09-04', 'status' => 'released'],
+                                    'market' => 'europe',
+                                    'sources' => ['market' => 'mythos-shinobi-europe', 'channel' => 'mythos-shinobi-date', 'released_on' => 'mythos-shinobi-date', 'status' => 'mythos-shinobi-date'],
+                                ],
+                            ],
+                            'sources' => ['name' => 'mythos-shinobi-en', 'language' => 'mythos-shinobi-en', 'status' => 'mythos-shinobi-en'],
+                        ],
+                        [
+                            'attributes' => ['name' => 'Shinobi Shiren', 'status' => 'released', 'is_visible' => true],
+                            'language' => 'fr',
+                            'asset' => null,
+                            'releases' => [],
+                            'sources' => ['name' => 'mythos-shinobi-fr', 'language' => 'mythos-shinobi-fr-print', 'status' => 'mythos-shinobi-fr-print'],
+                        ],
+                    ],
+                    'sources' => ['name' => 'mythos-shinobi-en', 'display_name.en' => 'mythos-shinobi-en', 'display_name.fr' => 'mythos-shinobi-fr'],
+                ],
             ],
         ],
     ],

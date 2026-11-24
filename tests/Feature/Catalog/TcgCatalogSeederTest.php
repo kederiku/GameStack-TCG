@@ -58,20 +58,138 @@ class TcgCatalogSeederTest extends TestCase
                 ->where('expansion.selectedEdition.name', 'ポケモンカード151'));
     }
 
-    public function test_english_display_falls_back_to_the_japanese_expansion_and_series_names(): void
+    public function test_english_display_uses_english_names_for_the_japanese_expansion_and_series(): void
     {
         $this->seed(TcgCatalogSeeder::class);
 
         $this->get('/en/pokemon/japanese/151?edition=ja')->assertOk()
             ->assertInertia(fn (Assert $page) => $page
-                ->where('expansion.name', 'ポケモンカード151')
-                ->where('expansion.nameLanguage', 'ja')
-                ->where('expansion.nameFallback', true)
-                ->where('expansion.series.nameLanguage', 'ja')
-                ->where('expansion.series.nameFallback', true)
+                ->where('expansion.name', 'Pokémon Card 151')
+                ->where('expansion.nameLanguage', 'en')
+                ->where('expansion.nameFallback', false)
+                ->where('expansion.series.name', 'Scarlet & Violet')
+                ->where('expansion.series.nameLanguage', 'en')
+                ->where('expansion.series.nameFallback', false)
+                ->has('expansion.editions', 1)
+                ->where('expansion.selectedEdition.language.code', 'ja')
+                ->where('expansion.selectedEdition.name', 'ポケモンカード151')
                 ->where('expansion.catalog.name', 'Japanese')
                 ->where('expansion.catalog.nameLanguage', 'en')
                 ->where('expansion.catalog.nameFallback', false));
+    }
+
+    public function test_french_display_falls_back_to_the_english_display_name_of_scarlet_ex(): void
+    {
+        $this->seed(TcgCatalogSeeder::class);
+
+        $this->get('/fr/pokemon/japanese/scarlet-ex?edition=ja')->assertOk()
+            ->assertInertia(fn (Assert $page) => $page
+                ->where('expansion.name', 'Scarlet ex')
+                ->where('expansion.nameLanguage', 'en')
+                ->where('expansion.nameFallback', true)
+                ->has('expansion.editions', 1)
+                ->where('expansion.selectedEdition.language.code', 'ja')
+                ->where('expansion.selectedEdition.name', 'スカーレットex'));
+    }
+
+    public function test_the_seed_covers_selected_sets_and_their_french_print_runs(): void
+    {
+        $this->seed(TcgCatalogSeeder::class);
+
+        $this->assertDatabaseCount('games', 12);
+        $this->assertDatabaseCount('catalogs', 19);
+        $this->assertDatabaseCount('series', 7);
+        $this->assertSame(
+            [
+                'altered' => [5, 5, 5],
+                'cyberpunk' => [1, 1, 1],
+                'final-fantasy-tcg' => [10, 10, 9],
+                'flesh-and-blood' => [10, 10, 4],
+                'lorcana' => [10, 10, 10],
+                'magic' => [10, 10, 10],
+                'naruto-mythos' => [2, 2, 2],
+                'one-piece' => [20, 10, 4],
+                'pokemon' => [15, 12, 7],
+                'riftbound' => [6, 6, 6],
+                'star-wars-unlimited' => [10, 10, 10],
+                'yu-gi-oh' => [20, 10, 10],
+            ],
+            DB::table('expansions')
+                ->join('catalogs', 'catalogs.id', '=', 'expansions.catalog_id')
+                ->join('games', 'games.id', '=', 'catalogs.game_id')
+                ->leftJoin('expansion_editions', 'expansion_editions.expansion_id', '=', 'expansions.id')
+                ->leftJoin('languages', 'languages.id', '=', 'expansion_editions.language_id')
+                ->groupBy('games.slug')
+                ->orderBy('games.slug')
+                ->selectRaw("games.slug, count(distinct expansions.id) as rows, count(distinct expansions.key) as keys, count(distinct expansions.id) filter (where languages.code = 'fr') as french_prints")
+                ->get()
+                ->mapWithKeys(fn ($row) => [$row->slug => [$row->rows, $row->keys, $row->french_prints]])
+                ->all(),
+        );
+    }
+
+    public function test_named_printed_titles_use_their_attested_languages(): void
+    {
+        $this->seed(TcgCatalogSeeder::class);
+
+        $this->assertDatabaseCount('languages', 10);
+        foreach ([
+            ['magic', 'international', 'foundations', ['de', 'en', 'es', 'fr', 'it', 'ja']],
+            ['magic', 'international', 'khans-of-tarkir', ['en', 'fr']],
+            ['one-piece', 'international', 'romance-dawn', ['en']],
+            ['one-piece', 'international', 'emperors-in-the-new-world', ['en', 'fr']],
+            ['one-piece', 'japanese', 'emperors-in-the-new-world', ['ja']],
+            ['pokemon', 'international', 'temporal-forces', ['de', 'en', 'es', 'fr', 'it']],
+            ['riftbound', 'international', 'origins', ['en', 'fr', 'ko', 'zh-Hans', 'zh-Hant']],
+            ['riftbound', 'international', 'radiance', ['en', 'fr', 'zh-Hans']],
+            ['final-fantasy-tcg', 'chapter', 'chapter-i', ['ja']],
+            ['final-fantasy-tcg', 'opus', 'journey-of-discovery', ['en', 'fr', 'ja', 'zh-Hans']],
+            ['yu-gi-oh', 'tcg', 'phantom-nightmare', ['de', 'en', 'es', 'fr', 'it', 'pt']],
+        ] as [$game, $catalog, $key, $languages]) {
+            $editions = DB::table('expansion_editions')
+                ->join('languages', 'languages.id', '=', 'expansion_editions.language_id')
+                ->join('expansions', 'expansions.id', '=', 'expansion_editions.expansion_id')
+                ->join('catalogs', 'catalogs.id', '=', 'expansions.catalog_id')
+                ->join('games', 'games.id', '=', 'catalogs.game_id')
+                ->where('games.slug', $game)
+                ->where('catalogs.key', $catalog)
+                ->where('expansions.key', $key)
+                ->orderBy('languages.code')
+                ->pluck('languages.code');
+
+            $this->assertSame($languages, $editions->all(), "$game/$catalog/$key");
+        }
+
+        $this->get('/fr/one-piece/international/emperors-in-the-new-world?edition=fr')->assertOk()
+            ->assertInertia(fn (Assert $page) => $page
+                ->where('expansion.selectedEdition.name', 'LES NOUVEAUX EMPEREURS')
+                ->where('expansion.selectedEdition.releases.0.releasedOn', '2025-02-07'));
+        $this->get('/en/yu-gi-oh/ocg/the-infinite-forbidden?edition=ja')->assertOk()
+            ->assertInertia(fn (Assert $page) => $page
+                ->where('expansion.name', 'The Infinite Forbidden')
+                ->where('expansion.selectedEdition.name', 'INFINITE FORBIDDEN'));
+    }
+
+    public function test_the_manifest_references_documented_sources_languages_and_markets(): void
+    {
+        $directory = database_path('seeders/data');
+        $manifest = require $directory.'/tcg.php';
+        $sources = require $directory.'/tcg-sources.php';
+        $records = array_map(fn (string $path) => require $directory.'/'.$path, $manifest['games']);
+        $this->assertManifestReferences($manifest, $manifest, $sources);
+        $this->assertManifestReferences($records, $manifest, $sources);
+
+        foreach ($records as $game) {
+            foreach ($game['catalogs'] as $catalog) {
+                foreach ([...$catalog['series'], ...$catalog['expansions']] as $record) {
+                    $name = $record['attributes']['name'];
+                    if (preg_match('/[\p{Han}\p{Hiragana}\p{Katakana}\p{Hangul}]/u', $name)) {
+                        $this->assertNotEmpty($record['attributes']['display_name']['en'] ?? null, $name);
+                        $this->assertArrayHasKey('display_name.en', $record['sources'], $name);
+                    }
+                }
+            }
+        }
     }
 
     public function test_a_second_seed_reuses_records_and_encoded_media(): void
@@ -190,6 +308,39 @@ class TcgCatalogSeederTest extends TestCase
     private function baseSet(): Expansion
     {
         return Expansion::query()->where('key', 'scarlet-violet')->whereHas('catalog.game', fn ($query) => $query->where('slug', 'pokemon'))->sole();
+    }
+
+    private function assertManifestReferences(array $record, array $manifest, array $sources): void
+    {
+        foreach (['language' => 'languages', 'default_language' => 'languages', 'market' => 'markets'] as $key => $reference) {
+            if (isset($record[$key])) {
+                $this->assertArrayHasKey($record[$key], $manifest[$reference]);
+            }
+        }
+
+        foreach ($record['sources'] ?? [] as $id) {
+            $this->assertArrayHasKey($id, $sources);
+            $this->assertNotEmpty($sources[$id]['url'], $id);
+            $this->assertNotEmpty($sources[$id]['consulted_on'], $id);
+            $this->assertNotEmpty($sources[$id]['note'], $id);
+        }
+
+        if (isset($record['language']) && isset($record['attributes'])) {
+            foreach (['name', 'language', 'status'] as $field) {
+                $this->assertArrayHasKey($field, $record['sources']);
+            }
+        }
+        if (isset($record['market']) && isset($record['attributes'])) {
+            foreach (['market', 'channel', 'released_on', 'status'] as $field) {
+                $this->assertArrayHasKey($field, $record['sources']);
+            }
+        }
+
+        foreach ($record as $key => $value) {
+            if ($key !== 'sources' && is_array($value)) {
+                $this->assertManifestReferences($value, $manifest, $sources);
+            }
+        }
     }
 
     private function catalogueIds(): array

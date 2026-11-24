@@ -329,12 +329,23 @@ Après `make init`, charger le catalogue de référence sur demande :
 make seed
 ```
 
-Sur une base neuve, le seed charge 12 jeux, 19 catalogues, 7 séries, 29 extensions,
-35 éditions, 30 sorties, 6 langues et 9 marchés. Les fiches sont visibles dès le
-chargement. Chaque sortie associe une date documentée à un marché confirmé.
+Sur une base neuve, le seed charge 12 jeux, 19 catalogues, 7 séries, 119 fiches
+d’extension, 327 éditions imprimées dont 78 en français, 213 sorties, 10 langues
+de contenu et 9 marchés. Un même titre peut avoir une fiche dans plusieurs
+catalogues régionaux, comme les versions japonaises et internationales de
+ONE PIECE et Yu-Gi-Oh!. Les fiches sont visibles dès le chargement.
 Le seed utilise les fichiers versionnés, sans accès réseau, et ne crée ni compte
 ni relation entre extensions. Les deux visuels officiels servent aux images de
 série et d’édition. Les jeux sans logo affichent leurs initiales.
+
+Le catalogue retient cinq extensions Altered distribuées en boosters d’origine,
+cinq extensions Riftbound et le coffret Premiers pas, deux extensions NARUTO
+Mythos et une extension Cyberpunk. Les produits annoncés et les packs Altered
+imprimés à la demande sont documentés dans le registre de sources. Chaque
+édition correspond à une impression physique attestée et chaque sortie datée
+à un couple marché et canal confirmé. Le libellé d’interface anglais d’un
+booster japonais peut être une traduction éditoriale du produit imprimé en
+japonais. Les langues d’interface disponibles restent le français et l’anglais.
 
 **Une réexécution rétablit les valeurs fournies par le manifeste**, y compris
 après une modification manuelle. La commande utilise les identifiants métier,

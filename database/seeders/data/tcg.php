@@ -28,6 +28,22 @@ return [
             'attributes' => ['code' => 'zh-Hant', 'name' => 'Chinois traditionnel'],
             'sources' => ['code' => 'language-tags'],
         ],
+        'de' => [
+            'attributes' => ['code' => 'de', 'name' => 'Allemand'],
+            'sources' => ['code' => 'language-tags'],
+        ],
+        'es' => [
+            'attributes' => ['code' => 'es', 'name' => 'Espagnol'],
+            'sources' => ['code' => 'language-tags'],
+        ],
+        'it' => [
+            'attributes' => ['code' => 'it', 'name' => 'Italien'],
+            'sources' => ['code' => 'language-tags'],
+        ],
+        'pt' => [
+            'attributes' => ['code' => 'pt', 'name' => 'Portugais'],
+            'sources' => ['code' => 'language-tags'],
+        ],
     ],
     'markets' => [
         'france' => [
