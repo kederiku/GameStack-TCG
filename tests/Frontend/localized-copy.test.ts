@@ -3,7 +3,7 @@ import { test } from 'node:test';
 import { createElement } from 'react';
 import { renderToString, renderToStaticMarkup } from 'react-dom/server';
 import { createInertiaApp } from '@inertiajs/react';
-import { createServer } from 'vite';
+import { createSsrTestServer } from './ssr-server.ts';
 import en from '../../resources/js/i18n/generated/php_en.json' with { type: 'json' };
 import fr from '../../resources/js/i18n/generated/php_fr.json' with { type: 'json' };
 import { createTranslator } from '../../resources/js/i18n/translator.ts';
@@ -48,12 +48,8 @@ void test('application counts, replacement text and public passkey errors are lo
     );
 });
 
-void test('real Inertia auth and account renders translate layouts, accessible controls and links per locale', async () => {
-    const server = await createServer({
-        configFile: false,
-        server: { middlewareMode: true, ws: false },
-        resolve: { alias: { '@': `${process.cwd()}/resources/js` } },
-    });
+void test('real Inertia auth and account renders translate layouts, accessible controls and links per locale', async (context) => {
+    const server = await createSsrTestServer(context);
     try {
         const { TooltipProvider } = await server.ssrLoadModule(
             '/resources/js/components/ui/tooltip.tsx',
@@ -226,12 +222,8 @@ void test('real Inertia auth and account renders translate layouts, accessible c
     }
 });
 
-void test('passkey deletion renders localized pending and idle states', async () => {
-    const server = await createServer({
-        configFile: false,
-        server: { middlewareMode: true, ws: false },
-        resolve: { alias: { '@': `${process.cwd()}/resources/js` } },
-    });
+void test('passkey deletion renders localized pending and idle states', async (context) => {
+    const server = await createSsrTestServer(context);
     try {
         const { LocaleProvider } = await server.ssrLoadModule(
             '/resources/js/i18n/provider.tsx',

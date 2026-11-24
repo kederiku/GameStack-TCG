@@ -48,6 +48,7 @@ void test('password login and confirmation render and typecheck against a real p
     };
     const server = await createServer({
         configFile: false,
+        cacheDir: join(root, 'vite-cache'),
         server: { middlewareMode: true, ws: false },
         resolve: { alias: aliases },
     });
@@ -113,6 +114,7 @@ void test('passkey success opens the intended Filament document', async (context
     );
     const server = await createServer({
         configFile: false,
+        cacheDir: join(root, 'vite-cache'),
         server: { middlewareMode: true, ws: false },
         resolve: {
             alias: {

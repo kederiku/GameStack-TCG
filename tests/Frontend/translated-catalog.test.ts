@@ -3,14 +3,10 @@ import { test } from 'node:test';
 import { createElement } from 'react';
 import { renderToString } from 'react-dom/server';
 import { createInertiaApp } from '@inertiajs/react';
-import { createServer } from 'vite';
+import { createSsrTestServer } from './ssr-server.ts';
 
-void test('expansion renders text with independent language provenance and omits deliberately absent descriptions', async () => {
-    const server = await createServer({
-        configFile: false,
-        server: { middlewareMode: true, ws: false },
-        resolve: { alias: { '@': `${process.cwd()}/resources/js` } },
-    });
+void test('expansion renders text with independent language provenance and omits deliberately absent descriptions', async (context) => {
+    const server = await createSsrTestServer(context);
     try {
         const { LocaleProvider } = await server.ssrLoadModule(
             '/resources/js/i18n/provider.tsx',
@@ -80,12 +76,8 @@ void test('expansion renders text with independent language provenance and omits
     }
 });
 
-void test('the name-sorted catalogue keeps A/B/A series cards in server order', async () => {
-    const server = await createServer({
-        configFile: false,
-        server: { middlewareMode: true, ws: false },
-        resolve: { alias: { '@': `${process.cwd()}/resources/js` } },
-    });
+void test('the name-sorted catalogue keeps A/B/A series cards in server order', async (context) => {
+    const server = await createSsrTestServer(context);
     try {
         const { LocaleProvider } = await server.ssrLoadModule(
             '/resources/js/i18n/provider.tsx',
