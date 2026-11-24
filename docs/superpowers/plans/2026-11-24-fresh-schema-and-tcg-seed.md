@@ -96,16 +96,16 @@
 
 ## Task 3: Retrait des anciennes conversions d’images et documentation
 
-**Files:** supprimer `app/Console/Commands/ConvertGameImagesToAvif.php`, `CopyGameImagesToS3.php`, `tests/Feature/ConvertGameImagesTest.php`, `CopyGameImagesTest.php` ; modifier `app/Services/GameImages.php`, `app/Services/AvifImages.php`, `tests/Feature/GameImageStorageTest.php`, `tests/Feature/Auth/AuthGamesTest.php`, `tests/Feature/PublicGameTest.php`, `tests/Integration/GarageStorageTest.php`, `README.md`, `docs/localization.md` et rapports historiques concernés.
+**Files:** supprimer `app/Console/Commands/ConvertGameImagesToAvif.php`, `CopyGameImagesToS3.php`, `tests/Feature/ConvertGameImagesTest.php`, `CopyGameImagesTest.php` ; modifier `app/Services/GameImages.php`, `app/Services/AvifImages.php`, `tests/Feature/GameImageStorageTest.php`, `tests/Feature/Auth/AuthGamesTest.php`, `tests/Feature/PublicGameTest.php`, `tests/Feature/DashboardTest.php`, `tests/Integration/GarageStorageTest.php`, `README.md`, `docs/localization.md` et rapports historiques concernés.
 
 **Interfaces:** conserver les uploads JPEG/PNG/WebP/SVG et leur normalisation AVIF, ainsi que le partage de l’encodeur introduit en tâche 2. Les chemins gérés de jeux et leur renommage ne conservent plus les anciens formats stockés WebP/SVG ; `AvifImages::write()` écrit uniquement de l’AVIF, sans paramètre d’extension historique. Les seules commandes de localisation utiles restent check/export/sync-languages ; aucun alias vers une conversion supprimée.
 
-- [ ] Retirer les commandes historiques et leur cas d’intégration dédié ; conserver les tests de cycle de vie réel Garage et les tests d’upload AVIF/SVG.
-- [ ] Retirer la compatibilité des anciens formats stockés dans `GameImages` et `AvifImages`, supprimer le cas historique de `GameImageStorageTest` et actualiser les chemins de fixtures publiques. Préserver les tests de téléversement SVG dans `GameSvgTest`.
-- [ ] Réécrire les procédures d’installation et de seed : `make init` non destructif, langues actives, `make seed` explicite avec données réelles et comportement de réexécution, création d’admin interactive.
-- [ ] Documenter la rupture d’historique et la remise à zéro explicite requise sur les autres installations. Retirer les anciennes procédures de conversion du guide actif ; annoter les rapports historiques sans les présenter comme instructions actuelles.
-- [ ] Exécuter les tests concernés d’images et de stockage ; rechercher les références exécutables aux commandes/tables supprimées. Formater les fichiers touchés avec les outils du projet.
-- [ ] Mettre à jour le plan et créer un commit après `git diff --check`.
+- [x] Retirer les commandes historiques et leur cas d’intégration dédié ; conserver les tests de cycle de vie réel Garage et les tests d’upload AVIF/SVG.
+- [x] Retirer la compatibilité des anciens formats stockés dans `GameImages` et `AvifImages`, supprimer le cas historique de `GameImageStorageTest` et actualiser les chemins de fixtures publiques. Préserver les tests de téléversement SVG dans `GameSvgTest`.
+- [x] Réécrire les procédures d’installation et de seed : `make init` non destructif, langues actives, `make seed` explicite avec données réelles et comportement de réexécution, création d’admin interactive.
+- [x] Documenter la rupture d’historique et la remise à zéro explicite requise sur les autres installations. Retirer les anciennes procédures de conversion du guide actif ; annoter les rapports historiques sans les présenter comme instructions actuelles.
+- [x] Exécuter les tests concernés d’images et de stockage ; rechercher les références exécutables aux commandes/tables supprimées. Formater les fichiers touchés avec les outils du projet.
+- [x] Mettre à jour le plan et créer un commit après `git diff --check`.
 
 ## Task 4: Vérification globale, purge locale, revue et livraison
 
@@ -113,7 +113,7 @@
 
 **Interfaces:** utilise les commandes validées des tâches 1–3. La purge vise seulement les deux bases et le bucket locaux vérifiés, jamais une destination fournie implicitement sans contrôle.
 
-- [ ] Examiner le diff complet et les nouveaux fichiers. Exécuter `make check`, `make assets`, `make up`, `make test-storage`. Corriger toute régression, sans retirer un garde-fou.
+- [x] Examiner le diff complet et les nouveaux fichiers. Exécuter `make check`, `make assets`, `make up`, `make test-storage`. Corriger toute régression, sans retirer un garde-fou.
 - [ ] Vérifier installation neuve et rollback/réinstallation sur `gamestackr_testing` ; contrôler séparément que l’installation ordinaire réexécutée ne supprime pas des données existantes.
 - [ ] Réaliser une revue indépendante de la branche. Corriger les défauts importants et faire relire les deltas avant de poursuivre.
 - [ ] Inventorier les destinations locales et les données à effacer sans exposer leurs contenus privés. Vérifier hôtes, noms des deux bases et bucket Garage ; arrêter les écritures et workers avant toute purge.

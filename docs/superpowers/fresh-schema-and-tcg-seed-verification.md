@@ -57,8 +57,33 @@ les attributs importés ; les années, éditeurs et relations facultatifs non
 retenus restent absents. Les images proviennent des deux fixtures officielles
 dont la provenance et les empreintes sont conservées dans leur README.
 
+## Nettoyage des anciennes images et validation globale
+
+Implémentation : `e2129aee3e8be399255bb9e6d6951577c32b4d52`.
+Revue indépendante : `fresh_cleanup_review3`, conformité et qualité approuvées.
+Les formats d’import actuels restent disponibles ; seuls les anciens formats
+stockés et leurs commandes de conversion sont retirés.
+
+- Deux tests échouent avant le retrait de la compatibilité des fichiers stockés
+  WebP/SVG ; les 81 tests ciblés passent ensuite, avec 680 assertions.
+- `make check` : 393 tests PHP, 4 012 assertions et 19 tests frontend réussis ;
+  Pint, PHPStan, lint, dictionnaires et TypeScript réussis.
+- `make up` puis `make test-storage` : deux tests et 24 assertions sur Garage réel.
+- `make assets` : compilation de production réussie sur les mêmes fichiers
+  frontend et de build. L’avis de mise à jour npm et les indications de durée
+  du bundler n’ont pas nécessité de changement de dépendances.
+- Les seules commandes de localisation restantes sont `check`, `export` et
+  `sync-languages`. La recherche dans le code exécutable et les guides actifs
+  ne trouve aucun appel aux anciennes commandes.
+- Diff complet vérifié pour les espaces et les fichiers non suivis ; aucun
+  changement de `.env`, d’accès Garage ou de dépendance installée à publier.
+
+Le reviewer relève une précision documentaire mineure possible sur la portée
+de `make migrate` dans le paragraphe de mise à jour des images. L’avertissement
+principal du README explique déjà la rupture d’historique. Ce point est transmis
+à la revue complète.
+
 ## Contrôles restant à terminer
 
-Retrait des conversions d’images, validation globale,
-installation et réexécution, inventaires avant/après purge, parcours navigateur,
+Installation et réexécution, inventaires avant/après purge, parcours navigateur,
 revue complète, PR et CI. Aucun résultat n’est présumé réussi.
