@@ -19,7 +19,10 @@ trait HasContentTranslations
             throw ValidationException::withMessages([$key => __('validation.catalog.regex')]);
         }
 
-        return $this->spatieSetTranslation($key, CatalogRules::languageCode($locale), TranslationPatch::value($key, $value));
+        // Keep the submitted text intact so the save can compare it with the original.
+        TranslationPatch::value($key, $value);
+
+        return $this->spatieSetTranslation($key, CatalogRules::languageCode($locale), $value);
     }
 
     /** @param array<string, mixed> $translations */

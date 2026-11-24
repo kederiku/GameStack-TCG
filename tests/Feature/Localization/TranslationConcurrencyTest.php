@@ -2,10 +2,12 @@
 
 namespace Tests\Feature\Localization;
 
+use App\Actions\Games\SaveGame;
 use App\Models\Game;
 use App\Models\Language;
 use Illuminate\Support\Facades\DB;
 use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\TestWith;
 use Symfony\Component\Process\Process;
 use Tests\Concerns\BuildsCatalog;
 use Tests\Concerns\UsesLocalizedSchema;
@@ -15,6 +17,29 @@ class TranslationConcurrencyTest extends TestCase
 {
     use BuildsCatalog;
     use UsesLocalizedSchema;
+
+    #[TestWith(['eloquent'])]
+    #[TestWith(['game action'])]
+    #[TestWith(['catalog action'])]
+    public function test_stale_full_map_preserves_a_concurrent_french_edit(string $writer): void
+    {
+        $this->createLocalizedSchema();
+        $record = $writer === 'catalog action' ? $this->series($this->catalog()) : Game::factory()->create();
+        DB::table($record->getTable())->where('id', $record->id)->update(['description' => '{"fr":"  original  ","en":"Old"}']);
+        $stale = $record->fresh();
+        $record->refresh()->setTranslation('description', 'fr', 'Français modifié')->save();
+
+        $translations = ['fr' => '  original  ', 'en' => '  New  '];
+        if ($writer === 'eloquent') {
+            $stale->setTranslations('description', $translations)->save();
+        } elseif ($stale instanceof Game) {
+            app(SaveGame::class)->handle($stale, ['name' => $stale->name, 'description' => $translations]);
+        } else {
+            $this->saveCatalog($stale, ['description' => $translations]);
+        }
+
+        $this->assertSame(['en' => 'New', 'fr' => 'Français modifié'], $record->fresh()->getTranslations('description'));
+    }
 
     public static function races(): array
     {

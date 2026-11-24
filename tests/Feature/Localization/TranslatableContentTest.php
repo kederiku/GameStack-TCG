@@ -217,4 +217,15 @@ class TranslatableContentTest extends TestCase
         $this->assertEquals(['fr' => null, 'en' => 'English'], $updated->getTranslations('description'));
         $this->assertSame($game->name, $updated->name);
     }
+
+    public function test_full_map_preserves_unchanged_historical_text_and_normalizes_the_edit(): void
+    {
+        $this->createLocalizedSchema();
+        $game = Game::factory()->create();
+        DB::table('games')->where('id', $game->id)->update(['description' => '{"fr":"  original  ","en":"Old"}']);
+
+        $game->refresh()->setTranslations('description', ['FR' => '  original  ', 'en' => '  New  '])->save();
+
+        $this->assertSame(['en' => 'New', 'fr' => '  original  '], $game->fresh()->getTranslations('description'));
+    }
 }
