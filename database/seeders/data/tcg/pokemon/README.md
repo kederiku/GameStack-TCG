@@ -32,8 +32,9 @@ historique des nouvelles références est conservé.
 Les intitulés anglais des nouvelles références asiatiques sont des noms
 d’affichage, souvent des traductions éditoriales. Ils ne créent pas une édition
 anglaise et ne remplissent pas son nom commercial local. Une valeur `null` dans
-la référence devient `—` dans le champ `name` obligatoire de l’édition : cela
-signale un nom inconnu sans lui attribuer une langue erronée. Les intitulés
+la référence omet le nom dans le manifeste. À la création, le champ `name`
+obligatoire reçoit `—` ; lors d’une réexécution, un nom déjà enregistré est
+conservé. Cela signale un nom inconnu sans lui attribuer une langue erronée. Les intitulés
 natifs fournis explicitement sont utilisés, notamment Hantaman Pertama et
 Kehadiran Juara. Les anciennes fiches conservent leurs noms natifs vérifiés.
 

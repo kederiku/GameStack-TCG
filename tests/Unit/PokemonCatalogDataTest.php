@@ -101,7 +101,7 @@ class PokemonCatalogDataTest extends TestCase
         $catalogs = collect(PokemonCatalogData::load()['catalogs'])->keyBy('attributes.key');
         $japanese = collect($catalogs['japanese']['expansions'])->keyBy('attributes.key');
         $this->assertSame('Expansion Pack (Base Set)', $japanese['expansion-pack-base-set']['attributes']['display_name']['en']);
-        $this->assertSame('—', $japanese['expansion-pack-base-set']['editions'][0]['attributes']['name']);
+        $this->assertArrayNotHasKey('name', $japanese['expansion-pack-base-set']['editions'][0]['attributes']);
         $this->assertSame('ポケモンカード151', $japanese['151']['editions'][0]['attributes']['name']);
         $indonesian = collect($catalogs['indonesian']['expansions'])->keyBy('attributes.key');
         $this->assertSame('Hantaman Pertama', $indonesian['first-impact-set-a']['editions'][0]['attributes']['name']);

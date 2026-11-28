@@ -114,6 +114,8 @@ class TcgCatalogSeeder extends Seeder
                 foreach ($expansionData['editions'] as $editionData) {
                     $edition = $expansion->editions()->firstOrNew(['language_id' => $languages[$editionData['language']]]);
                     $edition = $this->saveCatalog->handle($edition, [
+                        // Only a new record needs a fallback for a name absent from the reference.
+                        ...($edition->exists ? [] : ['name' => '—']),
                         ...$editionData['attributes'],
                         ...$this->imageAttributes($edition, $editionData['asset']),
                     ]);

@@ -367,7 +367,8 @@ Les mois seuls restent des périodes. Les dates anglophones sans marché identif
 restent dans la description ; elles ne créent pas une sortie mondiale. Une date
 japonaise n’est pas appliquée aux autres éditions asiatiques. Les intitulés
 anglais de référence de ces éditions ne désignent pas des impressions anglaises.
-Un nom commercial local absent des sources est indiqué par `—` ; sa traduction
+Un nom commercial local absent des sources est indiqué par `—` à la création ;
+un nom renseigné ensuite est conservé lors des réexécutions. Sa traduction
 anglaise reste uniquement un nom d’affichage de l’extension.
 Le référentiel comprend les 16 langues documentées, mais seules les éditions
 retenues par le manifeste sont créées : il ne croise pas automatiquement toutes

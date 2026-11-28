@@ -93,14 +93,17 @@ final class PokemonCatalogData
 
         foreach ($row['editions'] as $language => $name) {
             $edition = [
-                // The model requires a name. A neutral unknown value must never
-                // present an English reference title as a native official name.
-                'attributes' => ['name' => $name ?? '—', 'status' => $row['status'] ?? 'released', 'is_visible' => true],
+                // An unknown native name is absent so reseeding preserves local edits.
+                'attributes' => ['status' => $row['status'] ?? 'released', 'is_visible' => true],
                 'language' => $language,
                 'asset' => null,
                 'releases' => [],
-                'sources' => array_fill_keys(['name', 'language', 'status'], $source),
+                'sources' => array_fill_keys(['language', 'status'], $source),
             ];
+            if ($name !== null) {
+                $edition['attributes']['name'] = $name;
+                $edition['sources']['name'] = $source;
+            }
             if (isset($row['codes'][$language])) {
                 $edition['attributes']['official_code'] = $row['codes'][$language];
                 $edition['sources']['official_code'] = $source;

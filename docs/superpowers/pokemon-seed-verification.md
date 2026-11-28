@@ -8,9 +8,10 @@ fournies sont référencées par leur titre, leur SHA-256 et leur emplacement ; 
 ne sont pas nécessaires à l’exécution et ne sont pas publiées.
 
 - Nouveaux tests de couverture exécutés d’abord en échec sur les références absentes.
-- Tests de régression exécutés en échec sur les marchés McDonald’s et l’utilisation
-  de traductions anglaises comme noms officiels locaux, puis corrigés.
-- `make check` réussi : 407 tests PHP, 71 451 assertions, 19 tests frontend,
+- Tests de régression exécutés en échec sur les marchés McDonald’s, l’utilisation
+  de traductions anglaises comme noms officiels locaux et l’écrasement d’un nom
+  local renseigné après import, puis corrigés.
+- `make check` réussi : 407 tests PHP, 19 tests frontend,
   localisation, Pint, PHPStan, formatage, lint et TypeScript.
 - Tests du seeder : réexécution, stabilité des identifiants, conservation des
   médias existants, validation du manifeste et rollback transactionnel inclus.
@@ -36,8 +37,9 @@ Vérification dans le navigateur après chargement du seed :
 
 ## Revue et limites
 
-La première revue indépendante a fait corriger l’attribution des dates McDonald’s,
-les noms locaux inconnus et les compléments régionaux explicites du document Word.
+Les revues indépendantes ont fait corriger l’attribution des dates McDonald’s,
+les noms locaux inconnus, leur préservation au reseed et les compléments régionaux
+explicites du document Word.
 La relecture du commit final et les résultats CI sont consignés dans la PR.
 
 Les règles détaillées figurent dans

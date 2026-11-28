@@ -277,6 +277,12 @@ class TcgCatalogSeederTest extends TestCase
             'display_name' => ['fr' => 'Titre modifié', 'en' => 'Scarlet & Violet', 'ja' => 'Libellé ajouté'],
         ]);
         $foreign = $this->expansion($expansion->catalog, key: 'unlisted-expansion');
+        $japanese = Game::query()->where('slug', 'pokemon')->sole()->catalogs()->where('key', 'japanese')->sole();
+        $jungle = $japanese->expansions()->where('key', 'pokemon-jungle')->sole()->editions()->sole();
+        $this->assertSame('—', $jungle->name);
+        $this->saveCatalog($jungle, ['name' => 'Nom local renseigné']);
+        $verified = $japanese->expansions()->where('key', '151')->sole()->editions()->sole();
+        $this->saveCatalog($verified, ['name' => 'Nom remplacé']);
 
         $this->seed(TcgCatalogSeeder::class);
 
@@ -285,6 +291,8 @@ class TcgCatalogSeederTest extends TestCase
         $this->assertSame('Écarlate et Violet', $expansion->getTranslations('display_name')['fr']);
         $this->assertSame('Libellé ajouté', $expansion->getTranslations('display_name')['ja']);
         $this->assertDatabaseHas('expansions', ['id' => $foreign->id, 'key' => 'unlisted-expansion']);
+        $this->assertSame('Nom local renseigné', $jungle->refresh()->name);
+        $this->assertSame('ポケモンカード151', $verified->refresh()->name);
     }
 
     public function test_the_seed_locks_existing_languages_in_canonical_code_order(): void
@@ -406,8 +414,14 @@ class TcgCatalogSeederTest extends TestCase
         }
 
         if (isset($record['language']) && isset($record['attributes'])) {
-            foreach (['name', 'language', 'status'] as $field) {
+            foreach (['language', 'status'] as $field) {
                 $this->assertArrayHasKey($field, $record['sources']);
+            }
+            if (array_key_exists('name', $record['attributes'])) {
+                $this->assertNotEmpty($record['attributes']['name']);
+                $this->assertArrayHasKey('name', $record['sources']);
+            } else {
+                $this->assertArrayNotHasKey('name', $record['sources']);
             }
         }
         if (isset($record['market']) && isset($record['attributes'])) {
