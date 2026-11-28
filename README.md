@@ -329,9 +329,9 @@ Après `make init`, charger le catalogue de référence sur demande :
 make seed
 ```
 
-Sur une base neuve, le seed charge 12 jeux, 19 catalogues, 7 séries, 119 fiches
-d’extension, 327 éditions imprimées dont 78 en français, 213 sorties, 10 langues
-de contenu et 9 marchés. Un même titre peut avoir une fiche dans plusieurs
+Sur une base neuve, le seed charge 12 jeux, 21 catalogues, 65 séries, 930 fiches
+d’extension, 1 267 éditions imprimées dont 210 en français, 541 sorties, 16 langues
+de contenu et 15 marchés. Un même titre peut avoir une fiche dans plusieurs
 catalogues régionaux, comme les versions japonaises et internationales de
 ONE PIECE et Yu-Gi-Oh!. Les fiches sont visibles dès le chargement.
 Le seed utilise les fichiers versionnés, sans accès réseau, et ne crée ni compte
@@ -356,6 +356,29 @@ sous le slug du manifeste. Les écritures s’effectuent dans une transaction.
 
 La provenance est détaillée dans le [registre de sources](database/seeders/data/tcg-sources.php),
 les [fichiers par jeu](database/seeders/data/tcg/) et le [dossier des visuels](database/seeders/assets/tcg-catalog/README.md).
+
+Pokémon comprend 826 fiches dans sept catalogues : international, japonais,
+coréen, chinois traditionnel, chinois simplifié, thaïlandais et indonésien.
+Les références documentaires couvrent 1996–2026, les promotions et les
+collections McDonald’s, avec leurs différences France/Québec. Les fiches
+déjà vérifiées conservent leurs clés, noms natifs, visuels et dates précises.
+
+Les mois seuls restent des périodes. Les dates anglophones sans marché identifié
+restent dans la description ; elles ne créent pas une sortie mondiale. Une date
+japonaise n’est pas appliquée aux autres éditions asiatiques. Les intitulés
+anglais de référence de ces éditions ne désignent pas des impressions anglaises.
+Un nom commercial local absent des sources est indiqué par `—` à la création ;
+un nom renseigné ensuite est conservé lors des réexécutions. Sa traduction
+anglaise reste uniquement un nom d’affichage de l’extension.
+Le référentiel comprend les 16 langues documentées, mais seules les éditions
+retenues par le manifeste sont créées : il ne croise pas automatiquement toutes
+les extensions avec toutes les langues.
+
+Les [règles de reprise et limites Pokémon](database/seeders/data/tcg/pokemon/README.md)
+précisent les sources locales et les exclusions. Les documents Word/Excel
+originaux ne sont pas nécessaires à l’exécution du seed. Les variantes de cartes,
+les totaux de collection et les correspondances entre extensions ne sont pas
+importés dans des objets métier supplémentaires.
 
 ## Dashboard et composants partagés
 
