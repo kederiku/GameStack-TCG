@@ -44,6 +44,30 @@ return [
             'attributes' => ['code' => 'pt', 'name' => 'Portugais'],
             'sources' => ['code' => 'language-tags'],
         ],
+        'th' => [
+            'attributes' => ['code' => 'th', 'name' => 'Thaïlandais'],
+            'sources' => ['code' => 'language-tags', 'name' => 'pokemon-doc-languages'],
+        ],
+        'id' => [
+            'attributes' => ['code' => 'id', 'name' => 'Indonésien'],
+            'sources' => ['code' => 'language-tags', 'name' => 'pokemon-doc-languages'],
+        ],
+        'nl' => [
+            'attributes' => ['code' => 'nl', 'name' => 'Néerlandais'],
+            'sources' => ['code' => 'language-tags', 'name' => 'pokemon-doc-languages'],
+        ],
+        'pl' => [
+            'attributes' => ['code' => 'pl', 'name' => 'Polonais'],
+            'sources' => ['code' => 'language-tags', 'name' => 'pokemon-doc-languages'],
+        ],
+        'ru' => [
+            'attributes' => ['code' => 'ru', 'name' => 'Russe'],
+            'sources' => ['code' => 'language-tags', 'name' => 'pokemon-doc-languages'],
+        ],
+        'es-419' => [
+            'attributes' => ['code' => 'es-419', 'name' => 'Espagnol (Amérique latine)'],
+            'sources' => ['code' => 'language-tags', 'name' => 'pokemon-doc-languages'],
+        ],
     ],
     'markets' => [
         'france' => [
@@ -108,6 +132,24 @@ return [
                 'name' => 'Monde',
                 'display_name' => ['en' => 'Worldwide', 'fr' => 'Monde'],
             ],
+        ],
+        'canada' => [
+            'attributes' => ['key' => 'canada', 'name' => 'Canada', 'display_name' => ['fr' => 'Canada', 'en' => 'Canada']],
+        ],
+        'quebec' => [
+            'attributes' => ['key' => 'quebec', 'name' => 'Québec', 'display_name' => ['fr' => 'Québec', 'en' => 'Quebec']],
+        ],
+        'united-kingdom' => [
+            'attributes' => ['key' => 'united-kingdom', 'name' => 'Royaume-Uni', 'display_name' => ['fr' => 'Royaume-Uni', 'en' => 'United Kingdom']],
+        ],
+        'australia' => [
+            'attributes' => ['key' => 'australia', 'name' => 'Australie', 'display_name' => ['fr' => 'Australie', 'en' => 'Australia']],
+        ],
+        'thailand' => [
+            'attributes' => ['key' => 'thailand', 'name' => 'Thaïlande', 'display_name' => ['fr' => 'Thaïlande', 'en' => 'Thailand']],
+        ],
+        'indonesia' => [
+            'attributes' => ['key' => 'indonesia', 'name' => 'Indonésie', 'display_name' => ['fr' => 'Indonésie', 'en' => 'Indonesia']],
         ],
     ],
     'games' => [

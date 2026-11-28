@@ -59,6 +59,58 @@ class TcgCatalogSeederTest extends TestCase
                 ->where('expansion.selectedEdition.name', 'ポケモンカード151'));
     }
 
+    public function test_pokemon_reference_covers_history_regions_and_promotions_without_inventing_editions(): void
+    {
+        $this->seed(TcgCatalogSeeder::class);
+
+        $pokemon = Game::query()->where('slug', 'pokemon')->sole();
+        foreach ([
+            ['international', 'base-set', ['en', 'fr']],
+            ['international', 'base-set-2', ['en']],
+            ['international', 'arceus', ['en']],
+            ['international', 'legendary-treasures', ['en']],
+            ['international', 'delta-reign', ['en', 'fr']],
+            ['japanese', 'expansion-pack-base-set', ['ja']],
+            ['korean', 'start-of-an-adventure-ktcg-0', ['ko']],
+            ['thai', 'first-impact-set-a', ['th']],
+            ['indonesian', 'first-impact-set-a', ['id']],
+            ['international', 'mcdonalds-2018-france', ['fr']],
+            ['international', 'mcdonalds-2018-international', ['en', 'fr']],
+            ['international', 'wizards-black-star-promos', ['en']],
+        ] as [$catalog, $key, $languages]) {
+            $expansion = $pokemon->catalogs()->where('key', $catalog)->sole()->expansions()->where('key', $key)->sole();
+            $this->assertSame($languages, $expansion->editions()->with('language')->get()->pluck('language.code')->sort()->values()->all(), "$catalog/$key");
+        }
+
+        $japanese = $pokemon->catalogs()->where('key', 'japanese')->sole();
+        $this->assertFalse($japanese->expansions()->where('key', 'start-of-an-adventure-ktcg-0')->exists());
+        $taiwan = $pokemon->catalogs()->where('key', 'traditional-chinese')->sole();
+        $this->assertFalse($taiwan->expansions()->where('key', 'collection-sun')->exists());
+    }
+
+    public function test_pokemon_reference_preserves_month_precision_and_existing_native_titles(): void
+    {
+        $this->seed(TcgCatalogSeeder::class);
+
+        $international = Game::query()->where('slug', 'pokemon')->sole()->catalogs()->where('key', 'international')->sole();
+        $base = $international->expansions()->where('key', 'base-set')->sole();
+        $this->assertCount(0, $base->editions()->whereHas('language', fn ($query) => $query->where('code', 'fr'))->sole()->releases);
+        $this->get('/fr/pokemon/japanese/pokemon-jungle?edition=ja')->assertOk()
+            ->assertInertia(fn (Assert $page) => $page
+                ->where('expansion.selectedEdition.name', '—')
+                ->where('expansion.selectedEdition.releases.0.releasedOn', null)
+                ->where('expansion.selectedEdition.releases.0.announcedPeriod', '1997-03'));
+
+        $this->get('/fr/pokemon/international/scarlet-violet?edition=fr')->assertOk()
+            ->assertInertia(fn (Assert $page) => $page
+                ->where('expansion.selectedEdition.name', 'Écarlate et Violet')
+                ->where('expansion.selectedEdition.releases.0.releasedOn', '2023-03-31'));
+        $this->get('/fr/pokemon/japanese/151?edition=ja')->assertOk()
+            ->assertInertia(fn (Assert $page) => $page
+                ->where('expansion.selectedEdition.name', 'ポケモンカード151')
+                ->where('expansion.selectedEdition.releases.0.releasedOn', '2023-06-16'));
+    }
+
     public function test_english_display_uses_english_names_for_the_japanese_expansion_and_series(): void
     {
         $this->seed(TcgCatalogSeeder::class);
@@ -98,8 +150,8 @@ class TcgCatalogSeederTest extends TestCase
         $this->seed(TcgCatalogSeeder::class);
 
         $this->assertDatabaseCount('games', 12);
-        $this->assertDatabaseCount('catalogs', 19);
-        $this->assertDatabaseCount('series', 7);
+        $this->assertDatabaseCount('catalogs', 21);
+        $this->assertDatabaseCount('series', 65);
         $this->assertSame(
             [
                 'altered' => [5, 5, 5],
@@ -110,7 +162,7 @@ class TcgCatalogSeederTest extends TestCase
                 'magic' => [10, 10, 10],
                 'naruto-mythos' => [2, 2, 2],
                 'one-piece' => [20, 10, 4],
-                'pokemon' => [15, 12, 7],
+                'pokemon' => [826, 493, 139],
                 'riftbound' => [6, 6, 6],
                 'star-wars-unlimited' => [10, 10, 10],
                 'yu-gi-oh' => [20, 10, 10],
@@ -133,7 +185,7 @@ class TcgCatalogSeederTest extends TestCase
     {
         $this->seed(TcgCatalogSeeder::class);
 
-        $this->assertDatabaseCount('languages', 10);
+        $this->assertDatabaseCount('languages', 16);
         foreach ([
             ['magic', 'international', 'foundations', ['de', 'en', 'es', 'fr', 'it', 'ja']],
             ['magic', 'international', 'khans-of-tarkir', ['en', 'fr']],
@@ -342,7 +394,13 @@ class TcgCatalogSeederTest extends TestCase
 
         foreach ($record['sources'] ?? [] as $id) {
             $this->assertArrayHasKey($id, $sources);
-            $this->assertNotEmpty($sources[$id]['url'], $id);
+            if ($sources[$id]['url'] === null) {
+                $this->assertNotEmpty($sources[$id]['document'], $id);
+                $this->assertNotEmpty($sources[$id]['locator'], $id);
+                $this->assertMatchesRegularExpression('/^[a-f0-9]{64}$/', $sources[$id]['sha256'], $id);
+            } else {
+                $this->assertMatchesRegularExpression('#^https?://#', $sources[$id]['url'], $id);
+            }
             $this->assertNotEmpty($sources[$id]['consulted_on'], $id);
             $this->assertNotEmpty($sources[$id]['note'], $id);
         }

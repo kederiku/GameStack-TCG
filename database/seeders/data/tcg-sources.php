@@ -463,4 +463,4 @@ foreach ($sources as $id => [$url, $note]) {
     $sources[$id] = ['url' => $url, 'consulted_on' => $consultations[$id] ?? $consultedOn, 'note' => $note];
 }
 
-return $sources;
+return [...$sources, ...require __DIR__.'/tcg/pokemon/sources.php'];

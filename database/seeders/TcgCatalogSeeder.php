@@ -19,7 +19,7 @@ use Illuminate\Support\Facades\DB;
 /**
  * @phpstan-type Attributes array<string, mixed>
  * @phpstan-type KeyedAttributes array{key: string, ...<string, mixed>}
- * @phpstan-type NamedSource array{url: string, consulted_on: string, note: string}
+ * @phpstan-type NamedSource array{url: ?string, consulted_on: string, note: string}
  * @phpstan-type ReleaseData array{attributes: array{channel: string, ...<string, mixed>}, market: string, sources: array{released_on: string, ...<string, string>}}
  * @phpstan-type EditionData array{attributes: Attributes, language: string, asset: ?string, releases: list<ReleaseData>}
  * @phpstan-type ExpansionData array{attributes: KeyedAttributes, series: ?string, editions: list<EditionData>}
